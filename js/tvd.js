@@ -48,6 +48,7 @@ const waterfallView = document.getElementById('waterfall-view');
 const phaseSelector = document.getElementById('phase-selector');
 const summaryPanel = document.getElementById('summary-panel');
 const legend = document.getElementById('legend');
+const waterfallLegend = document.getElementById('waterfall-legend');
 
 // --- D3 SCALES AND FORMATTERS ---
 
@@ -102,6 +103,7 @@ function render() {
     waterfallView.classList.add('hidden');
     phaseSelector.classList.add('hidden');
     legend.classList.add('hidden');
+    waterfallLegend.classList.add('hidden');
 
     chartViewBtn.classList.remove('active');
     tableViewBtn.classList.remove('active');
@@ -131,6 +133,7 @@ function render() {
     } else if (currentView === 'waterfall') {
         waterfallView.classList.remove('hidden');
         phaseSelector.classList.remove('hidden');
+        waterfallLegend.classList.remove('hidden');
         waterfallViewBtn.classList.add('active');
         renderWaterfallChart();
     }
@@ -291,7 +294,8 @@ function renderChart() {
  */
 function handleProgramCellChange(event) {
     const input = event.target;
-    const newValue = parseFloat(input.value);
+    // Remove commas before parsing to handle formatted numbers.
+    const newValue = parseFloat(input.value.replace(/,/g, ''));
     const phaseKey = input.dataset.phase;
     const componentName = input.dataset.name;
 
@@ -314,7 +318,7 @@ function renderWaterfallChart() {
     container.html(""); // Clear previous chart
 
     // Define chart dimensions and margins
-    const margin = { top: 20, right: 30, bottom: 150, left: 100 };
+    const margin = { top: 20, right: 30, bottom: 50, left: 100 }; // Reduced bottom margin for horizontal labels
     const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
     const height = 700 - margin.top - margin.bottom;
 
@@ -364,8 +368,8 @@ function renderWaterfallChart() {
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x0))
         .selectAll("text")
-        .attr("transform", "translate(-10,0)rotate(-60)")
-        .style("text-anchor", "end");
+        // Removed rotation transform
+        .style("text-anchor", "middle");
 
     // The Y-axis for cost values. The domain is scaled to fit the largest value.
     const yMax = Math.max(cumulativeTarget, cumulativeCurrent, phaseData.totalProjectBudget);
@@ -489,8 +493,8 @@ function renderProgramView() {
             
             // Render square footage as an editable input field.
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
-                .append('input').attr('type', 'number').attr('class', 'w-full text-center')
-                .attr('value', d.square_footage)
+                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
+                .attr('value', d.square_footage.toLocaleString('en-US'))
                 .attr('data-phase', d.dataPhase)
                 .attr('data-name', d.name)
                 .on('change', handleProgramCellChange);
@@ -577,7 +581,7 @@ function renderYAxisLabels() {
             .style('position', 'absolute')
             .style('top', `${yScale(tick)}px`)
             .style('transform', 'translateY(-50%)')
-            .text(tick);
+            .text(`$${tick}`);
     });
 }
 
