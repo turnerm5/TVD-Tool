@@ -1,58 +1,100 @@
-# Target Value Design Tool
+# Interactive Target Value Design (TVD) Tool
 
-This is an interactive web tool for visualizing and adjusting project budgets using Target Value Design (TVD) principles. It is branded for the WSU Integrated Science Building project.
+An interactive web-based tool for visualizing, adjusting, and analyzing project budgets using Target Value Design (TVD) principles. This tool allows teams to collaboratively explore cost scenarios, compare against benchmark data, and maintain alignment with the project's target value.
 
-## Features
-- **Interactive Chart:** Drag to adjust component ROM values, with real-time feedback and auto-balancing.
-- **Lock/Unlock Bars:** Lock specific components to prevent them from changing during adjustments.
-- **Benchmark Visualization:** See project benchmarks, target values, and current ROMs for each component.
-- **File Upload:** Upload your own JSON data file to visualize your project's budget.
-- **Sample Data:** Use built-in sample data for quick demonstration.
-- **Export/Import:** Download your current data as JSON or reset to the original state.
-- **Branding:** Displays Hoffman and ZGF logos above the project title.
+## Key Features
+
+- **Multiple Views:**
+    - **Slider View:** An interactive bar chart for visually adjusting component costs. Drag the "Current ROM" bar to see real-time cost balancing across unlocked components.
+    - **Table View:** A detailed tabular breakdown of all components, allowing for precise numerical input and at-a-glance comparison.
+    - **Benchmarks View:** A gallery of benchmark projects used for comparison, displaying their overall cost per square foot.
+
+- **Dynamic Data Visualization:**
+    - **Component Sliders:** Each component is represented by a vertical bar, showing its relationship to benchmark ranges and the target value.
+    - **Benchmark Indicators:** On the sliders, circular markers (A, B, C, D) pinpoint the exact cost of each benchmark project for that component.
+    - **Conditional Formatting:** In both the slider and table views, the "Current ROM" turns red if it falls outside the established low/high benchmark range, providing an immediate visual warning.
+    - **Delta Values:** When a cost is adjusted, a "ghost bar" shows the original value and a label displays the positive (green) or negative (red) cost delta.
+
+- **Data & Project Management:**
+    - **Phase Selection:** Toggle between "Phase 1" and "Phase 2" components in the Slider View.
+    - **Lock/Unlock Components:** Lock specific components in either view to prevent their values from changing during auto-balancing adjustments.
+    - **Dynamic Summary Panel:** A header panel provides a real-time summary of the total budget, target cost, current cost, and variance for each phase.
+
+- **File Handling:**
+    - **JSON Data Upload:** Upload a project data file to visualize a custom budget.
+    - **Sample Data:** Load built-in sample data for a quick demonstration.
+    - **Export to JSON/CSV:** Export the current state of the project data to either a JSON or CSV file. Filenames are timestamped for uniqueness.
+    - **Download Template:** Get a clean JSON template file to structure your own project data.
 
 ## Usage
-1. **Open `TVD.html` in your browser.**
-2. **Upload a JSON file** with your project data, or use the sample data provided.
-3. **Interact with the chart:**
-   - Drag the black bars to adjust ROM values.
-   - Click the lock icon below a bar to lock/unlock it.
-   - View benchmarks, targets, and deltas in real time.
-4. **Export your data** or reset as needed using the buttons in the header.
+
+1.  **Open `TVD.html`** in a modern web browser.
+2.  On the splash screen, either **upload a JSON file** or click **"Use Sample Data"**.
+3.  Navigate between the **Slider, Table, and Benchmarks views** using the buttons at the top.
+4.  **Interact with the data:**
+    - In **Slider View**, drag the dark grey "Current ROM" bars up or down.
+    - In **Table View**, type new values directly into the "Current" column.
+    - Click the lock icon (🔓/🔒) in either view to toggle a component's lock state.
+5.  Use the buttons in the header to **Export**, **Reset to Original**, or **Start Over**.
 
 ## JSON Data Format
-Your JSON file should look like this:
+
+The tool uses a structured JSON file. A top-level `benchmarks` array defines the comparison projects, and the `phases` object contains the primary project's data, split into `phase1` and `phase2`.
+
 ```json
 {
-  "totalProjectBudget": 20000000,
-  "projectAreaSF": 30000,
-  "components": [
-    { "name": "General Conditions", "benchmark_low": 20, "benchmark_high": 35, "target_value": 30, "current_rom": 29 },
-    { "name": "Demo", "benchmark_low": 22, "benchmark_high": 28, "target_value": 25, "current_rom": 26 }
-    // ... more components ...
-  ]
+  "benchmarks": [
+    {
+      "id": "A",
+      "name": "OSU Huang Collaborative Innovation Complex",
+      "overall_sf_cost": 1050,
+      "components": [
+        { "name": "General Conditions", "cost": 33.50 },
+        { "name": "Sitework", "cost": 65.00 }
+      ]
+    }
+  ],
+  "phases": {
+    "phase1": {
+      "totalProjectBudget": 25000000,
+      "projectAreaSF": 32000,
+      "components": [
+        { "name": "General Conditions", "target_value": 30, "current_rom": 29 },
+        { "name": "Demo", "target_value": 25, "current_rom": 26 }
+      ]
+    },
+    "phase2": {
+        "totalProjectBudget": 50000000,
+        "projectAreaSF": 60000,
+        "components": []
+    }
+  }
 }
 ```
+*Note: The `benchmark_low` and `benchmark_high` values for each component are calculated automatically from the `benchmarks` data upon loading.*
 
-## Customization
-- **Branding:** Replace `img/hoffman.svg` and `img/zgf.svg` with your own SVGs for different branding.
-- **Project Title:** Edit the title in the header section of `TVD.html`.
-- **Sample Data:** Modify the `sampleData` object in `TVD.html` for your own default dataset.
+## Project Structure
 
-## Requirements
-- Modern web browser (Chrome, Edge, Firefox, Safari)
-- No server or build step required; all logic is in `TVD.html`.
-
-## Folder Structure
 ```
-├── TVD.html         # Main application file
-├── styles/
-│   └── tvd.css      # Custom CSS styles
-├── img/
-│   ├── hoffman.svg  # Hoffman logo
-│   └── zgf.svg      # ZGF logo
-└── README.md        # This file
+.
+├── TVD.html
+├── README.md
+├── data
+│   └── sampleData.js
+├── img
+│   ├── hoffman.svg
+│   ├── osu.jpg
+│   ├── spark.jpg
+│   ├── wsu.svg
+│   ├── wsue.jpg
+│   ├── wsutc.jpg
+│   └── zgf.svg
+├── js
+│   └── tvd.js
+└── styles
+    └── tvd.css
 ```
 
 ## License
-This tool is for internal use and demonstration purposes. Contact the authors for reuse or adaptation. 
+
+This tool is for internal use and demonstration purposes. 
