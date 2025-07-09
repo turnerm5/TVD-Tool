@@ -46,6 +46,8 @@ Your JSON file should look like this:
 ## Folder Structure
 ```
 ├── TVD.html         # Main application file
+├── styles/
+│   └── tvd.css      # Custom CSS styles
 ├── img/
 │   ├── hoffman.svg  # Hoffman logo
 │   └── zgf.svg      # ZGF logo
