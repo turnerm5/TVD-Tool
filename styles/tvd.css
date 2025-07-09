@@ -11,7 +11,7 @@ body {
     padding: 1rem;
     padding-bottom: 7rem; /* Increased padding for rotated labels */
     width: 100%;
-    height: 75vh;
+    height: 700px;
     border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
     background-color: #f8fafc;
@@ -87,7 +87,7 @@ body {
     transform-origin: left center;
     transform: translateX(-10px) rotate(-60deg);
     white-space: nowrap;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.875rem;
     text-align: right;
 }
@@ -141,7 +141,8 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    font-size: 0.75rem;
+    font-weight: 600;
+    font-size: 0.875rem;
     color: #64748b;
 }
 .view-btn.active {
@@ -279,24 +280,20 @@ tr.benchmark-warning {
 
 .waterfall-chart-container {
     width: 100%;
-    height: 500px;
+    height: 700px;
 }
 
-.waterfall-bar.positive {
+.waterfall-bar.target {
     fill: #22c55e; /* green-500 */
 }
 
-.waterfall-bar.negative {
-    fill: #ef4444; /* red-500 */
-}
-
-.waterfall-bar.total {
+.waterfall-bar.current {
     fill: #3b82f6; /* blue-500 */
 }
 
 .waterfall-axis text {
     font-size: 0.875rem; /* 14px */
-    font-weight: 500;
+    font-weight: 600;
     fill: #4b5563; /* gray-600 */
 }
 

@@ -235,9 +235,9 @@ function renderWaterfallChart() {
     const container = d3.select("#waterfall-chart-container");
     container.html(""); // Clear previous chart
 
-    const margin = { top: 20, right: 30, bottom: 100, left: 100 };
+    const margin = { top: 20, right: 30, bottom: 150, left: 100 };
     const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
-    const height = 600 - margin.top - margin.bottom;
+    const height = 700 - margin.top - margin.bottom;
 
     const svg = container.append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -248,39 +248,47 @@ function renderWaterfallChart() {
     const phaseData = currentData.phases[currentPhase];
     const components = phaseData.components;
     
-    // Process data for waterfall
-    let cumulative = 0;
+    // Process data for waterfall with target and current values
+    let cumulativeTarget = 0;
+    let cumulativeCurrent = 0;
     const data = components.map(c => {
-        const value = c.current_rom * c.square_footage;
+        const targetValue = c.target_value * c.square_footage;
+        const currentValue = c.current_rom * c.square_footage;
         const d = {
             name: c.name,
-            start: cumulative,
-            end: cumulative + value,
-            value: value,
-            class: 'positive'
+            target_start: cumulativeTarget,
+            target_end: cumulativeTarget + targetValue,
+            current_start: cumulativeCurrent,
+            current_end: cumulativeCurrent + currentValue,
         };
-        cumulative += value;
+        cumulativeTarget += targetValue;
+        cumulativeCurrent += currentValue;
         return d;
     });
 
     // X axis
-    const x = d3.scaleBand()
+    const x0 = d3.scaleBand()
         .range([0, width])
         .domain(data.map(d => d.name))
         .padding(0.2);
+    
+    const x1 = d3.scaleBand()
+        .domain(['target', 'current'])
+        .range([0, x0.bandwidth()])
+        .padding(0.05);
 
     svg.append("g")
         .attr("class", "waterfall-axis")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x))
+        .call(d3.axisBottom(x0))
         .selectAll("text")
-        .attr("transform", "translate(-10,0)rotate(-45)")
+        .attr("transform", "translate(-10,0)rotate(-60)")
         .style("text-anchor", "end");
 
     // Y axis
-    const yMax = Math.max(cumulative, phaseData.totalProjectBudget);
+    const yMax = Math.max(cumulativeTarget, cumulativeCurrent, phaseData.totalProjectBudget);
     const y = d3.scaleLinear()
-        .domain([0, yMax])
+        .domain([0, yMax * 1.05]) // Add a little padding to the top
         .range([height, 0]);
 
     svg.append("g")
@@ -288,16 +296,29 @@ function renderWaterfallChart() {
         .call(d3.axisLeft(y).tickFormat(d => `$${(d / 1000000).toFixed(1)}M`));
 
     // Bars
-    svg.selectAll("rect")
+    const componentGroups = svg.selectAll(".component-group")
         .data(data)
         .enter()
-        .append("rect")
-        .attr("class", d => `waterfall-bar ${d.class}`)
-        .attr("x", d => x(d.name))
-        .attr("y", d => y(d.end))
-        .attr("height", d => y(d.start) - y(d.end))
-        .attr("width", x.bandwidth());
+        .append("g")
+        .attr("class", "component-group")
+        .attr("transform", d => `translate(${x0(d.name)},0)`);
+
+    // Target bars
+    componentGroups.append("rect")
+        .attr("class", "waterfall-bar target")
+        .attr("x", d => x1('target'))
+        .attr("y", d => y(d.target_end))
+        .attr("height", d => y(d.target_start) - y(d.target_end))
+        .attr("width", x1.bandwidth());
         
+    // Current ROM bars
+    componentGroups.append("rect")
+        .attr("class", "waterfall-bar current")
+        .attr("x", d => x1('current'))
+        .attr("y", d => y(d.current_end))
+        .attr("height", d => y(d.current_start) - y(d.current_end))
+        .attr("width", x1.bandwidth());
+
     // GMP Line
     const gmpValue = phaseData.totalProjectBudget;
     svg.append("line")
@@ -315,16 +336,27 @@ function renderWaterfallChart() {
         .attr("text-anchor", "end")
         .text("GMP");
 
-    // Connector lines
-    svg.selectAll(".connector")
+    // Connector lines - Target
+    svg.selectAll(".connector-target")
         .data(data.filter((d, i) => i < data.length - 1))
         .enter()
         .append("line")
         .attr("class", "connector")
-        .attr("x1", d => x(d.name) + x.bandwidth())
-        .attr("y1", d => y(d.end))
-        .attr("x2", d => x(data[data.indexOf(d) + 1].name))
-        .attr("y2", d => y(d.end));
+        .attr("x1", d => x0(d.name) + x1('target') + x1.bandwidth())
+        .attr("y1", d => y(d.target_end))
+        .attr("x2", d => x0(data[data.indexOf(d) + 1].name) + x1('target'))
+        .attr("y2", d => y(d.target_end));
+        
+    // Connector lines - Current
+    svg.selectAll(".connector-current")
+        .data(data.filter((d, i) => i < data.length - 1))
+        .enter()
+        .append("line")
+        .attr("class", "connector")
+        .attr("x1", d => x0(d.name) + x1('current') + x1.bandwidth())
+        .attr("y1", d => y(d.current_end))
+        .attr("x2", d => x0(data[data.indexOf(d) + 1].name) + x1('current'))
+        .attr("y2", d => y(d.current_end));
 }
 
 
