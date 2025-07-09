@@ -51,6 +51,7 @@ const phaseSelector = document.getElementById('phase-selector');
 const summaryPanel = document.getElementById('summary-panel');
 const legend = document.getElementById('legend');
 const waterfallLegend = document.getElementById('waterfall-legend');
+const maximizeBtn = document.getElementById('maximize-gmp-btn');
 
 // --- D3 SCALES AND FORMATTERS ---
 
@@ -120,6 +121,7 @@ function render() {
     phaseSelector.classList.add('hidden');
     legend.classList.add('hidden');
     waterfallLegend.classList.add('hidden');
+    maximizeBtn.classList.add('hidden');
 
     chartViewBtn.classList.remove('active');
     tableViewBtn.classList.remove('active');
@@ -132,6 +134,7 @@ function render() {
         mainChart.classList.remove('hidden');
         phaseSelector.classList.remove('hidden');
         legend.classList.remove('hidden');
+        maximizeBtn.classList.remove('hidden');
         chartViewBtn.classList.add('active');
         renderChart();
         renderYAxisLabels();
@@ -846,6 +849,118 @@ function toggleComponentLock(componentName, forceState) {
     render();
 }
 
+/**
+ * Maximizes the budget by adjusting unlocked components.
+ * Proportionally adjusts the 'current_rom' of all unlocked components in the current phase
+ * to make the total 'Current ROM' equal to the 'Total Project Budget'.
+ * This function only executes if the current total ROM is less than the budget.
+ */
+function maximizeGmp() {
+    const phaseData = currentData.phases[currentPhase];
+    const budget = phaseData.totalProjectBudget;
+    const currentTotalCost = d3.sum(phaseData.components, d => d.current_rom * d.square_footage);
+
+    // Only run if we are under budget.
+    if (currentTotalCost >= budget) {
+        console.warn("Current ROM is already at or above the budget. No action taken.");
+        // We could add a user-facing alert here if desired.
+        return;
+    }
+
+    const delta = budget - currentTotalCost;
+    const unlockedComponents = phaseData.components.filter(c => !c.locked);
+
+    if (unlockedComponents.length === 0) {
+        console.warn("No unlocked components to adjust.");
+        // We could add a user-facing alert here if desired.
+        return;
+    }
+
+    const unlockedTotalCost = d3.sum(unlockedComponents, d => d.current_rom * d.square_footage);
+
+    // Avoid division by zero if unlocked components have no cost.
+    if (unlockedTotalCost <= 0) {
+        console.warn("Unlocked components have a total cost of zero, cannot proportionally adjust.");
+        return;
+    }
+
+    // Calculate the scaling factor and apply it to each unlocked component.
+    const scalingFactor = 1 + (delta / unlockedTotalCost);
+    unlockedComponents.forEach(component => {
+        // We round the result to 2 decimal places to avoid floating point inaccuracies.
+        component.current_rom = parseFloat((component.current_rom * scalingFactor).toFixed(2));
+    });
+
+    // Refresh the UI to reflect the changes.
+    renderChart();
+    updateSummary();
+    if (document.getElementById('table-view').style.display !== 'none') {
+        renderTable();
+    }
+    // After adjusting, the "Reset to Original" button should be enabled.
+    document.getElementById('reset-button').disabled = false;
+}
+
+/**
+ * Sets the current phase of the application (e.g., 'phase1' or 'phase2').
+ * @param {string} phase - The phase to set as active.
+ */
+function setCurrentPhase(phase) {
+    currentPhase = phase;
+    render();
+}
+
+/**
+ * Switches the active view of the application (e.g., 'chart', 'table', 'benchmarks', 'program', 'waterfall').
+ * @param {string} viewId - The ID of the button that was clicked.
+ */
+function switchView(viewId) {
+    // Hide all views and deactivate all buttons
+    mainChart.style.display = 'none';
+    tableView.style.display = 'none';
+    programView.style.display = 'none';
+    waterfallView.style.display = 'none';
+    benchmarksView.style.display = 'none';
+    legend.style.display = 'none';
+    waterfallLegend.style.display = 'none';
+    document.getElementById('maximize-gmp-btn').style.display = 'none';
+    phaseSelector.style.display = 'flex'; // Always show phase selector for now
+    summaryPanel.style.display = 'none'; // Hide summary panel by default
+
+    // Deactivate all view buttons
+    chartViewBtn.classList.remove('active');
+    tableViewBtn.classList.remove('active');
+    benchmarksViewBtn.classList.remove('active');
+    programViewBtn.classList.remove('active');
+    waterfallViewBtn.classList.remove('active');
+
+    // Show the selected view and its specific controls
+    switch (viewId) {
+        case 'chart-view-btn':
+            mainChart.style.display = 'block';
+            legend.style.display = 'flex';
+            document.getElementById('maximize-gmp-btn').style.display = 'block';
+            renderChart();
+            break;
+        case 'table-view-btn':
+            tableView.style.display = 'block';
+            renderTable();
+            break;
+        case 'benchmarks-view-btn':
+            benchmarksView.style.display = 'block';
+            renderBenchmarksView();
+            break;
+        case 'program-view-btn':
+            programView.style.display = 'block';
+            renderProgramView();
+            break;
+        case 'waterfall-view-btn':
+            waterfallView.style.display = 'block';
+            renderWaterfallChart();
+            break;
+    }
+}
+
 // --- SUMMARY & FILE HANDLING ---
 
 /**
@@ -1090,11 +1205,11 @@ document.addEventListener('DOMContentLoaded', () => {
     startOverBtn.addEventListener('click', showSplashScreen);
     exportJsonBtn.addEventListener('click', exportJSON);
     exportCsvBtn.addEventListener('click', exportCSV);
-    resetButton.addEventListener('click', () => { 
-        if (originalData) { 
-            loadData(JSON.parse(JSON.stringify(originalData)), fileNameDisplay.textContent.replace('Using: ', '')); 
-        } 
+    resetButton.addEventListener('click', () => {
+        // Reload original data to reset all changes
+        loadData(JSON.parse(JSON.stringify(originalData)));
     });
+    maximizeBtn.addEventListener('click', maximizeGmp);
     
     // --- Phase and View Selector Handlers ---
     phase1Btn.addEventListener('click', () => { currentPhase = 'phase1'; render(); });
@@ -1127,4 +1242,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Re-render on window resize to ensure charts are responsive.
     window.addEventListener('resize', render);
+
+    // Initial load
 }); 
