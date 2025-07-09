@@ -139,4 +139,69 @@ body {
     justify-content: space-between;
     font-size: 0.75rem;
     color: #64748b;
+}
+.view-btn.active {
+    border-color: #2563eb; /* blue-600 */
+    color: #2563eb;
+}
+.view-btn {
+    border-color: transparent;
+    transition: all 0.2s;
+}
+
+#table-view table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+#table-view th, #table-view td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb; /* gray-200 */
+}
+#table-view th {
+    background-color: #f9fafb; /* gray-50 */
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #4b5563; /* gray-600 */
+}
+#table-view td {
+    font-size: 0.875rem;
+    color: #111827; /* gray-900 */
+}
+#table-view tbody tr:last-child td {
+    border-bottom: none;
+}
+#table-view .component-name {
+    font-weight: 500;
+}
+#table-view .editable-cell input {
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #d1d5db; /* gray-300 */
+    background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+/* Hide spin buttons on number inputs */
+#table-view .editable-cell input::-webkit-outer-spin-button,
+#table-view .editable-cell input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+#table-view .editable-cell input[type=number] {
+    -moz-appearance: textfield;
+}
+
+#table-view .editable-cell input:focus {
+    outline: none;
+    border-color: #2563eb; /* blue-600 */
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+}
+#table-view .na-cell {
+    color: #9ca3af; /* gray-400 */
+    font-style: italic;
 } 
