@@ -52,7 +52,7 @@ body {
     position: absolute;
     left: 20%;
     width: 60%;
-    background-color: #ef4444;
+    background-color: #16a34a; /* Green */
     height: 3px;
     z-index: 2;
 }
