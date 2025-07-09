@@ -1,5 +1,5 @@
 // --- INITIAL SETUP AND SAMPLE DATA ---
-let originalData = null, currentData = null, yDomainMax = 100, currentPhase = 'phase1', currentView = 'chart';
+let originalData = null, currentData = null, yDomainMax = 100, currentPhase = 'phase1', currentView = 'benchmarks';
 
 // --- DOM ELEMENT REFERENCES ---
 const splashScreen = document.getElementById('splash-screen'), mainContent = document.getElementById('main-content');
