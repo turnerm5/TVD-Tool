@@ -44,12 +44,18 @@
             <div class="flex flex-col items-end gap-2 ml-4">
                 <div class="flex items-center gap-2">
                     <button id="export-json-btn" class="bg-green-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-green-700 transition">Export JSON</button>
+                    <button id="export-csv-btn" class="bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition">Export CSV</button>
                     <button id="start-over-btn" class="bg-gray-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-gray-600 transition">Start Over</button>
                     <button id="reset-button" class="bg-red-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-red-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed">Reset to Original</button>
                 </div>
             </div>
         </header>
         
+        <div id="phase-selector" class="flex justify-center my-4 gap-2">
+            <button id="phase1-btn" class="phase-btn py-2 px-4 rounded-md font-semibold">Phase 1</button>
+            <button id="phase2-btn" class="phase-btn py-2 px-4 rounded-md font-semibold">Phase 2</button>
+        </div>
+
         <div id="legend" class="flex justify-center items-center gap-6 my-4 text-sm text-gray-600 flex-wrap">
             <div class="flex items-center gap-2"><div class="w-4 h-4 flex flex-col justify-between items-center"><div class="h-0.5 w-full" style="background-color: #38bdf8;"></div><div class="h-2.5 w-0.5" style="background-color: #38bdf8;"></div><div class="h-0.5 w-full" style="background-color: #38bdf8;"></div></div><span>Project Benchmark</span></div>
             <div class="flex items-center gap-2"><div class="w-4 h-1 rounded-full" style="background-color: #ef4444;"></div><span>Target Value</span></div>
@@ -59,11 +65,27 @@
         <main><div id="main-chart" class="relative"><div id="y-axis-labels-container" class="y-axis-labels"></div><div id="chart-container" class="chart-container"></div></div></main>
 
         <footer id="summary-panel" class="mt-8 bg-white p-4 rounded-lg shadow-md border border-gray-200">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div><h3 class="text-sm font-medium text-gray-500">Total Project Budget</h3><p id="total-budget" class="text-xl font-bold text-gray-800"></p></div>
-                <div><h3 class="text-sm font-medium text-gray-500">Target Cost ($/SF)</h3><p id="target-cost" class="text-xl font-semibold text-blue-600"></p></div>
-                <div><h3 class="text-sm font-medium text-gray-500">Current Cost ($/SF)</h3><p id="current-cost" class="text-xl font-semibold text-gray-800"></p></div>
-                <div><h3 class="text-sm font-medium text-gray-500">Variance ($/SF)</h3><p id="variance" class="text-xl font-bold"></p></div>
+            <!-- Phase 1 Summary -->
+            <div class="mb-4">
+                <h2 class="text-lg font-bold text-gray-700 mb-2">Phase 1</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div><h3 class="text-sm font-medium text-gray-500">Total Project Budget</h3><p id="total-budget-p1" class="text-xl font-bold text-gray-800"></p></div>
+                    <div><h3 class="text-sm font-medium text-gray-500">Target Cost ($/SF)</h3><p id="target-cost-p1" class="text-xl font-semibold text-blue-600"></p></div>
+                    <div><h3 class="text-sm font-medium text-gray-500">Current Cost ($/SF)</h3><p id="current-cost-p1" class="text-xl font-semibold text-gray-800"></p></div>
+                    <div><h3 class="text-sm font-medium text-gray-500">Variance ($/SF)</h3><p id="variance-p1" class="text-xl font-bold"></p></div>
+                </div>
+            </div>
+            <!-- Divider -->
+            <hr class="my-4 border-gray-300">
+            <!-- Phase 2 Summary -->
+            <div>
+                <h2 class="text-lg font-bold text-gray-700 mb-2">Phase 2</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div><h3 class="text-sm font-medium text-gray-500">Total Project Budget</h3><p id="total-budget-p2" class="text-xl font-bold text-gray-800"></p></div>
+                    <div><h3 class="text-sm font-medium text-gray-500">Target Cost ($/SF)</h3><p id="target-cost-p2" class="text-xl font-semibold text-blue-600"></p></div>
+                    <div><h3 class="text-sm font-medium text-gray-500">Current Cost ($/SF)</h3><p id="current-cost-p2" class="text-xl font-semibold text-gray-800"></p></div>
+                    <div><h3 class="text-sm font-medium text-gray-500">Variance ($/SF)</h3><p id="variance-p2" class="text-xl font-bold"></p></div>
+                </div>
             </div>
         </footer>
     </div>
@@ -71,32 +93,46 @@
     <script>
         // --- INITIAL SETUP AND SAMPLE DATA ---
         const sampleData = {
-            "totalProjectBudget": 20000000,
-            "projectAreaSF": 30000,
-            "components": [
-                { "name": "General Conditions", "benchmark_low": 20, "benchmark_high": 35, "target_value": 30, "current_rom": 29 },
-                { "name": "Demo", "benchmark_low": 22, "benchmark_high": 28, "target_value": 25, "current_rom": 26 },
-                { "name": "Site", "benchmark_low": 42, "benchmark_high": 62, "target_value": 55, "current_rom": 52 },
-                { "name": "Structure", "benchmark_low": 50, "benchmark_high": 100, "target_value": 65, "current_rom": 57 },
-                { "name": "Envelope", "benchmark_low": 60, "benchmark_high": 84, "target_value": 70, "current_rom": 71 },
-                { "name": "Roofing", "benchmark_low": 60, "benchmark_high": 96, "target_value": 75, "current_rom": 77 },
-                { "name": "Labs", "benchmark_low": 78, "benchmark_high": 120, "target_value": 88, "current_rom": 87 },
-                { "name": "Vertical Circulation", "benchmark_low": 29, "benchmark_high": 47, "target_value": 33, "current_rom": 34 },
-                { "name": "Plumbing", "benchmark_low": 22, "benchmark_high": 42, "target_value": 26, "current_rom": 25 },
-                { "name": "Electrical", "benchmark_low": 40, "benchmark_high": 60, "target_value": 48, "current_rom": 42 },
-                { "name": "HVAC", "benchmark_low": 38, "benchmark_high": 78, "target_value": 50, "current_rom": 48 },
-                { "name": "Fire Protection", "benchmark_low": 22, "benchmark_high": 42, "target_value": 28, "current_rom": 27 }
-            ]
+            "phases": {
+                "phase1": {
+                    "totalProjectBudget": 20000000,
+                    "projectAreaSF": 30000,
+                    "components": [
+                        { "name": "General Conditions", "benchmark_low": 20, "benchmark_high": 35, "target_value": 30, "current_rom": 29 },
+                        { "name": "Demo", "benchmark_low": 22, "benchmark_high": 28, "target_value": 25, "current_rom": 26 },
+                        { "name": "Site", "benchmark_low": 42, "benchmark_high": 62, "target_value": 55, "current_rom": 52 },
+                        { "name": "Utilities", "benchmark_low": 30, "benchmark_high": 50, "target_value": 40, "current_rom": 38 },
+                        { "name": "Weatherproofing", "benchmark_low": 15, "benchmark_high": 30, "target_value": 25, "current_rom": 22 }
+                    ]
+                },
+                "phase2": {
+                    "totalProjectBudget": 40000000,
+                    "projectAreaSF": 60000,
+                    "components": [
+                        { "name": "General Conditions", "benchmark_low": 25, "benchmark_high": 40, "target_value": 35, "current_rom": 33 },
+                        { "name": "Structure", "benchmark_low": 50, "benchmark_high": 100, "target_value": 65, "current_rom": 57 },
+                        { "name": "Envelope", "benchmark_low": 60, "benchmark_high": 84, "target_value": 70, "current_rom": 71 },
+                        { "name": "Labs", "benchmark_low": 78, "benchmark_high": 120, "target_value": 88, "current_rom": 87 },
+                        { "name": "Vertical Circulation", "benchmark_low": 29, "benchmark_high": 47, "target_value": 33, "current_rom": 34 },
+                        { "name": "Plumbing", "benchmark_low": 22, "benchmark_high": 42, "target_value": 26, "current_rom": 25 },
+                        { "name": "Electrical", "benchmark_low": 40, "benchmark_high": 60, "target_value": 48, "current_rom": 42 },
+                        { "name": "HVAC", "benchmark_low": 38, "benchmark_high": 78, "target_value": 50, "current_rom": 48 },
+                        { "name": "Fire Protection", "benchmark_low": 22, "benchmark_high": 42, "target_value": 28, "current_rom": 27 }
+                    ]
+                }
+            }
         };
-        let originalData = null, currentData = null, yDomainMax = 100;
+        let originalData = null, currentData = null, yDomainMax = 100, currentPhase = 'phase1';
 
         // --- DOM ELEMENT REFERENCES ---
         const splashScreen = document.getElementById('splash-screen'), mainContent = document.getElementById('main-content');
         const chartContainer = d3.select("#chart-container"), yAxisLabelsContainer = d3.select("#y-axis-labels-container");
         const resetButton = document.getElementById('reset-button'), startOverBtn = document.getElementById('start-over-btn');
         const exportJsonBtn = document.getElementById('export-json-btn'), useSampleDataBtn = document.getElementById('use-sample-data-btn');
+        const exportCsvBtn = document.getElementById('export-csv-btn');
         const downloadTemplateBtn = document.getElementById('download-template-btn'), fileDropZone = document.getElementById('file-drop-zone');
         const fileInput = document.getElementById('file-input'), fileNameDisplay = document.getElementById('file-name');
+        const phase1Btn = document.getElementById('phase1-btn'), phase2Btn = document.getElementById('phase2-btn');
 
         // --- SCALES AND FORMATTERS ---
         const yScale = d3.scaleLinear().domain([0, yDomainMax]);
@@ -109,15 +145,32 @@
         // --- MAIN RENDER FUNCTION ---
         function render() {
             if (!currentData) return;
-            chartContainer.style("grid-template-columns", `repeat(${currentData.components.length}, 1fr)`);
+
+            const phaseComponents = currentData.phases[currentPhase].components;
+            chartContainer.style("grid-template-columns", `repeat(${phaseComponents.length}, 1fr)`);
             yScale.range([chartContainer.node().clientHeight - parseFloat(chartContainer.style("padding-bottom")), 0]);
-            renderChart(); updateSummary(); renderYAxisLabels();
+            
+            if (currentPhase === 'phase1') {
+                phase1Btn.classList.add('bg-blue-600', 'text-white');
+                phase1Btn.classList.remove('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+                phase2Btn.classList.add('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+                phase2Btn.classList.remove('bg-blue-600', 'text-white');
+            } else {
+                phase2Btn.classList.add('bg-blue-600', 'text-white');
+                phase2Btn.classList.remove('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+                phase1Btn.classList.add('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
+                phase1Btn.classList.remove('bg-blue-600', 'text-white');
+            }
+
+            renderChart(); 
+            updateSummary(); 
+            renderYAxisLabels();
             resetButton.disabled = JSON.stringify(originalData) === JSON.stringify(currentData);
         }
 
         // --- CHART RENDERING ---
         function renderChart() {
-            const components = chartContainer.selectAll(".component-column").data(currentData.components, d => d.name);
+            const components = chartContainer.selectAll(".component-column").data(currentData.phases[currentPhase].components, d => d.name);
             components.exit().remove();
 
             const enterGroup = components.enter().append("div").attr("class", "component-column");
@@ -153,9 +206,10 @@
             updateGroup.select(".target-value").style("top", d => yScale(d.target_value) + "px").style("bottom", null);
             updateGroup.select(".current-rom").style("top", d => yScale(d.current_rom) - 3 + "px").style("bottom", null);
             
-            const originalComponents = originalData.components.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
+            const originalComponents = originalData.phases[currentPhase].components.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
             updateGroup.each(function(d) {
                 const original = originalComponents[d.name];
+                if (!original) return; // Safeguard if a component name changes or is missing
                 const valueGroup = d3.select(this).select(".value-label-group");
                 valueGroup.select(".current-value-label").text(formatCurrency(d.current_rom));
                 valueGroup.style("top", yScale(d.current_rom) - 10 + "px").style("bottom", null);
@@ -199,7 +253,7 @@
             const newRomValue = Math.max(0, Math.min(yDomainMax, yScale.invert(event.y)));
             const romChange = newRomValue - d.current_rom;
             if (Math.abs(romChange) < 0.01) return;
-            const unlockedComponents = currentData.components.filter(c => c !== d && !c.locked);
+            const unlockedComponents = currentData.phases[currentPhase].components.filter(c => c !== d && !c.locked);
             const totalUnlockedWeight = d3.sum(unlockedComponents, c => c.current_rom);
             if (unlockedComponents.length === 0 || totalUnlockedWeight <= 0) {
                  d.current_rom = newRomValue;
@@ -220,27 +274,46 @@
 
         // --- SUMMARY & FILE HANDLING ---
         function updateSummary() {
-            const totalTarget = d3.sum(currentData.components, d => d.target_value);
-            const totalCurrent = d3.sum(currentData.components, d => d.current_rom);
-            const variance = totalCurrent - totalTarget;
-            document.getElementById('total-budget').textContent = `$${currentData.totalProjectBudget.toLocaleString()}`;
-            document.getElementById('target-cost').textContent = formatCurrency(totalTarget);
-            document.getElementById('current-cost').textContent = formatCurrency(totalCurrent);
-            const varianceEl = document.getElementById('variance');
-            varianceEl.textContent = `${variance > 0 ? '+' : ''}${formatCurrency(variance)}`;
-            varianceEl.classList.toggle('text-red-600', variance > 0);
-            varianceEl.classList.toggle('text-green-600', variance <= 0);
+            // Phase 1
+            const p1 = currentData.phases.phase1;
+            const totalTargetP1 = d3.sum(p1.components, d => d.target_value);
+            const totalCurrentP1 = d3.sum(p1.components, d => d.current_rom);
+            const varianceP1 = totalCurrentP1 - totalTargetP1;
+            document.getElementById('total-budget-p1').textContent = `$${p1.totalProjectBudget.toLocaleString()}`;
+            document.getElementById('target-cost-p1').textContent = formatCurrency(totalTargetP1);
+            document.getElementById('current-cost-p1').textContent = formatCurrency(totalCurrentP1);
+            const varianceElP1 = document.getElementById('variance-p1');
+            varianceElP1.textContent = `${varianceP1 > 0 ? '+' : ''}${formatCurrency(varianceP1)}`;
+            varianceElP1.classList.toggle('text-red-600', varianceP1 > 0);
+            varianceElP1.classList.toggle('text-green-600', varianceP1 <= 0);
+
+            // Phase 2
+            const p2 = currentData.phases.phase2;
+            const totalTargetP2 = d3.sum(p2.components, d => d.target_value);
+            const totalCurrentP2 = d3.sum(p2.components, d => d.current_rom);
+            const varianceP2 = totalCurrentP2 - totalTargetP2;
+            document.getElementById('total-budget-p2').textContent = `$${p2.totalProjectBudget.toLocaleString()}`;
+            document.getElementById('target-cost-p2').textContent = formatCurrency(totalTargetP2);
+            document.getElementById('current-cost-p2').textContent = formatCurrency(totalCurrentP2);
+            const varianceElP2 = document.getElementById('variance-p2');
+            varianceElP2.textContent = `${varianceP2 > 0 ? '+' : ''}${formatCurrency(varianceP2)}`;
+            varianceElP2.classList.toggle('text-red-600', varianceP2 > 0);
+            varianceElP2.classList.toggle('text-green-600', varianceP2 <= 0);
         }
         
         function loadData(data, fileName = 'Sample Data') {
-            if (!data.components || !data.projectAreaSF || !data.totalProjectBudget) { alert("Invalid JSON format."); return; }
-            data.components.forEach(c => c.locked = false);
+            if (!data.phases || !data.phases.phase1 || !data.phases.phase2) { alert("Invalid JSON format. Must contain phase1 and phase2 data."); return; }
+            
+            Object.values(data.phases).forEach(phase => phase.components.forEach(c => c.locked = false));
             originalData = JSON.parse(JSON.stringify(data));
             currentData = data;
-            const maxVal = d3.max(data.components, d => Math.max(d.benchmark_high, d.target_value, d.current_rom));
+            
+            const allComponents = [...data.phases.phase1.components, ...data.phases.phase2.components];
+            const maxVal = d3.max(allComponents, d => Math.max(d.benchmark_high, d.target_value, d.current_rom));
             yDomainMax = Math.ceil(maxVal / 10) * 10 + 20;
             yScale.domain([0, yDomainMax]); // 0 at bottom, max at top
             fileNameDisplay.textContent = `Using: ${fileName}`;
+            currentPhase = 'phase1'; // Reset to phase 1 on new data load
             showMainContent();
         }
 
@@ -272,7 +345,9 @@
         function exportJSON() {
             if (!currentData) return;
             const dataToExport = JSON.parse(JSON.stringify(currentData));
-            dataToExport.components.forEach(c => delete c.locked);
+            Object.values(dataToExport.phases).forEach(phase => {
+                phase.components.forEach(c => delete c.locked);
+            });
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
@@ -282,12 +357,51 @@
             downloadAnchorNode.remove();
         }
 
+        function exportCSV() {
+            if (!currentData) return;
+
+            const headers = ["Phase", "Component", "Benchmark Low", "Benchmark High", "Target Value", "Current ROM"];
+            let csvContent = headers.join(",") + "\n";
+
+            for (const phaseKey in currentData.phases) {
+                if (currentData.phases.hasOwnProperty(phaseKey)) {
+                    const phase = currentData.phases[phaseKey];
+                    phase.components.forEach(component => {
+                        const row = [
+                            phaseKey,
+                            `"${component.name.replace(/"/g, '""')}"`, // Handle quotes in name
+                            component.benchmark_low,
+                            component.benchmark_high,
+                            component.target_value,
+                            component.current_rom
+                        ].join(",");
+                        csvContent += row + "\n";
+                    });
+                }
+            }
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", url);
+            downloadAnchorNode.setAttribute("download", `tvd_export_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            URL.revokeObjectURL(url);
+        }
+
         // --- EVENT LISTENERS ---
         useSampleDataBtn.addEventListener('click', () => loadData(sampleData));
         downloadTemplateBtn.addEventListener('click', downloadTemplate);
         startOverBtn.addEventListener('click', showSplashScreen);
         exportJsonBtn.addEventListener('click', exportJSON);
+        exportCsvBtn.addEventListener('click', exportCSV);
         resetButton.addEventListener('click', () => { if (originalData) { loadData(JSON.parse(JSON.stringify(originalData)), fileNameDisplay.textContent.replace('Using: ', '')); } });
+        
+        phase1Btn.addEventListener('click', () => { currentPhase = 'phase1'; render(); });
+        phase2Btn.addEventListener('click', () => { currentPhase = 'phase2'; render(); });
+
         fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
         fileDropZone.addEventListener('click', () => fileInput.click());
         fileDropZone.addEventListener('dragover', (e) => { e.preventDefault(); fileDropZone.classList.add('dragover'); });
