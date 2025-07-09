@@ -17,6 +17,8 @@ let yDomainMax = 100;
 let currentPhase = 'phase1';
 /** @type {('benchmarks'|'program'|'chart'|'table'|'waterfall')} - The currently active view. */
 let currentView = 'benchmarks';
+/** @type {string | null} - The ID of the selected benchmark project for the detail view. */
+let selectedBenchmark = null;
 
 // --- DOM ELEMENT REFERENCES ---
 // Caching DOM elements for performance and easier access.
@@ -64,6 +66,13 @@ const yScale = d3.scaleLinear().domain([0, yDomainMax]);
  * @returns {string} The formatted currency string.
  */
 const formatCurrency = (d) => `$${d.toFixed(2)}`;
+
+/**
+ * Formats a number to a string with thousands separators.
+ * @param {number} d - The number to format.
+ * @returns {string} The formatted number string.
+ */
+const formatNumber = (d) => d.toLocaleString('en-US');
 
 // --- VIEW MANAGEMENT ---
 
@@ -126,6 +135,7 @@ function render() {
     } else if (currentView === 'benchmarks') {
         benchmarksView.classList.remove('hidden');
         benchmarksViewBtn.classList.add('active');
+        renderBenchmarksView();
     } else if (currentView === 'program') {
         programView.classList.remove('hidden');
         programViewBtn.classList.add('active');
@@ -283,6 +293,79 @@ function renderChart() {
             d3.select(this).select('.benchmark-indicator-label').attr('x', '10%').attr('y', yPos).attr('dy', '0.35em').text(d.id);
         });
     });
+}
+
+/**
+ * Renders the Benchmarks view.
+ * This function handles the logic for displaying either the main grid of four projects
+ * or the detailed view for a single selected project.
+ */
+function renderBenchmarksView() {
+    const detailContainer = document.getElementById('benchmark-detail-container');
+    const benchmarkGrid = document.querySelector('.benchmark-grid');
+    const benchmarkCards = d3.selectAll('.benchmark-card');
+
+    if (selectedBenchmark) {
+        // --- Show Detail View ---
+        benchmarksView.classList.add('detail-active');
+        detailContainer.classList.remove('hidden');
+
+        // Move the detail container inside the grid to become a flex item
+        benchmarkGrid.appendChild(detailContainer);
+
+        // Highlight the selected card and fade others
+        benchmarkCards.classed('selected', false); // Clear all selections first
+        d3.select(`#benchmark-card-${selectedBenchmark}`).classed('selected', true);
+
+
+        // Find data for the selected project
+        const projectData = currentData.benchmarks.find(p => p.id === selectedBenchmark);
+        if (!projectData) return;
+
+        // --- Render the detail table ---
+        const detailContainerD3 = d3.select(detailContainer);
+        detailContainerD3.html(''); // Clear previous content
+
+        detailContainerD3.append('h3')
+            .attr('class', 'text-2xl font-bold text-gray-800')
+            .text(projectData.name);
+
+        detailContainerD3.append('button')
+            .attr('class', 'absolute top-0 right-0 mt-2 mr-2 text-2xl font-bold text-gray-500 hover:text-gray-800')
+            .html('&times;')
+            .on('click', () => {
+                selectedBenchmark = null;
+                render();
+            });
+
+        const table = detailContainerD3.append('table')
+            .attr('class', 'benchmark-detail-table');
+
+        const thead = table.append('thead');
+        thead.append('tr').selectAll('th')
+            .data(['Component', 'Cost ($/SF)'])
+            .enter()
+            .append('th')
+            .text(d => d);
+
+        const tbody = table.append('tbody');
+        const rows = tbody.selectAll('tr')
+            .data(projectData.components.sort((a, b) => b.cost - a.cost))
+            .enter()
+            .append('tr');
+
+        rows.append('td').text(d => d.name);
+        rows.append('td').text(d => formatCurrency(d.cost));
+
+    } else {
+        // --- Show Grid View ---
+        benchmarksView.classList.remove('detail-active');
+        detailContainer.classList.add('hidden');
+        benchmarkCards.classed('selected', false);
+
+        // Move the detail container back to its original position
+        benchmarksView.appendChild(detailContainer);
+    }
 }
 
 
@@ -827,8 +910,12 @@ function loadData(data, fileName = 'Sample Data') {
     if (currentData.benchmarks) {
         currentData.benchmarks.forEach(proj => {
             const costEl = document.getElementById(`benchmark-cost-${proj.id}`);
+            const sfEl = document.getElementById(`benchmark-sf-${proj.id}`);
             if (costEl) {
                 costEl.textContent = `${formatCurrency(proj.overall_sf_cost)} /SF`;
+            }
+            if (sfEl) {
+                sfEl.textContent = `${formatNumber(proj.square_footage)} SF`;
             }
         });
     }
@@ -952,7 +1039,7 @@ document.addEventListener('DOMContentLoaded', () => {
     phase2Btn.addEventListener('click', () => { currentPhase = 'phase2'; render(); });
     chartViewBtn.addEventListener('click', () => { currentView = 'chart'; render(); });
     tableViewBtn.addEventListener('click', () => { currentView = 'table'; render(); });
-    benchmarksViewBtn.addEventListener('click', () => { currentView = 'benchmarks'; render(); });
+    benchmarksViewBtn.addEventListener('click', () => { currentView = 'benchmarks'; selectedBenchmark = null; render(); });
     programViewBtn.addEventListener('click', () => { currentView = 'program'; render(); });
     waterfallViewBtn.addEventListener('click', () => { currentView = 'waterfall'; render(); });
 
@@ -963,6 +1050,19 @@ document.addEventListener('DOMContentLoaded', () => {
     fileDropZone.addEventListener('dragleave', () => fileDropZone.classList.remove('dragover'));
     fileDropZone.addEventListener('drop', (e) => { e.preventDefault(); fileDropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
     
+    // --- Benchmark Card Click Handlers ---
+    d3.selectAll('.benchmark-card').on('click', function() {
+        const id = this.id.split('-').pop();
+        
+        // If the clicked card is already selected, deselect it (reset view). Otherwise, select it.
+        if (selectedBenchmark === id) {
+            selectedBenchmark = null;
+        } else {
+            selectedBenchmark = id;
+        }
+        render();
+    });
+
     // Re-render on window resize to ensure charts are responsive.
     window.addEventListener('resize', render);
 }); 
