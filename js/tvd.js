@@ -12,8 +12,12 @@ const fileInput = document.getElementById('file-input'), fileNameDisplay = docum
 const phase1Btn = document.getElementById('phase1-btn'), phase2Btn = document.getElementById('phase2-btn');
 const chartViewBtn = document.getElementById('chart-view-btn'), tableViewBtn = document.getElementById('table-view-btn');
 const benchmarksViewBtn = document.getElementById('benchmarks-view-btn');
+const programViewBtn = document.getElementById('program-view-btn');
+const waterfallViewBtn = document.getElementById('waterfall-view-btn');
 const mainChart = document.getElementById('main-chart'), tableView = document.getElementById('table-view');
 const benchmarksView = document.getElementById('benchmarks-view');
+const programView = document.getElementById('program-view');
+const waterfallView = document.getElementById('waterfall-view');
 const phaseSelector = document.getElementById('phase-selector');
 const summaryPanel = document.getElementById('summary-panel');
 const legend = document.getElementById('legend');
@@ -34,11 +38,15 @@ function render() {
     mainChart.classList.add('hidden');
     tableView.classList.add('hidden');
     benchmarksView.classList.add('hidden');
+    programView.classList.add('hidden');
+    waterfallView.classList.add('hidden');
     phaseSelector.classList.add('hidden');
     legend.classList.add('hidden');
     chartViewBtn.classList.remove('active');
     tableViewBtn.classList.remove('active');
     benchmarksViewBtn.classList.remove('active');
+    programViewBtn.classList.remove('active');
+    waterfallViewBtn.classList.remove('active');
 
     if (currentView === 'chart') {
         mainChart.classList.remove('hidden');
@@ -54,6 +62,15 @@ function render() {
     } else if (currentView === 'benchmarks') {
         benchmarksView.classList.remove('hidden');
         benchmarksViewBtn.classList.add('active');
+    } else if (currentView === 'program') {
+        programView.classList.remove('hidden');
+        programViewBtn.classList.add('active');
+        renderProgramView();
+    } else if (currentView === 'waterfall') {
+        waterfallView.classList.remove('hidden');
+        phaseSelector.classList.remove('hidden');
+        waterfallViewBtn.classList.add('active');
+        renderWaterfallChart();
     }
 
     // Update Phase buttons
@@ -198,6 +215,178 @@ function renderChart() {
                 .attr('dy', '0.35em')
                 .text(d.id);
         });
+    });
+}
+
+function handleProgramCellChange(event) {
+    const input = event.target;
+    const newValue = parseFloat(input.value);
+    const phaseKey = input.dataset.phase;
+    const componentName = input.dataset.name;
+
+    const component = currentData.phases[phaseKey].components.find(c => c.name === componentName);
+    if (component) {
+        component.square_footage = newValue;
+        render(); // Rerender to update dependent views like waterfall
+    }
+}
+
+function renderWaterfallChart() {
+    const container = d3.select("#waterfall-chart-container");
+    container.html(""); // Clear previous chart
+
+    const margin = { top: 20, right: 30, bottom: 100, left: 100 };
+    const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
+    const height = 600 - margin.top - margin.bottom;
+
+    const svg = container.append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const phaseData = currentData.phases[currentPhase];
+    const components = phaseData.components;
+    
+    // Process data for waterfall
+    let cumulative = 0;
+    const data = components.map(c => {
+        const value = c.current_rom * c.square_footage;
+        const d = {
+            name: c.name,
+            start: cumulative,
+            end: cumulative + value,
+            value: value,
+            class: 'positive'
+        };
+        cumulative += value;
+        return d;
+    });
+
+    // X axis
+    const x = d3.scaleBand()
+        .range([0, width])
+        .domain(data.map(d => d.name))
+        .padding(0.2);
+
+    svg.append("g")
+        .attr("class", "waterfall-axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(-45)")
+        .style("text-anchor", "end");
+
+    // Y axis
+    const yMax = Math.max(cumulative, phaseData.totalProjectBudget);
+    const y = d3.scaleLinear()
+        .domain([0, yMax])
+        .range([height, 0]);
+
+    svg.append("g")
+        .attr("class", "waterfall-axis")
+        .call(d3.axisLeft(y).tickFormat(d => `$${(d / 1000000).toFixed(1)}M`));
+
+    // Bars
+    svg.selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("class", d => `waterfall-bar ${d.class}`)
+        .attr("x", d => x(d.name))
+        .attr("y", d => y(d.end))
+        .attr("height", d => y(d.start) - y(d.end))
+        .attr("width", x.bandwidth());
+        
+    // GMP Line
+    const gmpValue = phaseData.totalProjectBudget;
+    svg.append("line")
+        .attr("class", "gmp-line")
+        .attr("x1", 0)
+        .attr("x2", width)
+        .attr("y1", y(gmpValue))
+        .attr("y2", y(gmpValue));
+    
+    svg.append("text")
+        .attr("class", "gmp-label")
+        .attr("x", width)
+        .attr("y", y(gmpValue))
+        .attr("dy", -4)
+        .attr("text-anchor", "end")
+        .text("GMP");
+
+    // Connector lines
+    svg.selectAll(".connector")
+        .data(data.filter((d, i) => i < data.length - 1))
+        .enter()
+        .append("line")
+        .attr("class", "connector")
+        .attr("x1", d => x(d.name) + x.bandwidth())
+        .attr("y1", d => y(d.end))
+        .attr("x2", d => x(data[data.indexOf(d) + 1].name))
+        .attr("y2", d => y(d.end));
+}
+
+
+function renderProgramView() {
+    // Create a flattened data structure with phase headers
+    const tableData = [];
+    
+    // Phase 1
+    const p1Components = currentData.phases.phase1.components.sort((a, b) => a.name.localeCompare(b.name));
+    if (p1Components.length > 0) {
+        tableData.push({ type: 'header', name: 'Phase 1' });
+        p1Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase1' }));
+    }
+
+    // Phase 2
+    const p2Components = currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
+    if (p2Components.length > 0) {
+        tableData.push({ type: 'header', name: 'Phase 2' });
+        p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
+    }
+
+    // Clear previous content and build new one with D3
+    const programViewContainer = d3.select(programView);
+    programViewContainer.html(''); 
+    
+    const tableContainer = programViewContainer.append('div').attr('class', 'max-w-3xl mx-auto');
+
+    const table = tableContainer.append('table').attr('class', 'min-w-full divide-y divide-gray-200');
+    
+    // Create Header
+    const thead = table.append('thead').attr('class', 'bg-gray-50');
+    const headerRow = thead.append('tr');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '70%').text('Component');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '30%').text('Square Footage');
+    
+    // Create Body
+    const tbody = table.append('tbody');
+    const rows = tbody.selectAll('tr').data(tableData).enter().append('tr');
+
+    // Style rows based on type (header or component)
+    rows.each(function(d) {
+        const row = d3.select(this);
+        if (d.type === 'header') {
+            row.attr('class', 'bg-gray-100');
+            row.append('td')
+                .attr('colspan', 2)
+                .attr('class', 'py-2 px-6 text-sm font-bold text-gray-700')
+                .text(d.name);
+        } else {
+            row.attr('class', 'bg-white');
+            
+            // Component Name
+            row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
+            
+            // Square Footage (editable)
+            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
+                .append('input').attr('type', 'number').attr('class', 'w-full text-center')
+                .attr('value', d.square_footage)
+                .attr('data-phase', d.dataPhase)
+                .attr('data-name', d.name)
+                .on('change', handleProgramCellChange);
+        }
     });
 }
 
@@ -555,6 +744,8 @@ document.addEventListener('DOMContentLoaded', () => {
     chartViewBtn.addEventListener('click', () => { currentView = 'chart'; render(); });
     tableViewBtn.addEventListener('click', () => { currentView = 'table'; render(); });
     benchmarksViewBtn.addEventListener('click', () => { currentView = 'benchmarks'; render(); });
+    programViewBtn.addEventListener('click', () => { currentView = 'program'; render(); });
+    waterfallViewBtn.addEventListener('click', () => { currentView = 'waterfall'; render(); });
 
     fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
     fileDropZone.addEventListener('click', () => fileInput.click());
