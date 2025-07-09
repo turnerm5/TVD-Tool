@@ -20,6 +20,9 @@ let currentView = 'benchmarks';
 /** @type {string | null} - The ID of the selected benchmark project for the detail view. */
 let selectedBenchmark = null;
 
+/** @type {Set<string>} - Stores unique keys for locked components (e.g., "phase1-General Conditions"). */
+let lockedComponents = new Set();
+
 // --- DOM ELEMENT REFERENCES ---
 // Caching DOM elements for performance and easier access.
 const splashScreen = document.getElementById('splash-screen');
@@ -51,6 +54,7 @@ const phaseSelector = document.getElementById('phase-selector');
 const summaryPanel = document.getElementById('summary-panel');
 const legend = document.getElementById('legend');
 const waterfallLegend = document.getElementById('waterfall-legend');
+const maximizeBtn = document.getElementById('maximize-gmp-btn');
 
 // --- D3 SCALES AND FORMATTERS ---
 
@@ -120,6 +124,7 @@ function render() {
     phaseSelector.classList.add('hidden');
     legend.classList.add('hidden');
     waterfallLegend.classList.add('hidden');
+    maximizeBtn.classList.add('hidden');
 
     chartViewBtn.classList.remove('active');
     tableViewBtn.classList.remove('active');
@@ -132,6 +137,7 @@ function render() {
         mainChart.classList.remove('hidden');
         phaseSelector.classList.remove('hidden');
         legend.classList.remove('hidden');
+        maximizeBtn.classList.remove('hidden');
         chartViewBtn.classList.add('active');
         renderChart();
         renderYAxisLabels();
@@ -207,7 +213,7 @@ function renderChart() {
     const valueLabelGroup = enterGroup.append("div").attr("class", "value-label-group");
     valueLabelGroup.append("div").attr("class", "current-value-label");
     valueLabelGroup.append("div").attr("class", "delta-label");
-    enterGroup.append("div").attr("class", "lock-icon").on("click", toggleLock);
+    enterGroup.append("div").attr("class", "lock-icon");
 
     // Merge the enter selection with the update selection.
     // All subsequent operations apply to both new and existing elements.
@@ -266,8 +272,24 @@ function renderChart() {
     updateGroup.select(".component-label").text(d => d.name);
     updateGroup.select(".lock-icon")
         .style('display', 'block')
-        .style('opacity', d => d.locked ? 1 : 0.5)
-        .text(d => d.locked ? '🔒' : '🔓');
+        .style('opacity', d => {
+            const key = `${currentPhase}-${d.name}`;
+            return lockedComponents.has(key) ? 1 : 0.5;
+        })
+        .text(d => {
+            const key = `${currentPhase}-${d.name}`;
+            return lockedComponents.has(key) ? '🔒' : '🔓';
+        })
+        .on('click', (event, d) => {
+            event.stopPropagation();
+            const key = `${currentPhase}-${d.name}`;
+            if (lockedComponents.has(key)) {
+                lockedComponents.delete(key);
+            } else {
+                lockedComponents.add(key);
+            }
+            render();
+        });
 
     // --- Render the benchmark indicators (A, B, C, D) within each column's SVG ---
     updateGroup.each(function(componentData) {
@@ -640,11 +662,20 @@ function renderTable() {
             const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
             row.attr('class', 'bg-white').classed('benchmark-warning', isOutsideBenchmark);
 
+            const lockKey = `${d.dataPhase}-${d.name}`;
             row.append('td').attr('class', 'py-4 px-2 text-center text-sm align-middle')
                 .append('span').attr('class', 'lock-icon cursor-pointer')
-                .style('opacity', d.locked ? 1 : 0.5)
-                .text(d.locked ? '🔒' : '🔓')
-                .on('click', (event, d_inner) => toggleComponentLock(d_inner.name));
+                .style('opacity', lockedComponents.has(lockKey) ? 1 : 0.5)
+                .text(lockedComponents.has(lockKey) ? '🔒' : '🔓')
+                .on('click', (event, d_inner) => {
+                    const key = `${d_inner.dataPhase}-${d_inner.name}`;
+                    if (lockedComponents.has(key)) {
+                        lockedComponents.delete(key);
+                    } else {
+                        lockedComponents.add(key);
+                    }
+                    render();
+                });
             
             row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.benchmark_low));
@@ -703,9 +734,10 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     if (Math.abs(initialCostChange) < 0.01) return;
 
     // 2. Identify which components can absorb the change.
-    const unlockedComponents = phase.components.filter(c =>
-        c !== changedComponent && !c.locked && c.square_footage > 0
-    );
+    const unlockedComponents = phase.components.filter(c => {
+        const key = `${phaseKey}-${c.name}`;
+        return c !== changedComponent && !lockedComponents.has(key) && c.square_footage > 0
+    });
 
     // If no components can absorb the change, just apply it and let the total cost drift.
     if (unlockedComponents.length === 0) {
@@ -792,8 +824,10 @@ function handleTableCellChange(event) {
  */
 function dragStarted(event, d) { 
     d3.select(this).raise().classed("active", true); 
-    if (!d.locked) { 
-        toggleComponentLock(d.name, true); // Force lock
+    const key = `${currentPhase}-${d.name}`;
+    if (!lockedComponents.has(key)) { 
+        lockedComponents.add(key);
+        render(); // Re-render to show the lock immediately
     } 
 }
 
@@ -816,34 +850,118 @@ function dragged(event, d) {
 function dragEnded() { d3.select(this).classed("active", false); }
 
 /**
- * Click handler for the lock icon on the slider chart.
- * @param {Event} event - The click event.
- * @param {object} d - The data object for the clicked element.
+ * Balances the budget by adjusting unlocked components.
+ * Proportionally adjusts the 'current_rom' of all unlocked components in the current phase
+ * to make the total 'Current ROM' equal to the 'Total Project Budget' (with a small buffer).
+ * This function works whether the current total is over or under budget.
  */
-function toggleLock(event, d) {
-    toggleComponentLock(d.name);
+function balanceToGmp() {
+    const phaseData = currentData.phases[currentPhase];
+    const budget = phaseData.totalProjectBudget;
+    const currentTotalCost = d3.sum(phaseData.components, d => d.current_rom * d.square_footage);
+
+    // If we are already at the target (within the $1 buffer), do nothing.
+    if (Math.abs(budget - currentTotalCost) <= 1) {
+        console.log("Current ROM is already balanced to GMP. No action taken.");
+        return;
+    }
+
+    // Subtract a small buffer ($100.00) to prevent rounding errors from exceeding the budget.
+    const delta = budget - currentTotalCost - 150;
+    const unlockedComponents = phaseData.components.filter(c => {
+        const key = `${currentPhase}-${c.name}`;
+        return !lockedComponents.has(key);
+    });
+
+    if (unlockedComponents.length === 0) {
+        console.warn("No unlocked components to adjust.");
+        // We could add a user-facing alert here if desired.
+        return;
+    }
+
+    const unlockedTotalCost = d3.sum(unlockedComponents, d => d.current_rom * d.square_footage);
+
+    // Avoid division by zero if unlocked components have no cost.
+    if (unlockedTotalCost <= 0) {
+        console.warn("Unlocked components have a total cost of zero, cannot proportionally adjust.");
+        return;
+    }
+
+    // Calculate the scaling factor and apply it to each unlocked component.
+    const scalingFactor = 1 + (delta / unlockedTotalCost);
+    unlockedComponents.forEach(component => {
+        // We round the result to 2 decimal places to avoid floating point inaccuracies.
+        component.current_rom = parseFloat((component.current_rom * scalingFactor).toFixed(2));
+    });
+
+    // Refresh the UI to reflect the changes.
+    renderChart();
+    updateSummary();
+    if (document.getElementById('table-view').style.display !== 'none') {
+        renderTable();
+    }
+    // After adjusting, the "Reset to Original" button should be enabled.
+    document.getElementById('reset-button').disabled = false;
 }
 
 /**
- * Toggles the 'locked' state of a component.
- * It ensures that if a component exists in both phases, its lock state is consistent.
- * @param {string} componentName - The name of the component to lock/unlock.
- * @param {boolean} [forceState] - Optional. If provided, forces the lock state to true or false.
+ * Sets the current phase of the application (e.g., 'phase1' or 'phase2').
+ * @param {string} phase - The phase to set as active.
  */
-function toggleComponentLock(componentName, forceState) {
-    const p1Comp = currentData.phases.phase1.components.find(c => c.name === componentName);
-    const p2Comp = currentData.phases.phase2.components.find(c => c.name === componentName);
-
-    const component = p1Comp || p2Comp;
-    if (!component) return;
-
-    // If forceState is not provided, toggle the current state.
-    const newLockState = (forceState === undefined) ? !component.locked : forceState;
-
-    if (p1Comp) p1Comp.locked = newLockState;
-    if (p2Comp) p2Comp.locked = newLockState;
-    
+function setCurrentPhase(phase) {
+    currentPhase = phase;
     render();
+}
+
+/**
+ * Switches the active view of the application (e.g., 'chart', 'table', 'benchmarks', 'program', 'waterfall').
+ * @param {string} viewId - The ID of the button that was clicked.
+ */
+function switchView(viewId) {
+    // Hide all views and deactivate all buttons
+    mainChart.style.display = 'none';
+    tableView.style.display = 'none';
+    programView.style.display = 'none';
+    waterfallView.style.display = 'none';
+    benchmarksView.style.display = 'none';
+    legend.style.display = 'none';
+    waterfallLegend.style.display = 'none';
+    document.getElementById('maximize-gmp-btn').style.display = 'none';
+    phaseSelector.style.display = 'flex'; // Always show phase selector for now
+    summaryPanel.style.display = 'none'; // Hide summary panel by default
+
+    // Deactivate all view buttons
+    chartViewBtn.classList.remove('active');
+    tableViewBtn.classList.remove('active');
+    benchmarksViewBtn.classList.remove('active');
+    programViewBtn.classList.remove('active');
+    waterfallViewBtn.classList.remove('active');
+
+    // Show the selected view and its specific controls
+    switch (viewId) {
+        case 'chart-view-btn':
+            mainChart.style.display = 'block';
+            legend.style.display = 'flex';
+            document.getElementById('maximize-gmp-btn').style.display = 'block';
+            renderChart();
+            break;
+        case 'table-view-btn':
+            tableView.style.display = 'block';
+            renderTable();
+            break;
+        case 'benchmarks-view-btn':
+            benchmarksView.style.display = 'block';
+            renderBenchmarksView();
+            break;
+        case 'program-view-btn':
+            programView.style.display = 'block';
+            renderProgramView();
+            break;
+        case 'waterfall-view-btn':
+            waterfallView.style.display = 'block';
+            renderWaterfallChart();
+            break;
+    }
 }
 
 // --- SUMMARY & FILE HANDLING ---
@@ -950,7 +1068,7 @@ function loadData(data, fileName = 'Sample Data') {
     const processedData = processData(JSON.parse(JSON.stringify(data)));
 
     // Initialize the 'locked' state for all components.
-    Object.values(processedData.phases).forEach(phase => phase.components.forEach(c => c.locked = false));
+    lockedComponents = new Set();
     
     // Store deep copies for original (reset) and current (mutable) states.
     originalData = JSON.parse(JSON.stringify(processedData));
@@ -1090,11 +1208,11 @@ document.addEventListener('DOMContentLoaded', () => {
     startOverBtn.addEventListener('click', showSplashScreen);
     exportJsonBtn.addEventListener('click', exportJSON);
     exportCsvBtn.addEventListener('click', exportCSV);
-    resetButton.addEventListener('click', () => { 
-        if (originalData) { 
-            loadData(JSON.parse(JSON.stringify(originalData)), fileNameDisplay.textContent.replace('Using: ', '')); 
-        } 
+    resetButton.addEventListener('click', () => {
+        // Reload original data to reset all changes
+        loadData(JSON.parse(JSON.stringify(originalData)));
     });
+    maximizeBtn.addEventListener('click', balanceToGmp);
     
     // --- Phase and View Selector Handlers ---
     phase1Btn.addEventListener('click', () => { currentPhase = 'phase1'; render(); });
@@ -1127,4 +1245,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Re-render on window resize to ensure charts are responsive.
     window.addEventListener('resize', render);
+
+    // Initial load
 }); 
