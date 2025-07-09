@@ -121,7 +121,7 @@ function renderChart() {
         if (d.current_rom !== original.current_rom) {
             ghostBar.style("display", "block");
             const delta = d.current_rom - original.current_rom;
-            deltaLabel.style("display", "block").text(`${delta > 0 ? '+' : ''}${formatCurrency(delta)}`).style("color", delta > 0 ? '#dc2626' : '#16a34a');
+            deltaLabel.style("display", "block").text(`${delta > 0 ? '+' : ''}${formatCurrency(delta)}`).style("color", delta > 0 ? '#16a34a' : '#dc2626');
         } else {
             ghostBar.style("display", "none");
             deltaLabel.style("display", "none");
