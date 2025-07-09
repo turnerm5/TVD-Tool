@@ -7,9 +7,9 @@ body {
 }
 .chart-container {
     display: grid;
-    gap: 1rem;
-    padding: 1rem;
-    padding-bottom: 7rem; /* Increased padding for rotated labels */
+    gap: 0.5rem;
+    padding-top: 1rem;
+    padding-bottom: 4rem; /* Reduced padding as labels are no longer rotated */
     width: 100%;
     height: 700px;
     border: 1px solid #e2e8f0;
@@ -82,14 +82,17 @@ body {
 }
 .component-label {
     position: absolute;
-    bottom: -5rem;
+    bottom: -2.5rem; /* Position it below the component column */
     left: 50%;
-    transform-origin: left center;
-    transform: translateX(-10px) rotate(-60deg);
-    white-space: nowrap;
+    transform: translateX(-50%); /* Center the label horizontally */
+    width: 100%;
+    text-align: center;
     font-weight: 600;
     font-size: 0.875rem;
-    text-align: right;
+    color: #475569;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .component-column .lock-icon {
     position: absolute;
@@ -143,7 +146,8 @@ body {
     justify-content: space-between;
     font-weight: 600;
     font-size: 0.875rem;
-    color: #64748b;
+    color: #475569;
+    /* Removed transform to un-rotate labels */
 }
 .view-btn.active {
     border-color: #2563eb; /* blue-600 */
@@ -249,16 +253,16 @@ tr.benchmark-warning {
 .benchmark-card {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem; /* 12px */
 }
 
 .benchmark-card img {
-    height: 480px;
-    object-fit: cover;
+    height: 360px;
+    width: 100%;
+    object-fit: cover; /* Ensures the image covers the area without distortion */
 }
 
 .benchmark-caption {
-    text-align: center;
+    padding-top: 0.75rem;
 }
 
 .benchmark-label {
@@ -278,6 +282,63 @@ tr.benchmark-warning {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 } 
 
+/* --- Benchmark View Specific --- */
+#benchmarks-view.detail-active .benchmark-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+#benchmarks-view.detail-active .benchmark-card {
+    display: none; /* Hide non-selected cards */
+}
+
+#benchmarks-view.detail-active .benchmark-card.selected {
+    display: block; /* Show the selected card */
+    width: 50%; 
+    pointer-events: auto;
+}
+
+#benchmark-detail-container {
+    position: relative; /* Anchor for the close button */
+    width: 50%;
+    margin-left: 2%;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+#benchmarks-view.detail-active #benchmark-detail-container {
+    margin-left: 0; /* Remove margin when it's a flex item */
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.benchmark-detail-table {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    border: 1px solid #e5e7eb;
+    margin-top: 1rem;
+}
+
+.benchmark-detail-table th,
+.benchmark-detail-table td {
+    padding: 0.75rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.benchmark-detail-table th {
+    background-color: #f9fafb;
+    font-weight: 600;
+}
+
+.benchmark-detail-table tr:last-child td {
+    border-bottom: none;
+}
+  
 .waterfall-chart-container {
     width: 100%;
     height: 700px;

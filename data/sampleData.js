@@ -31,8 +31,11 @@ const sampleData = {
         {
             "id": "A",
             "name": "OSU Huang Collaborative Innovation Complex",
-            "overall_sf_cost": 650,
+            "overall_sf_cost": 850.50,
+            "square_footage": 152000,
             "components": [
+                { "name": "Substructure", "cost": 65.75 },
+                { "name": "Shell", "cost": 180.25 },
                 { "name": "General Conditions", "cost": 95 },
                 { "name": "Demo", "cost": 110 },
                 { "name": "Site", "cost": 220 },
@@ -51,8 +54,11 @@ const sampleData = {
         {
             "id": "B",
             "name": "WSU The Spark",
-            "overall_sf_cost": 700,
+            "overall_sf_cost": 910.00,
+            "square_footage": 83500,
             "components": [
+                { "name": "Substructure", "cost": 72.50 },
+                { "name": "Shell", "cost": 195.80 },
                 { "name": "General Conditions", "cost": 110 },
                 { "name": "Demo", "cost": 130 },
                 { "name": "Site", "cost": 250 },
@@ -71,8 +77,11 @@ const sampleData = {
         {
             "id": "C",
             "name": "WSU Everett",
-            "overall_sf_cost": 620,
+            "overall_sf_cost": 880.75,
+            "square_footage": 96000,
             "components": [
+                { "name": "Substructure", "cost": 68.00 },
+                { "name": "Shell", "cost": 188.50 },
                 { "name": "General Conditions", "cost": 85 },
                 { "name": "Demo", "cost": 115 },
                 { "name": "Site", "cost": 210 },
@@ -91,8 +100,11 @@ const sampleData = {
         {
             "id": "D",
             "name": "WSU Tri-Cities Collaboration Hall",
-            "overall_sf_cost": 720,
+            "overall_sf_cost": 825.00,
+            "square_footage": 58000,
             "components": [
+                { "name": "Substructure", "cost": 62.20 },
+                { "name": "Shell", "cost": 175.40 },
                 { "name": "General Conditions", "cost": 140 },
                 { "name": "Demo", "cost": 140 },
                 { "name": "Site", "cost": 260 },
