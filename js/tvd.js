@@ -11,7 +11,9 @@ const downloadTemplateBtn = document.getElementById('download-template-btn'), fi
 const fileInput = document.getElementById('file-input'), fileNameDisplay = document.getElementById('file-name');
 const phase1Btn = document.getElementById('phase1-btn'), phase2Btn = document.getElementById('phase2-btn');
 const chartViewBtn = document.getElementById('chart-view-btn'), tableViewBtn = document.getElementById('table-view-btn');
+const benchmarksViewBtn = document.getElementById('benchmarks-view-btn');
 const mainChart = document.getElementById('main-chart'), tableView = document.getElementById('table-view');
+const benchmarksView = document.getElementById('benchmarks-view');
 const phaseSelector = document.getElementById('phase-selector');
 const summaryPanel = document.getElementById('summary-panel');
 const legend = document.getElementById('legend');
@@ -29,23 +31,29 @@ function render() {
     if (!currentData) return;
 
     // Update View
+    mainChart.classList.add('hidden');
+    tableView.classList.add('hidden');
+    benchmarksView.classList.add('hidden');
+    phaseSelector.classList.add('hidden');
+    legend.classList.add('hidden');
+    chartViewBtn.classList.remove('active');
+    tableViewBtn.classList.remove('active');
+    benchmarksViewBtn.classList.remove('active');
+
     if (currentView === 'chart') {
         mainChart.classList.remove('hidden');
-        tableView.classList.add('hidden');
         phaseSelector.classList.remove('hidden');
         legend.classList.remove('hidden');
         chartViewBtn.classList.add('active');
-        tableViewBtn.classList.remove('active');
         renderChart();
         renderYAxisLabels();
-    } else {
-        mainChart.classList.add('hidden');
+    } else if (currentView === 'table') {
         tableView.classList.remove('hidden');
-        phaseSelector.classList.add('hidden');
-        legend.classList.add('hidden');
-        chartViewBtn.classList.remove('active');
         tableViewBtn.classList.add('active');
         renderTable();
+    } else if (currentView === 'benchmarks') {
+        benchmarksView.classList.remove('hidden');
+        benchmarksViewBtn.classList.add('active');
     }
 
     // Update Phase buttons
@@ -76,6 +84,7 @@ function renderChart() {
 
     const enterGroup = components.enter().append("div").attr("class", "component-column");
     enterGroup.append("div").attr("class", "y-axis");
+    enterGroup.append("svg").attr("class", "benchmark-indicator-svg"); // Add SVG container
     enterGroup.append("div").attr("class", "benchmark-range");
     enterGroup.append("div").attr("class", "benchmark-cap benchmark-cap-low");
     enterGroup.append("div").attr("class", "benchmark-cap benchmark-cap-high");
@@ -142,6 +151,54 @@ function renderChart() {
         .style('display', 'block')
         .style('opacity', d => d.locked ? 1 : 0.5)
         .text(d => d.locked ? '🔒' : '🔓');
+
+    // Add benchmark indicators
+    updateGroup.each(function(componentData) {
+        const group = d3.select(this);
+        const svg = group.select('.benchmark-indicator-svg'); // Select the SVG
+        const benchmarkProjects = currentData.benchmarks || [];
+
+        const indicators = svg.selectAll('.benchmark-indicator-group') // Select groups inside the SVG
+            .data(benchmarkProjects.filter(p => p.components.some(c => c.name === componentData.name)));
+
+        indicators.exit().remove();
+
+        const enterIndicators = indicators.enter().append('g')
+            .attr('class', 'benchmark-indicator-group');
+        
+        enterIndicators.append('line')
+            .attr('class', 'benchmark-indicator-line');
+        enterIndicators.append('circle')
+            .attr('class', 'benchmark-indicator-circle');
+        enterIndicators.append('text')
+            .attr('class', 'benchmark-indicator-label');
+
+        const mergedIndicators = enterIndicators.merge(indicators); // Correctly merge the enter and update selections
+
+        mergedIndicators.each(function(d) {
+            const benchmarkComp = d.components.find(c => c.name === componentData.name);
+            if (!benchmarkComp) return;
+
+            const yPos = yScale(benchmarkComp.cost);
+            
+            d3.select(this).select('.benchmark-indicator-line')
+                .attr('x1', '20%')
+                .attr('x2', '10%')
+                .attr('y1', yPos)
+                .attr('y2', yPos);
+
+            d3.select(this).select('.benchmark-indicator-circle')
+                .attr('cx', '10%')
+                .attr('cy', yPos)
+                .attr('r', 6);
+
+            d3.select(this).select('.benchmark-indicator-label')
+                .attr('x', '10%')
+                .attr('y', yPos)
+                .attr('dy', '0.35em')
+                .text(d.id);
+        });
+    });
 }
 
 // --- TABLE RENDERING ---
@@ -172,9 +229,11 @@ function renderTable() {
     const thead = table.append('thead').attr('class', 'bg-gray-50');
     const headerRow = thead.append('tr');
     headerRow.append('th').attr('class', 'py-3 px-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '5%'); // Lock
-    headerRow.append('th').attr('class', 'py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '50%').text('Component');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '22.5%').text('Target');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '22.5%').text('Current');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '30%').text('Component');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Benchmark Low');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Benchmark High');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '17.5%').text('Target');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '17.5%').text('Current');
     
     // Create Body
     const tbody = table.append('tbody');
@@ -186,11 +245,13 @@ function renderTable() {
         if (d.type === 'header') {
             row.attr('class', 'bg-gray-100');
             row.append('td')
-                .attr('colspan', 4)
+                .attr('colspan', 6)
                 .attr('class', 'py-2 px-6 text-sm font-bold text-gray-700')
                 .text(d.name);
         } else {
-            row.attr('class', 'bg-white');
+            const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
+            row.attr('class', 'bg-white').classed('benchmark-warning', isOutsideBenchmark);
+
             // Lock Icon
             row.append('td').attr('class', 'py-4 px-2 text-center text-sm align-middle')
                 .append('span').attr('class', 'lock-icon cursor-pointer')
@@ -201,6 +262,12 @@ function renderTable() {
             // Component Name
             row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
             
+            // Benchmark Low
+            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.benchmark_low));
+
+            // Benchmark High
+            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.benchmark_high));
+
             // Target
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.target_value));
             
@@ -311,6 +378,13 @@ function toggleComponentLock(componentName, forceState) {
 }
 
 // --- SUMMARY & FILE HANDLING ---
+function getFormattedTimestamp() {
+    const now = new Date();
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const time = `${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`;
+    return `${date}_${time}`;
+}
+
 function updateSummary() {
     // Phase 1
     const p1 = currentData.phases.phase1;
@@ -339,19 +413,56 @@ function updateSummary() {
     varianceElP2.classList.toggle('text-green-600', varianceP2 <= 0);
 }
 
+function processData(data) {
+    if (!data.benchmarks || !data.phases) return data;
+
+    const benchmarkCostsByName = {};
+    data.benchmarks.forEach(proj => {
+        proj.components.forEach(comp => {
+            if (!benchmarkCostsByName[comp.name]) {
+                benchmarkCostsByName[comp.name] = [];
+            }
+            benchmarkCostsByName[comp.name].push(comp.cost);
+        });
+    });
+
+    Object.values(data.phases).forEach(phase => {
+        phase.components.forEach(c => {
+            const costs = benchmarkCostsByName[c.name] || [];
+            c.benchmark_low = costs.length ? Math.min(...costs) : 0;
+            c.benchmark_high = costs.length ? Math.max(...costs) : 0;
+        });
+    });
+
+    return data;
+}
+
 function loadData(data, fileName = 'Sample Data') {
     if (!data.phases || !data.phases.phase1 || !data.phases.phase2) { alert("Invalid JSON format. Must contain phase1 and phase2 data."); return; }
     
-    Object.values(data.phases).forEach(phase => phase.components.forEach(c => c.locked = false));
-    originalData = JSON.parse(JSON.stringify(data));
-    currentData = data;
+    const processedData = processData(JSON.parse(JSON.stringify(data)));
+
+    Object.values(processedData.phases).forEach(phase => phase.components.forEach(c => c.locked = false));
+    originalData = JSON.parse(JSON.stringify(processedData));
+    currentData = processedData;
     
-    const allComponents = [...data.phases.phase1.components, ...data.phases.phase2.components];
+    const allComponents = [...currentData.phases.phase1.components, ...currentData.phases.phase2.components];
     const maxVal = d3.max(allComponents, d => Math.max(d.benchmark_high, d.target_value, d.current_rom));
     yDomainMax = Math.ceil(maxVal / 10) * 10 + 20;
     yScale.domain([0, yDomainMax]); // 0 at bottom, max at top
     fileNameDisplay.textContent = `Using: ${fileName}`;
     currentPhase = 'phase1'; // Reset to phase 1 on new data load
+
+    // Update benchmark view costs
+    if (currentData.benchmarks) {
+        currentData.benchmarks.forEach(proj => {
+            const costEl = document.getElementById(`benchmark-cost-${proj.id}`);
+            if (costEl) {
+                costEl.textContent = `${formatCurrency(proj.overall_sf_cost)} /SF`;
+            }
+        });
+    }
+
     showMainContent();
 }
 
@@ -389,7 +500,7 @@ function exportJSON() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `tvd_export_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchorNode.setAttribute("download", `tvd_export_${getFormattedTimestamp()}.json`);
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
@@ -422,7 +533,7 @@ function exportCSV() {
     const url = URL.createObjectURL(blob);
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", url);
-    downloadAnchorNode.setAttribute("download", `tvd_export_${new Date().toISOString().split('T')[0]}.csv`);
+    downloadAnchorNode.setAttribute("download", `tvd_export_${getFormattedTimestamp()}.csv`);
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
@@ -443,6 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chartViewBtn.addEventListener('click', () => { currentView = 'chart'; render(); });
     tableViewBtn.addEventListener('click', () => { currentView = 'table'; render(); });
+    benchmarksViewBtn.addEventListener('click', () => { currentView = 'benchmarks'; render(); });
 
     fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
     fileDropZone.addEventListener('click', () => fileInput.click());

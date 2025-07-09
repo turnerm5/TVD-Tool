@@ -55,6 +55,7 @@
         <div id="view-selector" class="flex justify-center mb-4 border-b">
             <button id="chart-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Slider View</button>
             <button id="table-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Table View</button>
+            <button id="benchmarks-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Benchmarks</button>
         </div>
 
         <div id="legend" class="flex justify-center items-center gap-6 my-4 text-sm text-gray-600 flex-wrap">
@@ -98,6 +99,54 @@
                     </div>
                 </div>
                 <!-- Table will be rendered here by D3 -->
+            </div>
+            <div id="benchmarks-view" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Benchmark Project A -->
+                    <div class="benchmark-card">
+                        <div class="relative">
+                            <img src="img/osu.jpg" alt="OSU Huang Collaborative Innovation Complex" class="w-full h-auto rounded-lg shadow-md">
+                            <div class="benchmark-label">A</div>
+                        </div>
+                        <div class="benchmark-caption">
+                            <h4 class="font-semibold">OSU Huang Collaborative Innovation Complex</h4>
+                            <p id="benchmark-cost-A" class="text-gray-600 text-sm">??? /SF</p>
+                        </div>
+                    </div>
+                    <!-- Benchmark Project B -->
+                    <div class="benchmark-card">
+                        <div class="relative">
+                            <img src="img/spark.jpg" alt="WSU The Spark" class="w-full h-auto rounded-lg shadow-md">
+                            <div class="benchmark-label">B</div>
+                        </div>
+                        <div class="benchmark-caption">
+                            <h4 class="font-semibold">WSU The Spark</h4>
+                            <p id="benchmark-cost-B" class="text-gray-600 text-sm">??? /SF</p>
+                        </div>
+                    </div>
+                    <!-- Benchmark Project C -->
+                    <div class="benchmark-card">
+                        <div class="relative">
+                            <img src="img/wsue.jpg" alt="WSU Everett" class="w-full h-auto rounded-lg shadow-md">
+                            <div class="benchmark-label">C</div>
+                        </div>
+                        <div class="benchmark-caption">
+                            <h4 class="font-semibold">WSU Everett</h4>
+                            <p id="benchmark-cost-C" class="text-gray-600 text-sm">??? /SF</p>
+                        </div>
+                    </div>
+                    <!-- Benchmark Project D -->
+                    <div class="benchmark-card">
+                        <div class="relative">
+                            <img src="img/wsutc.jpg" alt="WSU Tri-Cities Collaboration Hall" class="w-full h-auto rounded-lg shadow-md">
+                            <div class="benchmark-label">D</div>
+                        </div>
+                        <div class="benchmark-caption">
+                            <h4 class="font-semibold">WSU Tri-Cities Collaboration Hall</h4>
+                            <p id="benchmark-cost-D" class="text-gray-600 text-sm">??? /SF</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
 
