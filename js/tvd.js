@@ -105,7 +105,14 @@ function renderChart() {
         .style("bottom", null);
 
     updateGroup.select(".target-value").style("top", d => yScale(d.target_value) + "px").style("bottom", null);
-    updateGroup.select(".current-rom").style("top", d => yScale(d.current_rom) - 3 + "px").style("bottom", null);
+    
+    updateGroup.select(".current-rom")
+        .style("top", d => yScale(d.current_rom) - 3 + "px")
+        .style("bottom", null)
+        .style("background-color", d => {
+            const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
+            return isOutsideBenchmark ? '#dc2626' : '#1f2937';
+        });
     
     const originalComponents = originalData.phases[currentPhase].components.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
     updateGroup.each(function(d) {
@@ -122,7 +129,8 @@ function renderChart() {
         if (d.current_rom !== original.current_rom) {
             ghostBar.style("display", "block");
             const delta = d.current_rom - original.current_rom;
-            deltaLabel.style("display", "block").text(`${delta > 0 ? '+' : ''}${formatCurrency(delta)}`).style("color", delta > 0 ? '#16a34a' : '#dc2626');
+            const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
+            deltaLabel.style("display", "block").text(`${delta > 0 ? '+' : ''}${formatCurrency(delta)}`).style("color", isOutsideBenchmark ? '#dc2626' : '#16a34a');
         } else {
             ghostBar.style("display", "none");
             deltaLabel.style("display", "none");
