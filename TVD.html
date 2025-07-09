@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Target Value Design Tool</title>
+    <title>Target Value Design Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -53,19 +53,23 @@
         </header>
         
         <div id="view-selector" class="flex justify-center mb-4 border-b">
+            <button id="benchmarks-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Benchmarks</button>
+            <button id="program-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Program</button>
             <button id="chart-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Slider View</button>
             <button id="table-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Table View</button>
-            <button id="benchmarks-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Benchmarks</button>
+            <button id="waterfall-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Waterfall View</button>
         </div>
 
-        <div id="legend" class="flex justify-center items-center gap-6 my-4 text-sm text-gray-600 flex-wrap">
+        <div id="controls-container" class="flex justify-center items-center gap-6 my-4 text-sm text-gray-600 flex-wrap">
             <div id="phase-selector" class="flex items-center gap-2 mr-6">
-                 <button id="phase1-btn" class="phase-btn py-1 px-3 text-sm rounded-md font-medium">Phase 1</button>
-                 <button id="phase2-btn" class="phase-btn py-1 px-3 text-sm rounded-md font-medium">Phase 2</button>
+                <button id="phase1-btn" class="phase-btn py-1 px-3 text-sm rounded-md font-medium">Phase 1</button>
+                <button id="phase2-btn" class="phase-btn py-1 px-3 text-sm rounded-md font-medium">Phase 2</button>
             </div>
-            <div class="flex items-center gap-2"><div class="w-4 h-4 flex flex-col justify-between items-center"><div class="h-0.5 w-full" style="background-color: #38bdf8;"></div><div class="h-2.5 w-0.5" style="background-color: #38bdf8;"></div><div class="h-0.5 w-full" style="background-color: #38bdf8;"></div></div><span>Project Benchmark</span></div>
-            <div class="flex items-center gap-2"><div class="w-4 h-1 rounded-full" style="background-color: #16a34a;"></div><span>Target Value</span></div>
-            <div class="flex items-center gap-2"><div class="w-4 h-1.5 rounded-full" style="background-color: #1f2937;"></div><span>Current ROM</span></div>
+            <div id="legend" class="flex items-center gap-6">
+                <div class="flex items-center gap-2"><div class="w-4 h-4 flex flex-col justify-between items-center"><div class="h-0.5 w-full" style="background-color: #38bdf8;"></div><div class="h-2.5 w-0.5" style="background-color: #38bdf8;"></div><div class="h-0.5 w-full" style="background-color: #38bdf8;"></div></div><span>Project Benchmark</span></div>
+                <div class="flex items-center gap-2"><div class="w-4 h-1 rounded-full" style="background-color: #16a34a;"></div><span>Target Value</span></div>
+                <div class="flex items-center gap-2"><div class="w-4 h-1.5 rounded-full" style="background-color: #1f2937;"></div><span>Current ROM</span></div>
+            </div>
         </div>
         
         <main>
@@ -99,6 +103,12 @@
                     </div>
                 </div>
                 <!-- Table will be rendered here by D3 -->
+            </div>
+            <div id="program-view" class="hidden">
+                <!-- Program table will be rendered here -->
+            </div>
+            <div id="waterfall-view" class="hidden">
+                <div id="waterfall-chart-container" class="waterfall-chart-container"></div>
             </div>
             <div id="benchmarks-view" class="hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
