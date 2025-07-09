@@ -209,3 +209,70 @@ body {
     color: #9ca3af; /* gray-400 */
     font-style: italic;
 } 
+
+tr.benchmark-warning {
+    background-color: #fee2e2; /* red-100 */
+}
+
+.benchmark-indicator-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.benchmark-indicator-line {
+    stroke: #38bdf8;
+    stroke-width: 1;
+    stroke-dasharray: 2 2;
+}
+
+.benchmark-indicator-circle {
+    fill: #1d4ed8;
+    stroke: #fff;
+    stroke-width: 1.5;
+}
+
+.benchmark-indicator-label {
+    fill: #fff;
+    font-size: 8px;
+    font-weight: bold;
+    text-anchor: middle;
+    pointer-events: none;
+    user-select: none;
+}
+
+.benchmark-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* 12px */
+}
+
+.benchmark-card img {
+    height: 480px;
+    object-fit: cover;
+}
+
+.benchmark-caption {
+    text-align: center;
+}
+
+.benchmark-label {
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px; /* a large value to ensure it's a circle */
+    background-color: #1d4ed8; /* a strong blue */
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+} 
