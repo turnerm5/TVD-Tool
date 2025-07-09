@@ -1,6 +1,6 @@
-# WSU Integrated Science Building - Target Value Design Tool
+# Target Value Design Tool
 
-This is an interactive web tool for visualizing and adjusting project budgets using Target Value Design (TVD) principles. It is branded for the WSU Integrated Science Building project, with Hoffman and ZGF logos.
+This is an interactive web tool for visualizing and adjusting project budgets using Target Value Design (TVD) principles. It is branded for the WSU Integrated Science Building project.
 
 ## Features
 - **Interactive Chart:** Drag to adjust component ROM values, with real-time feedback and auto-balancing.
