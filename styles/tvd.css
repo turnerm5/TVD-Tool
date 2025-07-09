@@ -91,7 +91,7 @@ body {
     font-size: 0.875rem;
     text-align: right;
 }
-.lock-icon {
+.component-column .lock-icon {
     position: absolute;
     bottom: -25px;
     left: 50%;
