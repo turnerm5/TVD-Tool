@@ -14,6 +14,7 @@ const chartViewBtn = document.getElementById('chart-view-btn'), tableViewBtn = d
 const mainChart = document.getElementById('main-chart'), tableView = document.getElementById('table-view');
 const phaseSelector = document.getElementById('phase-selector');
 const summaryPanel = document.getElementById('summary-panel');
+const legend = document.getElementById('legend');
 
 // --- SCALES AND FORMATTERS ---
 const yScale = d3.scaleLinear().domain([0, yDomainMax]);
@@ -32,7 +33,7 @@ function render() {
         mainChart.classList.remove('hidden');
         tableView.classList.add('hidden');
         phaseSelector.classList.remove('hidden');
-        summaryPanel.classList.add('hidden');
+        legend.classList.remove('hidden');
         chartViewBtn.classList.add('active');
         tableViewBtn.classList.remove('active');
         renderChart();
@@ -41,7 +42,7 @@ function render() {
         mainChart.classList.add('hidden');
         tableView.classList.remove('hidden');
         phaseSelector.classList.add('hidden');
-        summaryPanel.classList.remove('hidden');
+        legend.classList.add('hidden');
         chartViewBtn.classList.remove('active');
         tableViewBtn.classList.add('active');
         renderTable();
@@ -137,56 +138,74 @@ function renderChart() {
 
 // --- TABLE RENDERING ---
 function renderTable() {
-    const allComponentNames = [...new Set([
-        ...currentData.phases.phase1.components.map(c => c.name),
-        ...currentData.phases.phase2.components.map(c => c.name)
-    ])].sort();
+    // Create a flattened data structure with phase headers
+    const tableData = [];
+    
+    // Phase 1
+    const p1Components = currentData.phases.phase1.components.sort((a, b) => a.name.localeCompare(b.name));
+    if (p1Components.length > 0) {
+        tableData.push({ type: 'header', name: 'Phase 1' });
+        p1Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase1' }));
+    }
 
-    const p1Comps = currentData.phases.phase1.components.reduce((acc, c) => ({ ...acc, [c.name]: c }), {});
-    const p2Comps = currentData.phases.phase2.components.reduce((acc, c) => ({ ...acc, [c.name]: c }), {});
+    // Phase 2
+    const p2Components = currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
+    if (p2Components.length > 0) {
+        tableData.push({ type: 'header', name: 'Phase 2' });
+        p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
+    }
 
-    let tableHtml = `
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th rowspan="2" class="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider align-bottom" style="width: 28%;">Component</th>
-                    <th colspan="2" class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Phase 1</th>
-                    <th colspan="2" class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Phase 2</th>
-                </tr>
-                <tr>
-                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 18%;">Target</th>
-                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 18%;">Current</th>
-                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 18%;">Target</th>
-                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 18%;">Current</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+    // Clear previous table and build new one with D3
+    d3.select(tableView).select('table').remove();
 
-    allComponentNames.forEach(name => {
-        const p1 = p1Comps[name];
-        const p2 = p2Comps[name];
+    const table = d3.select(tableView).append('table').attr('class', 'min-w-full divide-y divide-gray-200');
+    
+    // Create Header
+    const thead = table.append('thead').attr('class', 'bg-gray-50');
+    const headerRow = thead.append('tr');
+    headerRow.append('th').attr('class', 'py-3 px-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '5%'); // Lock
+    headerRow.append('th').attr('class', 'py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '50%').text('Component');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '22.5%').text('Target');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '22.5%').text('Current');
+    
+    // Create Body
+    const tbody = table.append('tbody');
+    const rows = tbody.selectAll('tr').data(tableData).enter().append('tr');
 
-        tableHtml += `
-            <tr class="bg-white">
-                <td class="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap component-name">${name}</td>
-                
-                <!-- Phase 1 Data -->
-                ${p1 ? `<td class="py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center">${formatCurrency(p1.target_value)}</td>` : '<td class="py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center na-cell">N/A</td>'}
-                ${p1 ? `<td class="py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell"><input type="number" class="w-full text-center" value="${p1.current_rom.toFixed(2)}" step="0.01" data-phase="phase1" data-name="${name}"></td>` : '<td class="py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center na-cell">N/A</td>'}
-
-                <!-- Phase 2 Data -->
-                ${p2 ? `<td class="py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center">${formatCurrency(p2.target_value)}</td>` : '<td class="py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center na-cell">N/A</td>'}
-                ${p2 ? `<td class="py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell"><input type="number" class="w-full text-center" value="${p2.current_rom.toFixed(2)}" step="0.01" data-phase="phase2" data-name="${name}"></td>` : '<td class="py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center na-cell">N/A</td>'}
-            </tr>
-        `;
+    // Style rows based on type (header or component)
+    rows.each(function(d) {
+        const row = d3.select(this);
+        if (d.type === 'header') {
+            row.attr('class', 'bg-gray-100');
+            row.append('td')
+                .attr('colspan', 4)
+                .attr('class', 'py-2 px-6 text-sm font-bold text-gray-700')
+                .text(d.name);
+        } else {
+            row.attr('class', 'bg-white');
+            // Lock Icon
+            row.append('td').attr('class', 'py-4 px-2 text-center text-sm align-middle')
+                .append('span').attr('class', 'lock-icon cursor-pointer')
+                .style('opacity', d.locked ? 1 : 0.5)
+                .text(d.locked ? '🔒' : '🔓')
+                .on('click', (event, d_inner) => toggleComponentLock(d_inner.name));
+            
+            // Component Name
+            row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
+            
+            // Target
+            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.target_value));
+            
+            // Current (editable)
+            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
+                .append('input').attr('type', 'number').attr('class', 'w-full text-center')
+                .attr('value', d.current_rom.toFixed(2))
+                .attr('step', 0.01)
+                .attr('data-phase', d.dataPhase)
+                .attr('data-name', d.name)
+                .on('change', handleTableCellChange);
+        }
     });
-
-    tableHtml += `</tbody></table>`;
-    tableView.innerHTML = tableHtml;
-
-    // Add event listeners to the new input fields
-    d3.selectAll('#table-view .editable-cell input').on('change', handleTableCellChange);
 }
 
 function renderYAxisLabels() {
@@ -253,13 +272,35 @@ function handleTableCellChange(event) {
 }
 
 // --- DRAG LOGIC ---
-function dragStarted(event, d) { d3.select(this).raise().classed("active", true); if (!d.locked) { d.locked = true; render(); } }
+function dragStarted(event, d) { 
+    d3.select(this).raise().classed("active", true); 
+    if (!d.locked) { 
+        toggleComponentLock(d.name, true);
+    } 
+}
 function dragged(event, d) {
     const newRomValue = Math.max(0, Math.min(yDomainMax, yScale.invert(event.y)));
     applyChangeAndBalance(d, newRomValue, currentPhase);
 }
 function dragEnded() { d3.select(this).classed("active", false); }
-function toggleLock(event, d) { d.locked = !d.locked; render(); }
+function toggleLock(event, d) {
+    toggleComponentLock(d.name);
+}
+
+function toggleComponentLock(componentName, forceState) {
+    const p1Comp = currentData.phases.phase1.components.find(c => c.name === componentName);
+    const p2Comp = currentData.phases.phase2.components.find(c => c.name === componentName);
+
+    const component = p1Comp || p2Comp; // Get a reference component to check current lock state
+    if (!component) return;
+
+    const newLockState = (forceState === undefined) ? !component.locked : forceState;
+
+    if (p1Comp) p1Comp.locked = newLockState;
+    if (p2Comp) p2Comp.locked = newLockState;
+    
+    render();
+}
 
 // --- SUMMARY & FILE HANDLING ---
 function updateSummary() {
