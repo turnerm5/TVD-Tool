@@ -75,7 +75,7 @@ body {
     width: 60%;
     background-color: #1f2937;
     height: 6px;
-    opacity: 0.3;
+    opacity: 0.15;
     border-radius: 3px;
     pointer-events: none;
     z-index: 3;
