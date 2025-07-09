@@ -68,6 +68,13 @@ const yScale = d3.scaleLinear().domain([0, yDomainMax]);
 const formatCurrency = (d) => `$${d.toFixed(2)}`;
 
 /**
+ * Formats a large number into a currency string with no decimal places (e.g., $1,234,567).
+ * @param {number} d - The number to format.
+ * @returns {string} The formatted currency string.
+ */
+const formatCurrencyBig = (d) => `$${Math.round(d).toLocaleString('en-US')}`;
+
+/**
  * Formats a number to a string with thousands separators.
  * @param {number} d - The number to format.
  * @returns {string} The formatted number string.
@@ -680,43 +687,76 @@ function renderYAxisLabels() {
  */
 function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     const phase = currentData.phases[phaseKey];
-    const originalValue = changedComponent.current_rom;
-    const romChange = newValue - originalValue;
 
-    if (Math.abs(romChange) < 0.01) return; // Ignore trivial changes
+    // 1. Calculate the initial change in absolute cost from the user's action.
+    const originalRom = changedComponent.current_rom;
+    const newRom = Math.max(0, newValue); // Ensure new value isn't negative
+    const initialCostChange = (newRom - originalRom) * changedComponent.square_footage;
 
-    const unlockedComponents = phase.components.filter(c => c !== changedComponent && !c.locked);
-    const totalUnlockedWeight = d3.sum(unlockedComponents, c => c.current_rom);
+    if (Math.abs(initialCostChange) < 0.01) return;
 
-    if (unlockedComponents.length === 0 || totalUnlockedWeight <= 0) {
-        // If no other components are unlocked, just apply the change directly.
-        changedComponent.current_rom = newValue;
-    } else {
-        let remainingChange = -romChange;
-        changedComponent.current_rom = Math.max(0, originalValue + romChange);
+    // 2. Identify which components can absorb the change.
+    const unlockedComponents = phase.components.filter(c =>
+        c !== changedComponent && !c.locked && c.square_footage > 0
+    );
 
-        // Distribute the change proportionally.
-        let distributedChange = 0;
-        unlockedComponents.forEach(comp => {
-            const proportion = totalUnlockedWeight > 0 ? comp.current_rom / totalUnlockedWeight : 1 / unlockedComponents.length;
-            let adjustment = remainingChange * proportion;
-            
-            // Prevent a component's value from going below zero.
-            if (comp.current_rom + adjustment < 0) {
-                adjustment = -comp.current_rom;
+    // If no components can absorb the change, just apply it and let the total cost drift.
+    if (unlockedComponents.length === 0) {
+        changedComponent.current_rom = newRom;
+        render();
+        return;
+    }
+
+    // 3. Set the target component to its new value.
+    changedComponent.current_rom = newRom;
+
+    // 4. Calculate the total cost that needs to be absorbed by the other components.
+    const costToAbsorb = -initialCostChange;
+
+    // 5. Distribute this cost change, handling cases where components bottom out at 0.
+    // This loop ensures that if one component hits $0/SF, the remaining cost is
+    // redistributed among the other available components.
+    let remainingCostToAbsorb = costToAbsorb;
+    let componentsAvailableToAbsorb = [...unlockedComponents];
+    let iterations = 0; // Safety break to prevent infinite loops
+
+    while (Math.abs(remainingCostToAbsorb) > 0.01 && componentsAvailableToAbsorb.length > 0 && iterations < 10) {
+        const costShare = remainingCostToAbsorb / componentsAvailableToAbsorb.length;
+        remainingCostToAbsorb = 0; // Reset for this iteration
+
+        const nextComponentsAvailable = [];
+
+        componentsAvailableToAbsorb.forEach(comp => {
+            const currentCompRom = comp.current_rom;
+            const sf = comp.square_footage;
+            const romChangeForComp = costShare / sf;
+            const newCompRom = currentCompRom + romChangeForComp;
+
+            if (newCompRom < 0) {
+                // This component can't absorb its full share. Absorb what it can down to 0.
+                const absorbedCost = -currentCompRom * sf;
+                remainingCostToAbsorb += (costShare - absorbedCost); // Add the un-absorbed amount to the remainder.
+                comp.current_rom = 0;
+            } else {
+                // This component can absorb its full share for this iteration.
+                comp.current_rom = newCompRom;
+                nextComponentsAvailable.push(comp); // This component is still available for future adjustments.
             }
-            distributedChange += adjustment;
-            comp.current_rom += adjustment;
         });
         
-        // If the full change couldn't be distributed (e.g., all other bars hit 0),
-        // adjust the originally changed bar to absorb the remainder.
-        const undistributed = remainingChange - distributedChange;
-        if(Math.abs(undistributed) > 0.01) {
-            changedComponent.current_rom += undistributed;
-        }
+        componentsAvailableToAbsorb = nextComponentsAvailable;
+        iterations++;
     }
-    render(); // Trigger a re-render to show the changes.
+
+    // 6. If any cost remains un-absorbed (because all other components hit 0),
+    // apply it back to the originally changed component to maintain the total budget.
+    if (Math.abs(remainingCostToAbsorb) > 0.01 && changedComponent.square_footage > 0) {
+        const leftoverRomChange = remainingCostToAbsorb / changedComponent.square_footage;
+        changedComponent.current_rom += leftoverRomChange;
+        changedComponent.current_rom = Math.max(0, changedComponent.current_rom);
+    }
+
+    render();
 }
 
 /**
@@ -818,27 +858,23 @@ function getFormattedTimestamp() {
 function updateSummary() {
     // --- Phase 1 calculations ---
     const p1 = currentData.phases.phase1;
-    const totalTargetP1 = d3.sum(p1.components, d => d.target_value);
-    const totalCurrentP1 = d3.sum(p1.components, d => d.current_rom);
-    const varianceP1 = totalCurrentP1 - totalTargetP1;
-    document.getElementById('total-budget-p1').textContent = `$${p1.totalProjectBudget.toLocaleString()}`;
-    document.getElementById('target-cost-p1').textContent = formatCurrency(totalTargetP1);
-    document.getElementById('current-cost-p1').textContent = formatCurrency(totalCurrentP1);
+    const currentRomEstimateP1 = d3.sum(p1.components, d => d.current_rom * d.square_footage);
+    const varianceP1 = currentRomEstimateP1 - p1.totalProjectBudget;
+    document.getElementById('total-budget-p1').textContent = formatCurrencyBig(p1.totalProjectBudget);
+    document.getElementById('current-rom-estimate-p1').textContent = formatCurrencyBig(currentRomEstimateP1);
     const varianceElP1 = document.getElementById('variance-p1');
-    varianceElP1.textContent = `${varianceP1 > 0 ? '+' : ''}${formatCurrency(varianceP1)}`;
+    varianceElP1.textContent = `${varianceP1 >= 0 ? '+' : ''}${formatCurrencyBig(varianceP1)}`;
     varianceElP1.classList.toggle('text-red-600', varianceP1 > 0);
     varianceElP1.classList.toggle('text-green-600', varianceP1 <= 0);
 
     // --- Phase 2 calculations ---
     const p2 = currentData.phases.phase2;
-    const totalTargetP2 = d3.sum(p2.components, d => d.target_value);
-    const totalCurrentP2 = d3.sum(p2.components, d => d.current_rom);
-    const varianceP2 = totalCurrentP2 - totalTargetP2;
-    document.getElementById('total-budget-p2').textContent = `$${p2.totalProjectBudget.toLocaleString()}`;
-    document.getElementById('target-cost-p2').textContent = formatCurrency(totalTargetP2);
-    document.getElementById('current-cost-p2').textContent = formatCurrency(totalCurrentP2);
+    const currentRomEstimateP2 = d3.sum(p2.components, d => d.current_rom * d.square_footage);
+    const varianceP2 = currentRomEstimateP2 - p2.totalProjectBudget;
+    document.getElementById('total-budget-p2').textContent = formatCurrencyBig(p2.totalProjectBudget);
+    document.getElementById('current-rom-estimate-p2').textContent = formatCurrencyBig(currentRomEstimateP2);
     const varianceElP2 = document.getElementById('variance-p2');
-    varianceElP2.textContent = `${varianceP2 > 0 ? '+' : ''}${formatCurrency(varianceP2)}`;
+    varianceElP2.textContent = `${varianceP2 >= 0 ? '+' : ''}${formatCurrencyBig(varianceP2)}`;
     varianceElP2.classList.toggle('text-red-600', varianceP2 > 0);
     varianceElP2.classList.toggle('text-green-600', varianceP2 <= 0);
 }
