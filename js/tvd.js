@@ -199,7 +199,7 @@ function renderChart() {
     enterGroup.append("div").attr("class", "benchmark-range"); // The light blue line indicating the benchmark range
     enterGroup.append("div").attr("class", "benchmark-cap benchmark-cap-low");
     enterGroup.append("div").attr("class", "benchmark-cap benchmark-cap-high");
-    enterGroup.append("div").attr("class", "target-value"); // The green target line
+    // enterGroup.append("div").attr("class", "target-value"); // The green target line - REMOVED
     enterGroup.append("div").attr("class", "ghost-rom"); // The semi-transparent bar showing the original value
     // The draggable "current ROM" bar.
     enterGroup.append("div").attr("class", "current-rom").call(d3.drag().on("start", dragStarted).on("drag", dragged).on("end", dragEnded));
@@ -221,7 +221,7 @@ function renderChart() {
 
     updateGroup.select(".benchmark-cap-low").style("top", d => yScale(d.benchmark_low) + "px").style("bottom", null);
     updateGroup.select(".benchmark-cap-high").style("top", d => yScale(d.benchmark_high) + "px").style("bottom", null);
-    updateGroup.select(".target-value").style("top", d => yScale(d.target_value) + "px").style("bottom", null);
+    // updateGroup.select(".target-value").style("top", d => yScale(d.target_value) + "px").style("bottom", null); // REMOVED
     
     updateGroup.select(".current-rom")
         .style("top", d => yScale(d.current_rom) - 3 + "px")
@@ -425,8 +425,11 @@ function renderWaterfallChart() {
     // We calculate two cumulative totals: one for target costs and one for current costs.
     let cumulativeTarget = 0;
     let cumulativeCurrent = 0;
+    const originalPhaseData = originalData.phases[currentPhase];
     const data = components.map(c => {
-        const targetValue = c.target_value * c.square_footage;
+        const originalComponent = originalPhaseData.components.find(oc => oc.name === c.name);
+        const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
+        const targetValue = snapshotValue * c.square_footage;
         const currentValue = c.current_rom * c.square_footage;
         const d = {
             name: c.name,
@@ -621,7 +624,7 @@ function renderTable() {
     headerRow.append('th').attr('class', 'py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '30%').text('Component');
     headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Benchmark Low');
     headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Benchmark High');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '17.5%').text('Target');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '17.5%').text('Snapshot');
     headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '17.5%').text('Current');
     
     // Create Body
@@ -646,9 +649,13 @@ function renderTable() {
             row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.benchmark_low));
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.benchmark_high));
-            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.target_value));
+
+            // Snapshot
+            const originalComponent = originalData.phases[d.dataPhase].components.find(c => c.name === d.name);
+            const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
+            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(snapshotValue));
             
-            // Render the 'Current ROM' as an editable input.
+            // Current (editable)
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
                 .append('input').attr('type', 'number').attr('class', 'w-full text-center')
                 .attr('value', d.current_rom.toFixed(2))
@@ -857,10 +864,18 @@ function getFormattedTimestamp() {
  */
 function updateSummary() {
     // --- Phase 1 calculations ---
-    const p1 = currentData.phases.phase1;
-    const currentRomEstimateP1 = d3.sum(p1.components, d => d.current_rom * d.square_footage);
-    const varianceP1 = currentRomEstimateP1 - p1.totalProjectBudget;
-    document.getElementById('total-budget-p1').textContent = formatCurrencyBig(p1.totalProjectBudget);
+    const p1_current = currentData.phases.phase1;
+    const p1_original = originalData.phases.phase1;
+    const snapshotRomP1 = d3.sum(p1_original.components, d => d.current_rom * d.square_footage);
+    const snapshotVarianceP1 = snapshotRomP1 - p1_original.totalProjectBudget;
+    const currentRomEstimateP1 = d3.sum(p1_current.components, d => d.current_rom * d.square_footage);
+    const varianceP1 = currentRomEstimateP1 - p1_current.totalProjectBudget;
+    document.getElementById('total-budget-p1').textContent = formatCurrencyBig(p1_current.totalProjectBudget);
+    document.getElementById('snapshot-rom-p1').textContent = formatCurrencyBig(snapshotRomP1);
+    const snapshotVarianceElP1 = document.getElementById('snapshot-variance-p1');
+    snapshotVarianceElP1.textContent = `${snapshotVarianceP1 >= 0 ? '+' : ''}${formatCurrencyBig(snapshotVarianceP1)}`;
+    snapshotVarianceElP1.classList.toggle('text-red-600', snapshotVarianceP1 > 0);
+    snapshotVarianceElP1.classList.toggle('text-green-600', snapshotVarianceP1 <= 0);
     document.getElementById('current-rom-estimate-p1').textContent = formatCurrencyBig(currentRomEstimateP1);
     const varianceElP1 = document.getElementById('variance-p1');
     varianceElP1.textContent = `${varianceP1 >= 0 ? '+' : ''}${formatCurrencyBig(varianceP1)}`;
@@ -868,10 +883,18 @@ function updateSummary() {
     varianceElP1.classList.toggle('text-green-600', varianceP1 <= 0);
 
     // --- Phase 2 calculations ---
-    const p2 = currentData.phases.phase2;
-    const currentRomEstimateP2 = d3.sum(p2.components, d => d.current_rom * d.square_footage);
-    const varianceP2 = currentRomEstimateP2 - p2.totalProjectBudget;
-    document.getElementById('total-budget-p2').textContent = formatCurrencyBig(p2.totalProjectBudget);
+    const p2_current = currentData.phases.phase2;
+    const p2_original = originalData.phases.phase2;
+    const snapshotRomP2 = d3.sum(p2_original.components, d => d.current_rom * d.square_footage);
+    const snapshotVarianceP2 = snapshotRomP2 - p2_original.totalProjectBudget;
+    const currentRomEstimateP2 = d3.sum(p2_current.components, d => d.current_rom * d.square_footage);
+    const varianceP2 = currentRomEstimateP2 - p2_current.totalProjectBudget;
+    document.getElementById('total-budget-p2').textContent = formatCurrencyBig(p2_current.totalProjectBudget);
+    document.getElementById('snapshot-rom-p2').textContent = formatCurrencyBig(snapshotRomP2);
+    const snapshotVarianceElP2 = document.getElementById('snapshot-variance-p2');
+    snapshotVarianceElP2.textContent = `${snapshotVarianceP2 >= 0 ? '+' : ''}${formatCurrencyBig(snapshotVarianceP2)}`;
+    snapshotVarianceElP2.classList.toggle('text-red-600', snapshotVarianceP2 > 0);
+    snapshotVarianceElP2.classList.toggle('text-green-600', snapshotVarianceP2 <= 0);
     document.getElementById('current-rom-estimate-p2').textContent = formatCurrencyBig(currentRomEstimateP2);
     const varianceElP2 = document.getElementById('variance-p2');
     varianceElP2.textContent = `${varianceP2 >= 0 ? '+' : ''}${formatCurrencyBig(varianceP2)}`;
@@ -935,7 +958,7 @@ function loadData(data, fileName = 'Sample Data') {
     
     // Dynamically set the Y-axis domain based on the maximum value in the data.
     const allComponents = [...currentData.phases.phase1.components, ...currentData.phases.phase2.components];
-    const maxVal = d3.max(allComponents, d => Math.max(d.benchmark_high, d.target_value, d.current_rom));
+    const maxVal = d3.max(allComponents, d => Math.max(d.benchmark_high, d.current_rom));
     yDomainMax = Math.ceil(maxVal / 10) * 10 + 20; // Round up to the nearest 10 and add a buffer.
     yScale.domain([0, yDomainMax]);
     
@@ -1018,20 +1041,23 @@ function exportJSON() {
 function exportCSV() {
     if (!currentData) return;
 
-    const headers = ["Phase", "Component", "Benchmark Low", "Benchmark High", "Target Value", "Current ROM"];
+    const headers = ["Phase", "Component", "Benchmark Low", "Benchmark High", "Snapshot Value", "Current ROM"];
     let csvContent = headers.join(",") + "\n";
 
     // Iterate over phases and components to build the CSV string.
     for (const phaseKey in currentData.phases) {
         if (currentData.phases.hasOwnProperty(phaseKey)) {
             const phase = currentData.phases[phaseKey];
+            const originalPhase = originalData.phases[phaseKey];
             phase.components.forEach(component => {
+                const originalComponent = originalPhase.components.find(oc => oc.name === component.name);
+                const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
                 const row = [
                     phaseKey,
                     `"${component.name.replace(/"/g, '""')}"`, // Handle quotes in name
                     component.benchmark_low,
                     component.benchmark_high,
-                    component.target_value,
+                    snapshotValue,
                     component.current_rom
                 ].join(",");
                 csvContent += row + "\n";

@@ -4,26 +4,26 @@ const sampleData = {
             "totalProjectBudget": 20000000,
             "projectAreaSF": 30000,
             "components": [
-                { "name": "General Conditions", "square_footage": 30000, "target_value": 140, "current_rom": 137 },
-                { "name": "Demo", "square_footage": 15000, "target_value": 125, "current_rom": 123 },
-                { "name": "Site", "square_footage": 30000, "target_value": 240, "current_rom": 246 },
-                { "name": "Utilities", "square_footage": 30000, "target_value": 180, "current_rom": 180 },
-                { "name": "Weatherproofing", "square_footage": 12000, "target_value": 100, "current_rom": 104 }
+                { "name": "General Conditions", "square_footage": 30000, "current_rom": 140 },
+                { "name": "Demo", "square_footage": 15000, "current_rom": 125 },
+                { "name": "Site", "square_footage": 30000, "current_rom": 240 },
+                { "name": "Utilities", "square_footage": 30000, "current_rom": 180 },
+                { "name": "Weatherproofing", "square_footage": 12000, "current_rom": 100 }
             ]
         },
         "phase2": {
             "totalProjectBudget": 40000000,
             "projectAreaSF": 60000,
             "components": [
-                { "name": "General Conditions", "square_footage": 60000, "target_value": 70, "current_rom": 68 },
-                { "name": "Structure", "square_footage": 60000, "target_value": 115, "current_rom": 115 },
-                { "name": "Envelope", "square_footage": 45000, "target_value": 145, "current_rom": 142 },
-                { "name": "Labs", "square_footage": 25000, "target_value": 180, "current_rom": 179 },
-                { "name": "Vertical Circulation", "square_footage": 5000, "target_value": 70, "current_rom": 70 },
-                { "name": "Plumbing", "square_footage": 60000, "target_value": 50, "current_rom": 48 },
-                { "name": "Electrical", "square_footage": 60000, "target_value": 85, "current_rom": 85 },
-                { "name": "HVAC", "square_footage": 60000, "target_value": 100, "current_rom": 98 },
-                { "name": "Fire Protection", "square_footage": 60000, "target_value": 55, "current_rom": 55 }
+                { "name": "General Conditions", "square_footage": 60000, "current_rom": 70 },
+                { "name": "Structure", "square_footage": 60000, "current_rom": 115 },
+                { "name": "Envelope", "square_footage": 45000, "current_rom": 145 },
+                { "name": "Labs", "square_footage": 25000, "current_rom": 180 },
+                { "name": "Vertical Circulation", "square_footage": 5000, "current_rom": 70 },
+                { "name": "Plumbing", "square_footage": 60000, "current_rom": 50 },
+                { "name": "Electrical", "square_footage": 60000, "current_rom": 85 },
+                { "name": "HVAC", "square_footage": 60000, "current_rom": 100 },
+                { "name": "Fire Protection", "square_footage": 60000, "current_rom": 55 }
             ]
         }
     },
