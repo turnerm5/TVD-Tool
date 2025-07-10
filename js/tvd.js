@@ -371,7 +371,7 @@ function renderBenchmarksView() {
 
         const tbody = table.append('tbody');
         const rows = tbody.selectAll('tr')
-            .data(projectData.components.sort((a, b) => b.cost - a.cost))
+            .data(projectData.components)
             .enter()
             .append('tr');
 

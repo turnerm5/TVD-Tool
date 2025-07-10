@@ -158,7 +158,7 @@ body {
     transition: all 0.2s;
 }
 
-#table-view table {
+#program-view table {
     width: 100%;
     border-collapse: collapse;
     background-color: #fff;
@@ -166,28 +166,28 @@ body {
     overflow: hidden;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
-#table-view th, #table-view td {
+#program-view th, #program-view td {
     padding: 0.75rem 1rem;
     text-align: left;
     border-bottom: 1px solid #e5e7eb; /* gray-200 */
 }
-#table-view th {
+#program-view th {
     background-color: #f9fafb; /* gray-50 */
     font-weight: 600;
     font-size: 0.875rem;
     color: #4b5563; /* gray-600 */
 }
-#table-view td {
+#program-view td {
     font-size: 0.875rem;
     color: #111827; /* gray-900 */
 }
-#table-view tbody tr:last-child td {
+#program-view tbody tr:last-child td {
     border-bottom: none;
 }
-#table-view .component-name {
+#program-view .component-name {
     font-weight: 500;
 }
-#table-view .editable-cell input {
+#program-view .editable-cell input {
     width: 100%;
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
@@ -196,21 +196,30 @@ body {
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 /* Hide spin buttons on number inputs */
-#table-view .editable-cell input::-webkit-outer-spin-button,
-#table-view .editable-cell input::-webkit-inner-spin-button {
+#program-view .editable-cell input::-webkit-outer-spin-button,
+#program-view .editable-cell input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-#table-view .editable-cell input[type=number] {
+#program-view .editable-cell input[type=number] {
     -moz-appearance: textfield;
 }
 
-#table-view .editable-cell input:focus {
+#program-view .editable-cell {
+    background-color: #f0f9ff;
+    transition: background-color 0.2s ease-in-out;
+}
+
+#program-view .editable-cell:hover {
+    background-color: #e0f2fe;
+}
+
+#program-view .editable-cell input:focus {
     outline: none;
     border-color: #2563eb; /* blue-600 */
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
 }
-#table-view .na-cell {
+#program-view .na-cell {
     color: #9ca3af; /* gray-400 */
     font-style: italic;
 } 
