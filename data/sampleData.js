@@ -10,20 +10,20 @@ const sampleData = {
                 { "name": "D Services", "square_footage": 22500, "current_rom": 0 },
                 { "name": "E Equipment and Furnishings", "square_footage": 22500, "current_rom": 0 },
                 { "name": "F Special Construction", "square_footage": 40000, "current_rom": 102 },
-                { "name": "G Building Sitework", "square_footage": 40000, "current_rom": 65.00 }
+                { "name": "G Building Sitework", "square_footage": 40000, "current_rom": 105.00 }
             ]
         },
         "phase2": {
             "totalProjectBudget": 38000000,
             "projectAreaSF": 49050,
             "components": [
-                { "name": "A Substructure", "square_footage": 49050, "current_rom": 120.00 },
-                { "name": "B Shell", "square_footage": 49050, "current_rom": 150.00 },
-                { "name": "C Interiors", "square_footage": 49050, "current_rom": 140.00 },
+                { "name": "A Substructure", "square_footage": 49050, "current_rom": 130.00 },
+                { "name": "B Shell", "square_footage": 49050, "current_rom": 195.00 },
+                { "name": "C Interiors", "square_footage": 49050, "current_rom": 95.00 },
                 { "name": "D Services", "square_footage": 49050, "current_rom": 220.00 },
                 { "name": "E Equipment and Furnishings", "square_footage": 49050, "current_rom": 50.00 },
-                { "name": "F Special Construction", "square_footage": 10000, "current_rom": 80 },
-                { "name": "G Building Sitework", "square_footage": 49050, "current_rom": 40.72 }
+                { "name": "F Special Construction", "square_footage": 10000, "current_rom": 84 },
+                { "name": "G Building Sitework", "square_footage": 49050, "current_rom": 41 }
             ]
         }
     },

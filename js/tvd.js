@@ -558,9 +558,11 @@ function renderWaterfallChart() {
  * Renders the main data program view with detailed component information.
  */
 function renderProgramView() {
+    d3.select(programView).select('table').remove();
+
     const tableData = [];
     
-    // Flatten data from both phases.
+    // Flatten data from both phases into a single structure for the table.
     const p1Components = currentData.phases.phase1.components.sort((a, b) => a.name.localeCompare(b.name));
     if (p1Components.length > 0) {
         tableData.push({ type: 'header', name: 'Phase 1' });
@@ -573,20 +575,17 @@ function renderProgramView() {
         p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
     }
 
-    d3.select(programView).select('table').remove();
+    // Create Table
     const table = d3.select(programView).append('table').attr('class', 'min-w-full divide-y divide-gray-200');
-    
+
     // Create Header
     const thead = table.append('thead').attr('class', 'bg-gray-50');
-    const headerRow = thead.append('tr');
-    headerRow.append('th').attr('class', 'py-3 px-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '5%');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '25%').text('Component');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Square Footage');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Benchmark Low');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Benchmark High');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '12.5%').text('Snapshot');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '12.5%').text('Current');
-    
+    thead.append('tr').selectAll('th')
+        .data(['Lock', 'Component', 'Square Footage', 'Benchmark Low ($/sf)', 'Benchmark High ($/sf)', 'Snapshot ($/sf)', 'Current ROM ($/sf)'])
+        .enter().append('th')
+        .attr('class', 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider')
+        .text(d => d);
+
     // Create Body
     const tbody = table.append('tbody');
     const rows = tbody.selectAll('tr').data(tableData).enter().append('tr');
@@ -598,7 +597,12 @@ function renderProgramView() {
             row.append('td').attr('colspan', 7).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
         } else {
             const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
-            row.attr('class', 'bg-white').classed('benchmark-warning', isOutsideBenchmark);
+            
+            if (d.current_rom === 0 || d.square_footage === 0) {
+                row.attr('class', 'zero-value-row');
+            } else {
+                row.attr('class', 'bg-white').classed('benchmark-warning', isOutsideBenchmark);
+            }
 
             const lockKey = `${d.dataPhase}-${d.name}`;
             row.append('td').attr('class', 'py-4 px-2 text-center text-sm align-middle')
@@ -614,9 +618,9 @@ function renderProgramView() {
                     }
                     render();
                 });
-            
-            row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
 
+            row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
+            
             // Square Footage (editable)
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
                 .append('input').attr('type', 'text').attr('class', 'w-full text-center')
@@ -627,12 +631,12 @@ function renderProgramView() {
 
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.benchmark_low));
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.benchmark_high));
-
+            
             // Snapshot
             const originalComponent = originalData.phases[d.dataPhase].components.find(c => c.name === d.name);
             const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(snapshotValue));
-            
+
             // Current (editable)
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
                 .append('input').attr('type', 'number').attr('class', 'w-full text-center')

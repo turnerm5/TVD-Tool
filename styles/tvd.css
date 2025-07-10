@@ -191,10 +191,18 @@ body {
     width: 100%;
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
-    border: 1px solid #d1d5db; /* gray-300 */
-    background-color: #fff;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    border: 1px dashed #d1d5db; /* gray-300 */
+    background-color: transparent;
+    transition: border-color 0.2s, box-shadow 0.2s, border-style 0.2s;
+    font-style: italic;
+    color: #6b7280; /* gray-500 */
 }
+
+#program-view .editable-cell input:hover {
+    border-style: solid;
+    border-color: #9ca3af; /* gray-400 */
+}
+
 /* Hide spin buttons on number inputs */
 #program-view .editable-cell input::-webkit-outer-spin-button,
 #program-view .editable-cell input::-webkit-inner-spin-button {
@@ -203,15 +211,6 @@ body {
 }
 #program-view .editable-cell input[type=number] {
     -moz-appearance: textfield;
-}
-
-#program-view .editable-cell {
-    background-color: #f0f9ff;
-    transition: background-color 0.2s ease-in-out;
-}
-
-#program-view .editable-cell:hover {
-    background-color: #e0f2fe;
 }
 
 #program-view .editable-cell input:focus {
@@ -223,6 +222,17 @@ body {
     color: #9ca3af; /* gray-400 */
     font-style: italic;
 } 
+
+#program-view .zero-value-row td {
+    color: #d1d5db; /* lighter gray-300 */
+    font-style: italic;
+    font-weight: 300;
+}
+#program-view .zero-value-row .editable-cell input {
+    color: #a8a8a8; /* lighter gray-300 */
+    font-style: italic;
+    font-weight: 300;
+}
 
 tr.benchmark-warning {
     background-color: #fee2e2; /* red-100 */
