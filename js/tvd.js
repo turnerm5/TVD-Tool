@@ -1030,6 +1030,16 @@ function loadData(data, fileName = 'Sample Data') {
 
     // Initialize the 'locked' state for all components.
     lockedComponents = new Set();
+
+    // Automatically lock components that have a zero value for ROM or SF on import.
+    Object.keys(processedData.phases).forEach(phaseKey => {
+        processedData.phases[phaseKey].components.forEach(component => {
+            if (component.current_rom === 0 || component.square_footage === 0) {
+                const lockKey = `${phaseKey}-${component.name}`;
+                lockedComponents.add(lockKey);
+            }
+        });
+    });
     
     // Store deep copies for original (reset) and current (mutable) states.
     originalData = JSON.parse(JSON.stringify(processedData));
