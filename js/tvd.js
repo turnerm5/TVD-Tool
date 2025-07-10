@@ -41,14 +41,12 @@ const fileNameDisplay = document.getElementById('file-name');
 const phase1Btn = document.getElementById('phase1-btn');
 const phase2Btn = document.getElementById('phase2-btn');
 const chartViewBtn = document.getElementById('chart-view-btn');
-const tableViewBtn = document.getElementById('table-view-btn');
-const benchmarksViewBtn = document.getElementById('benchmarks-view-btn');
 const programViewBtn = document.getElementById('program-view-btn');
+const benchmarksViewBtn = document.getElementById('benchmarks-view-btn');
 const waterfallViewBtn = document.getElementById('waterfall-view-btn');
 const mainChart = document.getElementById('main-chart');
-const tableView = document.getElementById('table-view');
-const benchmarksView = document.getElementById('benchmarks-view');
 const programView = document.getElementById('program-view');
+const benchmarksView = document.getElementById('benchmarks-view');
 const waterfallView = document.getElementById('waterfall-view');
 const phaseSelector = document.getElementById('phase-selector');
 const summaryPanel = document.getElementById('summary-panel');
@@ -117,9 +115,8 @@ function render() {
 
     // --- 1. Hide all views and deactivate all buttons ---
     mainChart.classList.add('hidden');
-    tableView.classList.add('hidden');
-    benchmarksView.classList.add('hidden');
     programView.classList.add('hidden');
+    benchmarksView.classList.add('hidden');
     waterfallView.classList.add('hidden');
     phaseSelector.classList.add('hidden');
     legend.classList.add('hidden');
@@ -127,9 +124,8 @@ function render() {
     maximizeBtn.classList.add('hidden');
 
     chartViewBtn.classList.remove('active');
-    tableViewBtn.classList.remove('active');
-    benchmarksViewBtn.classList.remove('active');
     programViewBtn.classList.remove('active');
+    benchmarksViewBtn.classList.remove('active');
     waterfallViewBtn.classList.remove('active');
 
     // --- 2. Show the active view and call its render function ---
@@ -141,18 +137,14 @@ function render() {
         chartViewBtn.classList.add('active');
         renderChart();
         renderYAxisLabels();
-    } else if (currentView === 'table') {
-        tableView.classList.remove('hidden');
-        tableViewBtn.classList.add('active');
-        renderTable();
-    } else if (currentView === 'benchmarks') {
-        benchmarksView.classList.remove('hidden');
-        benchmarksViewBtn.classList.add('active');
-        renderBenchmarksView();
     } else if (currentView === 'program') {
         programView.classList.remove('hidden');
         programViewBtn.classList.add('active');
         renderProgramView();
+    } else if (currentView === 'benchmarks') {
+        benchmarksView.classList.remove('hidden');
+        benchmarksViewBtn.classList.add('active');
+        renderBenchmarksView();
     } else if (currentView === 'waterfall') {
         waterfallView.classList.remove('hidden');
         phaseSelector.classList.remove('hidden');
@@ -404,7 +396,7 @@ function renderBenchmarksView() {
  * Handles changes to the square footage inputs in the Program View table.
  * @param {Event} event - The input change event.
  */
-function handleProgramCellChange(event) {
+function handleSquareFootageCellChange(event) {
     const input = event.target;
     // Remove commas before parsing to handle formatted numbers.
     const newValue = parseFloat(input.value.replace(/,/g, ''));
@@ -563,64 +555,9 @@ function renderWaterfallChart() {
 }
 
 /**
- * Renders the Program View, which is a simple table showing component square footages.
+ * Renders the main data program view with detailed component information.
  */
 function renderProgramView() {
-    const tableData = [];
-    
-    // Flatten the data from both phases into a single array for table rendering.
-    const p1Components = currentData.phases.phase1.components.sort((a, b) => a.name.localeCompare(b.name));
-    if (p1Components.length > 0) {
-        tableData.push({ type: 'header', name: 'Phase 1' });
-        p1Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase1' }));
-    }
-
-    const p2Components = currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
-    if (p2Components.length > 0) {
-        tableData.push({ type: 'header', name: 'Phase 2' });
-        p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
-    }
-
-    const programViewContainer = d3.select(programView);
-    programViewContainer.html(''); 
-    
-    const tableContainer = programViewContainer.append('div').attr('class', 'max-w-3xl mx-auto');
-    const table = tableContainer.append('table').attr('class', 'min-w-full divide-y divide-gray-200');
-    
-    // Create Header
-    const thead = table.append('thead').attr('class', 'bg-gray-50');
-    const headerRow = thead.append('tr');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '70%').text('Component');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '30%').text('Square Footage');
-    
-    // Create Body
-    const tbody = table.append('tbody');
-    const rows = tbody.selectAll('tr').data(tableData).enter().append('tr');
-
-    rows.each(function(d) {
-        const row = d3.select(this);
-        if (d.type === 'header') {
-            row.attr('class', 'bg-gray-100');
-            row.append('td').attr('colspan', 2).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
-        } else {
-            row.attr('class', 'bg-white');
-            row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
-            
-            // Render square footage as an editable input field.
-            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
-                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
-                .attr('value', d.square_footage.toLocaleString('en-US'))
-                .attr('data-phase', d.dataPhase)
-                .attr('data-name', d.name)
-                .on('change', handleProgramCellChange);
-        }
-    });
-}
-
-/**
- * Renders the main data table view with detailed component information.
- */
-function renderTable() {
     const tableData = [];
     
     // Flatten data from both phases.
@@ -636,18 +573,19 @@ function renderTable() {
         p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
     }
 
-    d3.select(tableView).select('table').remove();
-    const table = d3.select(tableView).append('table').attr('class', 'min-w-full divide-y divide-gray-200');
+    d3.select(programView).select('table').remove();
+    const table = d3.select(programView).append('table').attr('class', 'min-w-full divide-y divide-gray-200');
     
     // Create Header
     const thead = table.append('thead').attr('class', 'bg-gray-50');
     const headerRow = thead.append('tr');
     headerRow.append('th').attr('class', 'py-3 px-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '5%');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '30%').text('Component');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '25%').text('Component');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Square Footage');
     headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Benchmark Low');
     headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '15%').text('Benchmark High');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '17.5%').text('Snapshot');
-    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '17.5%').text('Current');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '12.5%').text('Snapshot');
+    headerRow.append('th').attr('class', 'py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider').style('width', '12.5%').text('Current');
     
     // Create Body
     const tbody = table.append('tbody');
@@ -657,7 +595,7 @@ function renderTable() {
         const row = d3.select(this);
         if (d.type === 'header') {
             row.attr('class', 'bg-gray-100');
-            row.append('td').attr('colspan', 6).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
+            row.append('td').attr('colspan', 7).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
         } else {
             const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
             row.attr('class', 'bg-white').classed('benchmark-warning', isOutsideBenchmark);
@@ -678,6 +616,15 @@ function renderTable() {
                 });
             
             row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
+
+            // Square Footage (editable)
+            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
+                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
+                .attr('value', d.square_footage.toLocaleString('en-US'))
+                .attr('data-phase', d.dataPhase)
+                .attr('data-name', d.name)
+                .on('change', handleSquareFootageCellChange);
+
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.benchmark_low));
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(formatCurrency(d.benchmark_high));
 
@@ -693,7 +640,7 @@ function renderTable() {
                 .attr('step', 0.01)
                 .attr('data-phase', d.dataPhase)
                 .attr('data-name', d.name)
-                .on('change', handleTableCellChange);
+                .on('change', handleCurrentRomCellChange);
         }
     });
 }
@@ -802,7 +749,7 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
  * Handles the 'change' event from the editable cells in the main data table.
  * @param {Event} event - The input change event.
  */
-function handleTableCellChange(event) {
+function handleCurrentRomCellChange(event) {
     const input = event.target;
     const newValue = parseFloat(input.value);
     const phaseKey = input.dataset.phase;
@@ -897,8 +844,8 @@ function balanceToGmp() {
     // Refresh the UI to reflect the changes.
     renderChart();
     updateSummary();
-    if (document.getElementById('table-view').style.display !== 'none') {
-        renderTable();
+    if (document.getElementById('program-view').style.display !== 'none') {
+        renderProgramView();
     }
     // After adjusting, the "Reset to Original" button should be enabled.
     document.getElementById('reset-button').disabled = false;
@@ -1218,9 +1165,8 @@ document.addEventListener('DOMContentLoaded', () => {
     phase1Btn.addEventListener('click', () => { currentPhase = 'phase1'; render(); });
     phase2Btn.addEventListener('click', () => { currentPhase = 'phase2'; render(); });
     chartViewBtn.addEventListener('click', () => { currentView = 'chart'; render(); });
-    tableViewBtn.addEventListener('click', () => { currentView = 'table'; render(); });
-    benchmarksViewBtn.addEventListener('click', () => { currentView = 'benchmarks'; selectedBenchmark = null; render(); });
     programViewBtn.addEventListener('click', () => { currentView = 'program'; render(); });
+    benchmarksViewBtn.addEventListener('click', () => { currentView = 'benchmarks'; selectedBenchmark = null; render(); });
     waterfallViewBtn.addEventListener('click', () => { currentView = 'waterfall'; render(); });
 
     // --- File Drop Zone Handlers ---

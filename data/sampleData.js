@@ -15,9 +15,9 @@ const sampleData = {
             "totalProjectBudget": 40000000,
             "projectAreaSF": 60000,
             "components": [
-                { "name": "General Conditions", "square_footage": 60000, "current_rom": 70 },
+                { "name": "General Conditions", "square_footage": 60000, "current_rom": 90 },
                 { "name": "Structure", "square_footage": 60000, "current_rom": 115 },
-                { "name": "Envelope", "square_footage": 45000, "current_rom": 145 },
+                { "name": "Envelope", "square_footage": 35000, "current_rom": 145 },
                 { "name": "Labs", "square_footage": 25000, "current_rom": 180 },
                 { "name": "Vertical Circulation", "square_footage": 5000, "current_rom": 70 },
                 { "name": "Plumbing", "square_footage": 60000, "current_rom": 50 },
