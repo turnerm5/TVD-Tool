@@ -591,7 +591,7 @@ function renderProgramView() {
     // Create Header
     const thead = table.append('thead').attr('class', 'bg-gray-50');
     thead.append('tr').selectAll('th')
-        .data(['Lock', 'Component', 'Square Footage', 'Benchmark Low ($/sf)', 'Benchmark High ($/sf)', 'Snapshot ($/sf)', 'Scenario ROM ($/sf)'])
+        .data(['Lock', 'Component', 'Square Footage', 'Benchmark Low ($/sf)', 'Benchmark High ($/sf)', 'Starting ROM ($/sf)', 'Scenario ROM ($/sf)'])
         .enter().append('th')
         .attr('class', 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider')
         .text(d => d);
