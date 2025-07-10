@@ -96,7 +96,7 @@ body {
 }
 .component-column .lock-icon {
     position: absolute;
-    bottom: -25px;
+    bottom: -65px; /* moved down 20px from -15px */
     left: 50%;
     transform: translateX(-50%);
     cursor: pointer;
