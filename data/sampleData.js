@@ -1,7 +1,7 @@
 const sampleData = {
     "phases": {
         "phase1": {
-            "totalProjectBudget": 18000000,
+            "totalProjectBudget": 12000000,
             "projectAreaSF": 22500,
             "components": [
                 { "name": "A Substructure", "square_footage": 22500, "current_rom": 140.00 },

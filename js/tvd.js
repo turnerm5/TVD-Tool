@@ -224,9 +224,19 @@ function renderChart() {
     updateGroup.select(".current-rom")
         .style("top", d => yScale(d.current_rom) - 3 + "px")
         .style("bottom", null)
-        .style("background-color", d => {
+        .each(function(d) {
+            const bar = d3.select(this);
             const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
-            return isOutsideBenchmark ? '#dc2626' : '#1f2937'; // Red if outside, dark grey if inside
+
+            if (d.current_rom === 0) {
+                bar.style("background", "none")
+                   .style("border", "2px dashed #9ca3af") // gray-400
+                   .classed('zero-rom-bar', true);
+            } else {
+                bar.style("background", isOutsideBenchmark ? '#dc2626' : '#1f2937') // Red if outside, dark grey if inside
+                   .style("border", "none")
+                   .classed('zero-rom-bar', false);
+            }
         });
     
     // Create a map of original component values for quick lookup.
@@ -581,7 +591,7 @@ function renderProgramView() {
     // Create Header
     const thead = table.append('thead').attr('class', 'bg-gray-50');
     thead.append('tr').selectAll('th')
-        .data(['Lock', 'Component', 'Square Footage', 'Benchmark Low ($/sf)', 'Benchmark High ($/sf)', 'Snapshot ($/sf)', 'Current ROM ($/sf)'])
+        .data(['Lock', 'Component', 'Square Footage', 'Benchmark Low ($/sf)', 'Benchmark High ($/sf)', 'Snapshot ($/sf)', 'Scenario ROM ($/sf)'])
         .enter().append('th')
         .attr('class', 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider')
         .text(d => d);
@@ -803,7 +813,7 @@ function dragEnded() { d3.select(this).classed("active", false); }
 /**
  * Balances the budget by adjusting unlocked components.
  * Proportionally adjusts the 'current_rom' of all unlocked components in the current phase
- * to make the total 'Current ROM' equal to the 'Total Project Budget' (with a small buffer).
+ * to make the total 'Scenario  ROM' equal to the 'Total Project Budget' (with a small buffer).
  * This function works whether the current total is over or under budget.
  */
 function balanceToGmp() {
@@ -813,7 +823,7 @@ function balanceToGmp() {
 
     // If we are already at the target (within the $1 buffer), do nothing.
     if (Math.abs(budget - currentTotalCost) <= 1) {
-        console.log("Current ROM is already balanced to GMP. No action taken.");
+        console.log("Scenario ROM is already balanced to GMP. No action taken.");
         return;
     }
 
@@ -1110,7 +1120,7 @@ function exportJSON() {
 function exportCSV() {
     if (!currentData) return;
 
-    const headers = ["Phase", "Component", "Benchmark Low", "Benchmark High", "Snapshot Value", "Current ROM"];
+    const headers = ["Phase", "Component", "Benchmark Low", "Benchmark High", "Snapshot Value", "Scenario ROM"];
     let csvContent = headers.join(",") + "\n";
 
     // Iterate over phases and components to build the CSV string.
