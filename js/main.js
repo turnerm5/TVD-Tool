@@ -13,6 +13,7 @@ import * as fileHandlers from './modules/file-handlers.js';
 import * as slider from './modules/chart-slider.js';
 import * as waterfall from './modules/chart-waterfall.js';
 import * as views from './modules/views.js';
+import * as sankey from './modules/chart-sankey.js';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
@@ -61,6 +62,7 @@ function render() {
         dom.phase1View.classList.remove('hidden');
         dom.phase1ViewBtn.classList.add('active');
         views.renderPhase1View();
+        sankey.renderSankeyChart(state.currentData);
     } else if (state.currentView === 'benchmarks') {
         dom.benchmarksView.classList.remove('hidden');
         dom.benchmarksViewBtn.classList.add('active');

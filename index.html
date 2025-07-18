@@ -6,6 +6,7 @@
     <title>Target Value Design Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://d3js.org/d3.v7.min.js"></script>
+    <script type="module" src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
     <link rel="stylesheet" href="styles/tvd.css">
     <link rel="icon" href="img/wsu.svg" type="image/svg+xml">
 </head>
@@ -96,6 +97,7 @@
                 <div id="chart-container" class="chart-container"></div>
             </div>
             <div id="phase1-view" class="hidden">
+                <div id="sankey-chart-container" class="sankey-chart-container"></div>
                 <!-- Table for Phase 1 will be rendered here -->
             </div>
             <div id="program-view" class="hidden">
