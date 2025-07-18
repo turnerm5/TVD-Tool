@@ -133,7 +133,9 @@ export function exportJSON() {
     // Create a clean copy of the data, removing transient state properties like 'locked'.
     const dataToExport = JSON.parse(JSON.stringify(state.currentData));
     Object.values(dataToExport.phases).forEach(phase => {
-        phase.components.forEach(c => delete c.locked);
+        if (phase.components) {
+            phase.components.forEach(c => delete c.locked);
+        }
     });
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
     const downloadAnchorNode = document.createElement('a');
