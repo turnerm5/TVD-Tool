@@ -62,7 +62,9 @@ function render() {
         dom.phase1View.classList.remove('hidden');
         dom.phase1ViewBtn.classList.add('active');
         views.renderPhase1View();
-        sankey.renderSankeyChart(state.currentData);
+        requestAnimationFrame(() => {
+            sankey.renderSankeyChart(state.currentData);
+        });
     } else if (state.currentView === 'benchmarks') {
         dom.benchmarksView.classList.remove('hidden');
         dom.benchmarksViewBtn.classList.add('active');
