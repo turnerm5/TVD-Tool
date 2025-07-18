@@ -184,32 +184,6 @@ export function renderPhase1View() {
                 link: {
                     colorMode: 'gradient',
                     colors: colors
-                },
-                tooltip: {
-                    isHtml: true,
-                    trigger: 'focus'
-                }
-            },
-            tooltip: {
-                isHtml: true,
-                trigger: 'focus',
-                formatter: function(dataTable, dataRow) {
-                    const row = dataTable.getValue(dataRow, 0);
-                    const col = dataTable.getValue(dataRow, 1);
-                    const value = dataTable.getValue(dataRow, 2);
-                    
-                    // Format the value
-                    let formattedValue;
-                    if (value >= 1000000) {
-                        formattedValue = `$${(value / 1000000).toFixed(1)}M`;
-                    } else {
-                        formattedValue = `$${Math.round(value / 1000)}k`;
-                    }
-                    
-                    return `<div style="padding: 8px;">
-                        <strong>${row}</strong><br>
-                        <strong>${col}</strong><br>
-                    </div>`;
                 }
             }
         };

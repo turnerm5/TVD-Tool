@@ -10,7 +10,7 @@ const sampleData = {
                 { "Category": "Sitework", "Subcategory": "Site Electrical Utilities", "Total": 0 },
                 { "Category": "Sitework", "Subcategory": "Site Lighting", "Total": 0 },
                 { "Category": "Mark-Ups", "Subcategory": "Construction Contingency", "Total": 500000 },
-                { "Category": "Mark-Ups", "Subcategory": "Escalation Phase 1", "Total": 524000 },
+                { "Category": "Mark-Ups", "Subcategory": "Escalation", "Total": 524000 },
                 { "Category": "Mark-Ups", "Subcategory": "Escalation Phase 2", "Total": 0 },
                 { "Category": "Mark-Ups", "Subcategory": "Design Fees", "Total": 4300000 },
                 { "Category": "Mark-Ups", "Subcategory": "MEP Design", "Total": 2000000 },
