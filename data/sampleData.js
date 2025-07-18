@@ -1,22 +1,28 @@
 const sampleData = {
     "phases": {
         "phase1": {
-            "totalProjectBudget": 12000000,
-            "projectAreaSF": 22500,
-            "components": [
-                { "name": "A Substructure", "square_footage": 22500, "current_rom": 140.00 },
-                { "name": "B10 Superstructure", "square_footage": 22500, "current_rom": 0 },
-                { "name": "B20 Enclosure", "square_footage": 22500, "current_rom": 0 },
-                { "name": "B30 Roofing", "square_footage": 5625, "current_rom": 0 },
-                { "name": "C Interiors", "square_footage": 22500, "current_rom": 0 },
-                { "name": "D Services", "square_footage": 22500, "current_rom": 0 },
-                { "name": "E Equipment and Furnishings", "square_footage": 22500, "current_rom": 0 },
-                { "name": "F Special Construction", "square_footage": 40000, "current_rom": 102 },
-                { "name": "G Building Sitework", "square_footage": 40000, "current_rom": 105.00 }
+            "totalProjectBudget": 20000000,
+            "categories": [
+                { "Category": "Special Construction", "Subcategory": "Demolition", "Total": 5000000 },
+                { "Category": "Sitework", "Subcategory": "Site Preparation", "Total": 0 },
+                { "Category": "Sitework", "Subcategory": "Site Improvements", "Total": 0 },
+                { "Category": "Sitework", "Subcategory": "Civil & Mechanical Utilities", "Total": 0 },
+                { "Category": "Sitework", "Subcategory": "Site Electrical Utilities", "Total": 0 },
+                { "Category": "Sitework", "Subcategory": "Site Lighting", "Total": 0 },
+                { "Category": "Mark-Ups", "Subcategory": "Construction Contingency", "Total": 500000 },
+                { "Category": "Mark-Ups", "Subcategory": "Escalation Phase 1", "Total": 524000 },
+                { "Category": "Mark-Ups", "Subcategory": "Escalation Phase 2", "Total": 0 },
+                { "Category": "Mark-Ups", "Subcategory": "Design Fees", "Total": 4300000 },
+                { "Category": "Mark-Ups", "Subcategory": "MEP Design", "Total": 2000000 },
+                { "Category": "GCs and Insurance", "Subcategory": "Preconstruction", "Total": 600000 },
+                { "Category": "GCs and Insurance", "Subcategory": "Subcontractor Default Insurance", "Total": 0 },
+                { "Category": "GCs and Insurance", "Subcategory": "Hoffman Bond", "Total": 0 },
+                { "Category": "GCs and Insurance", "Subcategory": "Builder's Risk Insurance", "Total": 0 },
+                { "Category": "GCs and Insurance", "Subcategory": "General Requirements (SGC, OH, FEE)", "Total": 2076000 }
             ]
         },
         "phase2": {
-            "totalProjectBudget": 38000000,
+            "totalProjectBudget": 40000000,
             "projectAreaSF": 49050,
             "components": [
                 { "name": "A Substructure", "square_footage": 49050, "current_rom": 130.00 },

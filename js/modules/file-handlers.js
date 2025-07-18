@@ -29,7 +29,6 @@ export function setYScale(scale) {
 function processData(data) {
     if (!data.benchmarks || !data.phases) return data;
 
-    // Create a map of component names to an array of their costs across all benchmark projects.
     const benchmarkCostsByName = {};
     data.benchmarks.forEach(proj => {
         proj.components.forEach(comp => {
@@ -40,14 +39,14 @@ function processData(data) {
         });
     });
 
-    // Add benchmark_low and benchmark_high to each component in the main project data.
-    Object.values(data.phases).forEach(phase => {
-        phase.components.forEach(c => {
+    // Only process components for phase2
+    if (data.phases.phase2 && data.phases.phase2.components) {
+        data.phases.phase2.components.forEach(c => {
             const costs = benchmarkCostsByName[c.name] || [];
             c.benchmark_low = costs.length ? Math.min(...costs) : 0;
             c.benchmark_high = costs.length ? Math.max(...costs) : 0;
         });
-    });
+    }
 
     return data;
 }
@@ -63,36 +62,32 @@ export function loadData(data, fileName = 'Sample Data') {
         return;
     }
 
-    // Make a deep copy of the data for processing, leaving the original `sampleData` object untouched.
     const processedData = processData(JSON.parse(JSON.stringify(data)));
 
-    // Initialize the 'locked' state for all components.
     state.lockedComponents = new Set();
 
-    // Automatically lock components that have a zero value for ROM or SF on import.
-    Object.keys(processedData.phases).forEach(phaseKey => {
-        processedData.phases[phaseKey].components.forEach(component => {
+    // Lock components only for phase2
+    if (processedData.phases.phase2 && processedData.phases.phase2.components) {
+        processedData.phases.phase2.components.forEach(component => {
             if (component.current_rom === 0 || component.square_footage === 0) {
-                const lockKey = `${phaseKey}-${component.name}`;
+                const lockKey = `phase2-${component.name}`;
                 state.lockedComponents.add(lockKey);
             }
         });
-    });
+    }
 
-    // Store deep copies for original (reset) and current (mutable) states.
     state.originalData = JSON.parse(JSON.stringify(processedData));
     state.currentData = processedData;
 
-    // Dynamically set the Y-axis domain based on the maximum value in the data.
-    const allComponents = [...state.currentData.phases.phase1.components, ...state.currentData.phases.phase2.components];
+    // Dynamically set the Y-axis domain based on phase 2 data only
+    const allComponents = processedData.phases.phase2.components;
     const maxVal = d3.max(allComponents, d => Math.max(d.benchmark_high, d.current_rom));
-    state.yDomainMax = Math.ceil(maxVal / 10) * 10 + 20; // Round up to the nearest 10 and add a buffer.
+    state.yDomainMax = Math.ceil(maxVal / 10) * 10 + 20;
     yScale.domain([0, state.yDomainMax]);
 
     document.getElementById('file-name').textContent = `Using: ${fileName}`;
-    state.currentPhase = 'phase1'; // Reset to phase 1 on new data load
+    state.currentPhase = 'phase1';
 
-    // Update the cost labels on the Benchmarks view.
     if (state.currentData.benchmarks) {
         state.currentData.benchmarks.forEach(proj => {
             const costEl = document.getElementById(`benchmark-cost-${proj.id}`);
@@ -171,28 +166,27 @@ export function exportCSV() {
     const headers = ["Phase", "Component", "Benchmark Low", "Benchmark High", "Snapshot Value", "Scenario ROM"];
     let csvContent = headers.join(",") + "\n";
 
-    // Iterate over phases and components to build the CSV string.
-    for (const phaseKey in state.currentData.phases) {
-        if (state.currentData.phases.hasOwnProperty(phaseKey)) {
-            const phase = state.currentData.phases[phaseKey];
-            const originalPhase = state.originalData.phases[phaseKey];
-            phase.components.forEach(component => {
-                const originalComponent = originalPhase.components.find(oc => oc.name === component.name);
-                const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
-                const row = [
-                    phaseKey,
-                    `"${component.name.replace(/"/g, '""')}"`, // Handle quotes in name
-                    component.benchmark_low,
-                    component.benchmark_high,
-                    snapshotValue,
-                    component.current_rom
-                ].join(",");
-                csvContent += row + "\n";
-            });
-        }
+    // Only export phase 2 data
+    const phaseKey = 'phase2';
+    const phase = state.currentData.phases[phaseKey];
+    const originalPhase = state.originalData.phases[phaseKey];
+
+    if (phase && phase.components) {
+        phase.components.forEach(component => {
+            const originalComponent = originalPhase.components.find(oc => oc.name === component.name);
+            const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
+            const row = [
+                phaseKey,
+                `"${component.name.replace(/"/g, '""')}"`,
+                component.benchmark_low,
+                component.benchmark_high,
+                snapshotValue,
+                component.current_rom
+            ].join(",");
+            csvContent += row + "\n";
+        });
     }
 
-    // Use Blob to create the file for download.
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const downloadAnchorNode = document.createElement('a');
