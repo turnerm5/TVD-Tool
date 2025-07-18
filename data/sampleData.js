@@ -1,24 +1,34 @@
 const sampleData = {
     "phases": {
         "phase1": {
-            "totalProjectBudget": 12000000,
-            "projectAreaSF": 22500,
-            "components": [
-                { "name": "A Substructure", "square_footage": 22500, "current_rom": 140.00 },
-                { "name": "B Shell", "square_footage": 22500, "current_rom": 0 },
-                { "name": "C Interiors", "square_footage": 22500, "current_rom": 0 },
-                { "name": "D Services", "square_footage": 22500, "current_rom": 0 },
-                { "name": "E Equipment and Furnishings", "square_footage": 22500, "current_rom": 0 },
-                { "name": "F Special Construction", "square_footage": 40000, "current_rom": 102 },
-                { "name": "G Building Sitework", "square_footage": 40000, "current_rom": 105.00 }
+            "totalProjectBudget": 20000000,
+            "categories": [
+                { "Category": "Special Construction", "Subcategory": "Demolition", "Total": 5000000 },
+                { "Category": "Sitework", "Subcategory": "Site Preparation", "Total": 0 },
+                { "Category": "Sitework", "Subcategory": "Site Improvements", "Total": 0 },
+                { "Category": "Sitework", "Subcategory": "Civil & Mechanical Utilities", "Total": 0 },
+                { "Category": "Sitework", "Subcategory": "Site Electrical Utilities", "Total": 0 },
+                { "Category": "Sitework", "Subcategory": "Site Lighting", "Total": 0 },
+                { "Category": "Mark-Ups", "Subcategory": "Construction Contingency", "Total": 500000 },
+                { "Category": "Mark-Ups", "Subcategory": "Escalation", "Total": 524000 },
+                { "Category": "Mark-Ups", "Subcategory": "Escalation Phase 2", "Total": 0 },
+                { "Category": "Mark-Ups", "Subcategory": "Design Fees", "Total": 4300000 },
+                { "Category": "Mark-Ups", "Subcategory": "MEP Design", "Total": 2000000 },
+                { "Category": "GCs and Insurance", "Subcategory": "Preconstruction", "Total": 600000 },
+                { "Category": "GCs and Insurance", "Subcategory": "Subcontractor Default Insurance", "Total": 0 },
+                { "Category": "GCs and Insurance", "Subcategory": "Hoffman Bond", "Total": 0 },
+                { "Category": "GCs and Insurance", "Subcategory": "Builder's Risk Insurance", "Total": 0 },
+                { "Category": "GCs and Insurance", "Subcategory": "General Requirements (SGC, OH, FEE)", "Total": 2076000 }
             ]
         },
         "phase2": {
-            "totalProjectBudget": 38000000,
+            "totalProjectBudget": 40000000,
             "projectAreaSF": 49050,
             "components": [
                 { "name": "A Substructure", "square_footage": 49050, "current_rom": 130.00 },
-                { "name": "B Shell", "square_footage": 49050, "current_rom": 195.00 },
+                { "name": "B10 Superstructure", "square_footage": 49050, "current_rom": 78.00 },
+                { "name": "B20 Enclosure", "square_footage": 49050, "current_rom": 78.00 },
+                { "name": "B30 Roofing", "square_footage": 12263, "current_rom": 39.00 },
                 { "name": "C Interiors", "square_footage": 49050, "current_rom": 95.00 },
                 { "name": "D Services", "square_footage": 49050, "current_rom": 220.00 },
                 { "name": "E Equipment and Furnishings", "square_footage": 49050, "current_rom": 50.00 },
@@ -35,7 +45,9 @@ const sampleData = {
             "square_footage": 65000,
             "components": [
                 { "name": "A Substructure", "cost": 176.06 },
-                { "name": "B Shell", "cost": 200 },
+                { "name": "B10 Superstructure", "cost": 95 },
+                { "name": "B20 Enclosure", "cost": 90 },
+                { "name": "B30 Roofing", "cost": 45 },
                 { "name": "C Interiors", "cost": 108.12 },
                 { "name": "D Services", "cost": 227.34 },
                 { "name": "E Equipment and Furnishings", "cost": 49.06 },
@@ -50,7 +62,9 @@ const sampleData = {
             "square_footage": 83000,
             "components": [
                 { "name": "A Substructure", "cost": 125.78 },
-                { "name": "B Shell", "cost": 205 },
+                { "name": "B10 Superstructure", "cost": 80 },
+                { "name": "B20 Enclosure", "cost": 98 },
+                { "name": "B30 Roofing", "cost": 38 },
                 { "name": "C Interiors", "cost": 85.42 },
                 { "name": "D Services", "cost": 205.28 },
                 { "name": "E Equipment and Furnishings", "cost": 42.63 },
@@ -65,7 +79,9 @@ const sampleData = {
             "square_footage": 96000,
             "components": [
                 { "name": "A Substructure", "cost": 187.06 },
-                { "name": "B Shell", "cost": 210.24 },
+                { "name": "B10 Superstructure", "cost": 72 },
+                { "name": "B20 Enclosure", "cost": 75 },
+                { "name": "B30 Roofing", "cost": 48 },
                 { "name": "C Interiors", "cost": 75.05 },
                 { "name": "D Services", "cost": 210.28 },
                 { "name": "E Equipment and Furnishings", "cost": 55.45 },
@@ -80,7 +96,9 @@ const sampleData = {
             "square_footage": 37300,
             "components": [
                 { "name": "A Substructure", "cost": 139.63 },
-                { "name": "B Shell", "cost": 190 },
+                { "name": "B10 Superstructure", "cost": 78 },
+                { "name": "B20 Enclosure", "cost": 70 },
+                { "name": "B30 Roofing", "cost": 35 },
                 { "name": "C Interiors", "cost": 87.06 },
                 { "name": "D Services", "cost": 205.45 },
                 { "name": "E Equipment and Furnishings", "cost": 85.21 },

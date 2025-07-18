@@ -392,4 +392,19 @@ tr.benchmark-warning {
     fill: #ef4444; /* red-500 */
     font-weight: 600;
     font-size: 0.875rem;
+}
+
+/* Hide the "Value:" part of Google Charts Sankey tooltips */
+.google-visualization-tooltip-item-list {
+    display: none !important;
+}
+
+/* Custom tooltip styling for Sankey chart */
+.google-visualization-tooltip {
+    border: none !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    color: white !important;
+    border-radius: 4px !important;
+    padding: 8px !important;
+    font-size: 12px !important;
 } 

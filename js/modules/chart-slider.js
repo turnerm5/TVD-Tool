@@ -105,7 +105,7 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
  * This function uses the D3 enter/update/exit pattern to create and update the component columns.
  */
 export function renderChart() {
-    const phaseComponents = state.currentData.phases[state.currentPhase].components;
+    const phaseComponents = state.currentData.phases.phase2.components;
     // Set the number of columns in the CSS grid layout.
     dom.chartContainer.style("grid-template-columns", `repeat(${phaseComponents.length}, 1fr)`);
     // Set the output range for the y-scale based on the container's current height.
@@ -167,7 +167,7 @@ export function renderChart() {
         });
     
     // Create a map of original component values for quick lookup.
-    const originalComponents = state.originalData.phases[state.currentPhase].components.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
+    const originalComponents = state.originalData.phases.phase2.components.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
     
     // Update labels and ghost bars for each component.
     updateGroup.each(function(d) {
@@ -202,16 +202,16 @@ export function renderChart() {
     updateGroup.select(".lock-icon")
         .style('display', 'block')
         .style('opacity', d => {
-            const key = `${state.currentPhase}-${d.name}`;
+            const key = `phase2-${d.name}`;
             return state.lockedComponents.has(key) ? 1 : 0.5;
         })
         .text(d => {
-            const key = `${state.currentPhase}-${d.name}`;
+            const key = `phase2-${d.name}`;
             return state.lockedComponents.has(key) ? '🔒' : '🔓';
         })
         .on('click', (event, d) => {
             event.stopPropagation();
-            const key = `${state.currentPhase}-${d.name}`;
+            const key = `phase2-${d.name}`;
             if (state.lockedComponents.has(key)) {
                 state.lockedComponents.delete(key);
             } else {
@@ -269,16 +269,19 @@ export function renderYAxisLabels() {
 }
 
 /**
- * Handles the 'change' event from the editable cells in the main data table.
- * @param {Event} event - The input change event.
+ * Handles changes to the "Current ROM" input cells in the Program View table.
  */
 export function handleCurrentRomCellChange(event) {
     const input = event.target;
     const newValue = parseFloat(input.value);
-    const phaseKey = input.dataset.phase;
     const componentName = input.dataset.name;
+    const phaseKey = 'phase2';
 
-    const component = state.currentData.phases[phaseKey].components.find(c => c.name === componentName);
+    if (isNaN(newValue)) return;
+
+    const phase = state.currentData.phases[phaseKey];
+    const component = phase.components.find(c => c.name === componentName);
+
     if (component) {
         applyChangeAndBalance(component, newValue, phaseKey);
     }
@@ -286,19 +289,30 @@ export function handleCurrentRomCellChange(event) {
 
 /**
  * Handles changes to the square footage inputs in the Program View table.
- * @param {Event} event - The input change event.
  */
 export function handleSquareFootageCellChange(event) {
     const input = event.target;
-    // Remove commas before parsing to handle formatted numbers.
-    const newValue = parseFloat(input.value.replace(/,/g, ''));
-    const phaseKey = input.dataset.phase;
+    let newSF = parseFloat(input.value.replace(/,/g, ''));
     const componentName = input.dataset.name;
+    const phaseKey = 'phase2';
 
-    const component = state.currentData.phases[phaseKey].components.find(c => c.name === componentName);
+    if (isNaN(newSF) || newSF < 0) {
+        // Find the original value to revert to if input is invalid
+        const originalComponent = state.originalData.phases[phaseKey].components.find(c => c.name === componentName);
+        input.value = originalComponent ? originalComponent.square_footage.toLocaleString('en-US') : '0';
+        return;
+    }
+
+    const phase = state.currentData.phases[phaseKey];
+    const component = phase.components.find(c => c.name === componentName);
+
     if (component) {
-        component.square_footage = newValue;
-        render(); // Rerender to update dependent views like the waterfall chart.
+        component.square_footage = newSF;
+        // Format the input value with commas
+        input.value = newSF.toLocaleString('en-US');
+        // A change in square footage affects the total budget, so re-render everything.
+        render();
+        updateSummary();
     }
 }
 
@@ -313,10 +327,10 @@ export function handleSquareFootageCellChange(event) {
  */
 function dragStarted(event, d) { 
     d3.select(this).raise().classed("active", true); 
-    const key = `${state.currentPhase}-${d.name}`;
-    if (!state.lockedComponents.has(key)) { 
-        state.lockedComponents.add(key);
-        render(); // Re-render to show the lock immediately
+    // When dragging starts, check if the component is locked. If so, do nothing.
+    const key = `phase2-${d.name}`;
+    if (state.lockedComponents.has(key)) {
+        event.sourceEvent.stopPropagation(); // Stop the drag from starting
     } 
 }
 
@@ -327,8 +341,11 @@ function dragStarted(event, d) {
  * @param {object} d - The data object for the dragged element.
  */
 function dragged(event, d) {
-    const newRomValue = Math.max(0, Math.min(state.yDomainMax, yScale.invert(event.y)));
-    applyChangeAndBalance(d, newRomValue, state.currentPhase);
+    const key = `phase2-${d.name}`;
+    if (state.lockedComponents.has(key)) return;
+
+    const newRom = yScale.invert(event.y);
+    applyChangeAndBalance(d, newRom, 'phase2');
 }
 
 /**
@@ -339,56 +356,64 @@ function dragged(event, d) {
 function dragEnded() { d3.select(this).classed("active", false); }
 
 /**
- * Balances the budget by adjusting unlocked components.
- * Proportionally adjusts the 'current_rom' of all unlocked components in the current phase
- * to make the total 'Scenario  ROM' equal to the 'Total Project Budget' (with a small buffer).
- * This function works whether the current total is over or under budget.
+ * Automatically adjusts all unlocked components to meet the total project budget.
+ * This function calculates the current total scenario ROM, compares it to the target budget,
+ * and distributes the difference proportionally across all unlocked components.
  */
 export function balanceToGmp() {
-    const phaseData = state.currentData.phases[state.currentPhase];
-    const budget = phaseData.totalProjectBudget;
-    const currentTotalCost = d3.sum(phaseData.components, d => d.current_rom * d.square_footage);
-
-    // If we are already at the target (within the $1 buffer), do nothing.
-    if (Math.abs(budget - currentTotalCost) <= 1) {
-        console.log("Scenario ROM is already balanced to GMP. No action taken.");
-        return;
-    }
-
-    // Subtract a small buffer ($100.00) to prevent rounding errors from exceeding the budget.
-    const delta = budget - currentTotalCost - 150;
-    const unlockedComponents = phaseData.components.filter(c => {
-        const key = `${state.currentPhase}-${c.name}`;
-        return !state.lockedComponents.has(key);
+    const phaseKey = 'phase2';
+    const phase = state.currentData.phases[phaseKey];
+    const unlockedComponents = phase.components.filter(c => {
+        const key = `${phaseKey}-${c.name}`;
+        return !state.lockedComponents.has(key) && c.square_footage > 0
     });
 
     if (unlockedComponents.length === 0) {
-        console.warn("No unlocked components to adjust.");
-        // We could add a user-facing alert here if desired.
+        alert("No unlocked components with square footage to adjust.");
         return;
     }
 
-    const unlockedTotalCost = d3.sum(unlockedComponents, d => d.current_rom * d.square_footage);
+    const currentRomTotal = utils.calculateTotal(phase.components, 'current_rom');
+    const targetBudget = phase.totalProjectBudget;
+    const difference = targetBudget - currentRomTotal;
 
-    // Avoid division by zero if unlocked components have no cost.
-    if (unlockedTotalCost <= 0) {
-        console.warn("Unlocked components have a total cost of zero, cannot proportionally adjust.");
+    if (Math.abs(difference) < 1) {
+        alert("Already balanced to GMP.");
         return;
     }
 
-    // Calculate the scaling factor and apply it to each unlocked component.
-    const scalingFactor = 1 + (delta / unlockedTotalCost);
-    unlockedComponents.forEach(component => {
-        // We round the result to 2 decimal places to avoid floating point inaccuracies.
-        component.current_rom = parseFloat((component.current_rom * scalingFactor).toFixed(2));
-    });
+    const totalUnlockedSf = unlockedComponents.reduce((acc, c) => acc + c.square_footage, 0);
+    const costChangePerSf = difference / totalUnlockedSf;
 
-    // Refresh the UI to reflect the changes.
-    renderChart();
-    updateSummary();
+    let costRemainingToDistribute = difference;
+
+    const componentsAvailable = [...unlockedComponents];
+    let iterations = 0;
+    while(Math.abs(costRemainingToDistribute) > 1 && iterations < 5) {
+        const sfAvailable = componentsAvailable.reduce((acc, c) => acc + c.square_footage, 0);
+        if (sfAvailable === 0) break;
+        const costPerSf = costRemainingToDistribute / sfAvailable;
+
+        costRemainingToDistribute = 0;
+        const componentsForNextRound = [];
+
+        componentsAvailable.forEach(c => {
+            const newRom = c.current_rom + costPerSf;
+            if (newRom < 0) {
+                const absorbedCost = -c.current_rom * c.square_footage;
+                costRemainingToDistribute += (costPerSf * c.square_footage - absorbedCost);
+                c.current_rom = 0;
+            } else {
+                c.current_rom = newRom;
+                componentsForNextRound.push(c);
+            }
+        });
+        componentsAvailable.splice(0, componentsAvailable.length, ...componentsForNextRound);
+        iterations++;
+    }
+
+    render();
     if (document.getElementById('program-view').style.display !== 'none') {
         renderProgramView();
     }
-    // After adjusting, the "Reset to Original" button should be enabled.
-    document.getElementById('reset-button').disabled = false;
 } 

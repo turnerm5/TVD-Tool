@@ -92,21 +92,114 @@ export function renderBenchmarksView() {
 /**
  * Renders the main data program view with detailed component information.
  */
-export function renderProgramView() {
+export function renderPhase1View() {
+    google.charts.load('current', { 'packages': ['sankey'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        const phase1Data = state.currentData.phases.phase1;
+        const totalBudget = phase1Data.totalProjectBudget;
+        const categories = phase1Data.categories;
+
+        const data = new google.visualization.DataTable();
+        data.addColumn('string', 'From');
+        data.addColumn('string', 'To');
+        data.addColumn('number', 'Value');
+
+        const nodeTotals = {};
+        const links = [];
+
+        // Calculate totals for all nodes
+        let totalAllocated = 0;
+        categories.forEach(item => {
+            if (item.Total > 0) {
+                const category = item.Category;
+                const subcategory = item.Subcategory;
+                const value = item.Total;
+
+                nodeTotals[category] = (nodeTotals[category] || 0) + value;
+                nodeTotals[subcategory] = (nodeTotals[subcategory] || 0) + value;
+                totalAllocated += value;
+            }
+        });
+
+        const remainingBudget = totalBudget - totalAllocated;
+        if (remainingBudget > 0) {
+            nodeTotals['Additional COW'] = remainingBudget;
+        }
+        nodeTotals['Total Project Budget'] = totalBudget;
+        
+        // --- Create Links with Formatted Labels ---
+        const formatValue = (value) => {
+            if (value >= 1000000) {
+                return `$${(value / 1000000).toFixed(1)}M`;
+            } else {
+                return `$${Math.round(value / 1000)}k`;
+            }
+        };
+
+        categories.forEach(item => {
+            if (item.Total > 0) {
+                const category = item.Category;
+                const subcategory = item.Subcategory;
+                const value = item.Total;
+                
+                const fromLabel = `${category}: ${formatValue(nodeTotals[category])}`;
+                const toLabel = `${subcategory}: ${formatValue(nodeTotals[subcategory])}`;
+                links.push([fromLabel, toLabel, value]);
+            }
+        });
+
+        Object.keys(nodeTotals).forEach(node => {
+            if (node !== 'Total Project Budget' && !categories.some(c => c.Subcategory === node)) {
+                const fromLabel = `Total Project Budget: ${formatValue(totalBudget)}`;
+                const toLabel = `${node}: ${formatValue(nodeTotals[node])}`;
+                links.push([fromLabel, toLabel, nodeTotals[node]]);
+            }
+        });
+
+        if (remainingBudget > 0) {
+            const fromLabel = `Additional COW: ${formatValue(remainingBudget)}`;
+            const toLabel = `Additional COW : ${formatValue(remainingBudget)}`;
+            links.push([fromLabel, toLabel, remainingBudget]);
+        }
+
+        data.addRows(links);
+
+        const colors = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a'];
+
+        const options = {
+            height: 600,
+            sankey: {
+                node: {
+                    colors: colors,
+                    width: 30,
+                    nodePadding: 20,
+                    label: {
+                        fontSize: 14,
+                        color: '#000',
+                        bold: false
+                    }
+                },
+                link: {
+                    colorMode: 'gradient',
+                    colors: colors
+                }
+            }
+        };
+
+        const chart = new google.visualization.Sankey(document.getElementById('phase1-view'));
+        chart.draw(data, options);
+    }
+}
+
+export function renderPhase2ProgramView() {
     d3.select(dom.programView).select('table').remove();
 
     const tableData = [];
-    
-    // Flatten data from both phases into a single structure for the table.
-    const p1Components = state.currentData.phases.phase1.components.sort((a, b) => a.name.localeCompare(b.name));
-    if (p1Components.length > 0) {
-        tableData.push({ type: 'header', name: 'Phase 1' });
-        p1Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase1' }));
-    }
 
     const p2Components = state.currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
     if (p2Components.length > 0) {
-        tableData.push({ type: 'header', name: 'Phase 2' });
         p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
     }
 
