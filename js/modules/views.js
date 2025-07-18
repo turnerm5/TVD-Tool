@@ -138,7 +138,8 @@ export function renderBenchmarksView(render) {
  * Renders the main data program view with detailed component information.
  */
 export function renderPhase1View() {
-    dom.phase1View.innerHTML = '<div class="text-center p-8">Sankey Chart</div>';
+    // This function now only ensures the view is visible.
+    // The Sankey chart is rendered by main.js into the existing container.
     dom.phase1View.classList.remove('hidden');
 }
 
