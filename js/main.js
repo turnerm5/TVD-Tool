@@ -38,6 +38,7 @@ function render() {
     dom.legend.classList.add('hidden');
     dom.waterfallLegend.classList.add('hidden');
     dom.maximizeBtn.classList.add('hidden');
+    dom.takeSnapshotBtn.classList.add('hidden');
 
     dom.chartViewBtn.classList.remove('active');
     dom.programViewBtn.classList.remove('active');
@@ -51,6 +52,7 @@ function render() {
         // dom.phaseSelector.classList.remove('hidden');
         dom.legend.classList.remove('hidden');
         dom.maximizeBtn.classList.remove('hidden');
+        dom.takeSnapshotBtn.classList.remove('hidden');
         dom.chartViewBtn.classList.add('active');
         slider.renderChart();
         slider.renderYAxisLabels();
@@ -131,6 +133,23 @@ document.addEventListener('DOMContentLoaded', () => {
         fileHandlers.loadData(JSON.parse(JSON.stringify(state.originalData)));
     });
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);
+    dom.takeSnapshotBtn.addEventListener('click', () => {
+        const snapshotName = prompt("Enter a name for this snapshot:");
+        if (snapshotName) {
+            const phase2Components = state.currentData.phases.phase2.components;
+            const snapshotComponents = phase2Components.map(c => ({
+                name: c.name,
+                current_rom: c.current_rom,
+                square_footage: c.square_footage
+            }));
+            const snapshot = {
+                name: snapshotName,
+                components: snapshotComponents
+            };
+            state.addSnapshot(snapshot);
+            console.log('All snapshots:', state.snapshots);
+        }
+    });
     
     // --- Phase and View Selector Handlers ---
     dom.phase1Btn.addEventListener('click', () => { state.currentPhase = 'phase1'; render(); });
