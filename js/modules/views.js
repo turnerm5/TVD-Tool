@@ -8,9 +8,8 @@ import * as dom from './dom.js';
 import * as utils from './utils.js';
 
 // Forward-declare dependencies
-let render, handleSquareFootageCellChange, handleCurrentRomCellChange;
+let handleSquareFootageCellChange, handleCurrentRomCellChange;
 export function setDependencies(fns) {
-    render = fns.render;
     handleSquareFootageCellChange = fns.handleSquareFootageCellChange;
     handleCurrentRomCellChange = fns.handleCurrentRomCellChange;
 }
@@ -20,10 +19,57 @@ export function setDependencies(fns) {
  * This function handles the logic for displaying either the main grid of four projects
  * or the detailed view for a single selected project.
  */
-export function renderBenchmarksView() {
+export function renderBenchmarksView(render) {
     const detailContainer = document.getElementById('benchmark-detail-container');
-    const benchmarkGrid = document.querySelector('.benchmark-grid');
-    const benchmarkCards = d3.selectAll('.benchmark-card');
+    const benchmarkGrid = d3.select('.benchmark-grid');
+
+    // --- Always update the main grid first ---
+    const benchmarkData = state.currentData.benchmarks || [];
+
+    const benchmarkCards = benchmarkGrid.selectAll('.benchmark-card')
+        .data(benchmarkData, d => d.id)
+        .join(
+            enter => {
+                const card = enter.append('div')
+                    .attr('class', 'benchmark-card')
+                    .attr('id', d => `benchmark-card-${d.id}`);
+
+                const relativeDiv = card.append('div').attr('class', 'relative');
+                relativeDiv.append('img')
+                    .attr('src', d => d.image)
+                    .attr('alt', d => d.name)
+                    .attr('class', 'w-full h-auto rounded-lg shadow-md');
+                relativeDiv.append('div').attr('class', 'benchmark-label').text(d => d.id);
+
+                const caption = card.append('div').attr('class', 'benchmark-caption');
+                caption.append('h4').attr('class', 'font-semibold').text(d => d.name);
+                caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatCurrency(d.overall_sf_cost)} /SF`);
+                caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatNumber(d.square_footage)} SF`);
+                
+                return card;
+            },
+            update => {
+                // Update existing cards if necessary (e.g., if data changes)
+                update.select('h4').text(d => d.name);
+                update.select('img').attr('src', d => d.image).attr('alt', d => d.name);
+                update.selectAll('p').remove(); // Clear and re-append to be simple
+                const caption = update.select('.benchmark-caption');
+                caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatCurrency(d.overall_sf_cost)} /SF`);
+                caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatNumber(d.square_footage)} SF`);
+                return update;
+            }
+        );
+
+    // --- Handle Card Click Events ---
+    benchmarkCards.on('click', function(event, d) {
+        if (state.selectedBenchmark === d.id) {
+            state.selectedBenchmark = null;
+        } else {
+            state.selectedBenchmark = d.id;
+        }
+        render(); // Re-render to show/hide detail view
+    });
+
 
     if (state.selectedBenchmark) {
         // --- Show Detail View ---
@@ -31,11 +77,10 @@ export function renderBenchmarksView() {
         detailContainer.classList.remove('hidden');
 
         // Move the detail container inside the grid to become a flex item
-        benchmarkGrid.appendChild(detailContainer);
+        benchmarkGrid.node().appendChild(detailContainer);
 
         // Highlight the selected card and fade others
-        benchmarkCards.classed('selected', false); // Clear all selections first
-        d3.select(`#benchmark-card-${state.selectedBenchmark}`).classed('selected', true);
+        benchmarkCards.classed('selected', d => d.id === state.selectedBenchmark);
 
 
         // Find data for the selected project

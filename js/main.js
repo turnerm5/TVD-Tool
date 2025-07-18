@@ -64,7 +64,7 @@ function render() {
     } else if (state.currentView === 'benchmarks') {
         dom.benchmarksView.classList.remove('hidden');
         dom.benchmarksViewBtn.classList.add('active');
-        views.renderBenchmarksView();
+        views.renderBenchmarksView(render);
     } else if (state.currentView === 'waterfall') {
         dom.waterfallView.classList.remove('hidden');
         // dom.phaseSelector.classList.remove('hidden');
@@ -144,19 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.fileDropZone.addEventListener('dragleave', () => dom.fileDropZone.classList.remove('dragover'));
     dom.fileDropZone.addEventListener('drop', (e) => { e.preventDefault(); dom.fileDropZone.classList.remove('dragover'); fileHandlers.handleFile(e.dataTransfer.files[0]); });
     
-    // --- Benchmark Card Click Handlers ---
-    d3.selectAll('.benchmark-card').on('click', function() {
-        const id = this.id.split('-').pop();
-        
-        // If the clicked card is already selected, deselect it (reset view). Otherwise, select it.
-        if (state.selectedBenchmark === id) {
-            state.selectedBenchmark = null;
-        } else {
-            state.selectedBenchmark = id;
-        }
-        render();
-    });
-
     // Re-render on window resize to ensure charts are responsive.
     window.addEventListener('resize', render);
 

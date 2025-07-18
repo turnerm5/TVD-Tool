@@ -40,7 +40,8 @@ const sampleData = {
     "benchmarks": [
         {
             "id": "A",
-            "name": "WSU Schweitzer Engineering Hall",
+            "name": "OSU Johnson Hall",
+            "image": "img/osu-johnson-hall.jpg",
             "overall_sf_cost": 939.20,
             "square_footage": 65000,
             "components": [
@@ -58,6 +59,7 @@ const sampleData = {
         {
             "id": "B",
             "name": "WSU The Spark",
+            "image": "img/wsu-spark.jpg",
             "overall_sf_cost": 721.17,
             "square_footage": 83000,
             "components": [
@@ -75,6 +77,7 @@ const sampleData = {
         {
             "id": "C",
             "name": "WSU Everett",
+            "image": "img/wsu-everett.jpg",
             "overall_sf_cost": 964.36,
             "square_footage": 96000,
             "components": [
@@ -92,6 +95,7 @@ const sampleData = {
         {
             "id": "D",
             "name": "WSU Tri-Cities Collaboration Hall",
+            "image": "img/wsu-tricities.jpg",
             "overall_sf_cost": 746.33,
             "square_footage": 37300,
             "components": [

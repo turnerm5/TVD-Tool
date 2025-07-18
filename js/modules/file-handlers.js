@@ -88,19 +88,6 @@ export function loadData(data, fileName = 'Sample Data') {
     document.getElementById('file-name').textContent = `Using: ${fileName}`;
     state.currentPhase = 'phase1';
 
-    if (state.currentData.benchmarks) {
-        state.currentData.benchmarks.forEach(proj => {
-            const costEl = document.getElementById(`benchmark-cost-${proj.id}`);
-            const sfEl = document.getElementById(`benchmark-sf-${proj.id}`);
-            if (costEl) {
-                costEl.textContent = `${utils.formatCurrency(proj.overall_sf_cost)} /SF`;
-            }
-            if (sfEl) {
-                sfEl.textContent = `${utils.formatNumber(proj.square_footage)} SF`;
-            }
-        });
-    }
-
     ui.showMainContent();
 }
 
