@@ -92,21 +92,23 @@ export function renderBenchmarksView() {
 /**
  * Renders the main data program view with detailed component information.
  */
-export function renderProgramView() {
+export function renderPhase1View() {
+    d3.select(dom.phase1View).html('');
+    d3.select(dom.phase1View)
+        .append('div')
+        .attr('class', 'flex justify-center items-center h-64 bg-gray-100 rounded-lg')
+        .append('h2')
+        .attr('class', 'text-2xl font-bold text-gray-500')
+        .text('Sankey Chart');
+}
+
+export function renderPhase2ProgramView() {
     d3.select(dom.programView).select('table').remove();
 
     const tableData = [];
-    
-    // Flatten data from both phases into a single structure for the table.
-    const p1Components = state.currentData.phases.phase1.components.sort((a, b) => a.name.localeCompare(b.name));
-    if (p1Components.length > 0) {
-        tableData.push({ type: 'header', name: 'Phase 1' });
-        p1Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase1' }));
-    }
 
     const p2Components = state.currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
     if (p2Components.length > 0) {
-        tableData.push({ type: 'header', name: 'Phase 2' });
         p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
     }
 

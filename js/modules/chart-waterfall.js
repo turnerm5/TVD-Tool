@@ -5,6 +5,35 @@
 import { state } from './state.js';
 
 /**
+ * Wraps long SVG text labels.
+ * @param {d3.Selection} text - The d3 selection of text elements.
+ * @param {number} width - The maximum width for the text.
+ */
+function wrap(text, width) {
+    text.each(function () {
+        var text = d3.select(this),
+            words = text.text().split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1.1, // ems
+            y = text.attr("y"),
+            dy = parseFloat(text.attr("dy")),
+            tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+        while (word = words.pop()) {
+            line.push(word);
+            tspan.text(line.join(" "));
+            if (tspan.node().getComputedTextLength() > width) {
+                line.pop();
+                tspan.text(line.join(" "));
+                line = [word];
+                tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+            }
+        }
+    });
+}
+
+/**
  * Renders the Waterfall Chart view.
  * This chart shows how individual component absolute costs (cost * SF) add up.
  * It visualizes both 'target' and 'current' values side-by-side.
@@ -14,7 +43,7 @@ export function renderWaterfallChart() {
     container.html(""); // Clear previous chart
 
     // Define chart dimensions and margins
-    const margin = { top: 20, right: 30, bottom: 50, left: 100 }; // Reduced bottom margin for horizontal labels
+    const margin = { top: 20, right: 30, bottom: 80, left: 100 };
     const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
     const height = 700 - margin.top - margin.bottom;
 
@@ -24,14 +53,14 @@ export function renderWaterfallChart() {
       .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const phaseData = state.currentData.phases[state.currentPhase];
+    const phaseData = state.currentData.phases.phase2;
     const components = phaseData.components;
     
     // Process data for the waterfall structure.
     // We calculate two cumulative totals: one for target costs and one for current costs.
     let cumulativeTarget = 0;
     let cumulativeCurrent = 0;
-    const originalPhaseData = state.originalData.phases[state.currentPhase];
+    const originalPhaseData = state.originalData.phases.phase2;
     const data = components.map(c => {
         const originalComponent = originalPhaseData.components.find(oc => oc.name === c.name);
         const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
@@ -66,9 +95,8 @@ export function renderWaterfallChart() {
         .attr("class", "waterfall-axis")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x0))
-        .selectAll("text")
-        // Removed rotation transform
-        .style("text-anchor", "middle");
+        .selectAll(".tick text")
+        .call(wrap, x0.bandwidth());
 
     // The Y-axis for cost values. The domain is scaled to fit the largest value.
     const yMax = Math.max(cumulativeTarget, cumulativeCurrent, phaseData.totalProjectBudget);

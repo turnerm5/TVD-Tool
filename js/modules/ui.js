@@ -45,25 +45,6 @@ export function setCurrentPhase(phase) {
  * Updates the summary panel with the latest cost calculations for both phases.
  */
 export function updateSummary() {
-    // --- Phase 1 calculations ---
-    const p1_current = state.currentData.phases.phase1;
-    const p1_original = state.originalData.phases.phase1;
-    const snapshotRomP1 = d3.sum(p1_original.components, d => d.current_rom * d.square_footage);
-    const snapshotVarianceP1 = snapshotRomP1 - p1_original.totalProjectBudget;
-    const currentRomEstimateP1 = d3.sum(p1_current.components, d => d.current_rom * d.square_footage);
-    const varianceP1 = currentRomEstimateP1 - p1_current.totalProjectBudget;
-    document.getElementById('total-budget-p1').textContent = utils.formatCurrencyBig(p1_current.totalProjectBudget);
-    document.getElementById('snapshot-rom-p1').textContent = utils.formatCurrencyBig(snapshotRomP1);
-    const snapshotVarianceElP1 = document.getElementById('snapshot-variance-p1');
-    snapshotVarianceElP1.textContent = `${snapshotVarianceP1 >= 0 ? '+' : ''}${utils.formatCurrencyBig(snapshotVarianceP1)}`;
-    snapshotVarianceElP1.classList.toggle('text-red-600', snapshotVarianceP1 > 0);
-    snapshotVarianceElP1.classList.toggle('text-green-600', snapshotVarianceP1 <= 0);
-    document.getElementById('current-rom-estimate-p1').textContent = utils.formatCurrencyBig(currentRomEstimateP1);
-    const varianceElP1 = document.getElementById('variance-p1');
-    varianceElP1.textContent = `${varianceP1 >= 0 ? '+' : ''}${utils.formatCurrencyBig(varianceP1)}`;
-    varianceElP1.classList.toggle('text-red-600', varianceP1 > 0);
-    varianceElP1.classList.toggle('text-green-600', varianceP1 <= 0);
-
     // --- Phase 2 calculations ---
     const p2_current = state.currentData.phases.phase2;
     const p2_original = state.originalData.phases.phase2;

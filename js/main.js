@@ -30,6 +30,7 @@ function render() {
     // --- 1. Hide all views and deactivate all buttons ---
     dom.mainChart.classList.add('hidden');
     dom.programView.classList.add('hidden');
+    dom.phase1View.classList.add('hidden');
     dom.benchmarksView.classList.add('hidden');
     dom.waterfallView.classList.add('hidden');
     dom.phaseSelector.classList.add('hidden');
@@ -39,13 +40,14 @@ function render() {
 
     dom.chartViewBtn.classList.remove('active');
     dom.programViewBtn.classList.remove('active');
+    dom.phase1ViewBtn.classList.remove('active');
     dom.benchmarksViewBtn.classList.remove('active');
     dom.waterfallViewBtn.classList.remove('active');
 
     // --- 2. Show the active view and call its render function ---
     if (state.currentView === 'chart') {
         dom.mainChart.classList.remove('hidden');
-        dom.phaseSelector.classList.remove('hidden');
+        // dom.phaseSelector.classList.remove('hidden');
         dom.legend.classList.remove('hidden');
         dom.maximizeBtn.classList.remove('hidden');
         dom.chartViewBtn.classList.add('active');
@@ -54,14 +56,18 @@ function render() {
     } else if (state.currentView === 'program') {
         dom.programView.classList.remove('hidden');
         dom.programViewBtn.classList.add('active');
-        views.renderProgramView();
+        views.renderPhase2ProgramView();
+    } else if (state.currentView === 'phase1') {
+        dom.phase1View.classList.remove('hidden');
+        dom.phase1ViewBtn.classList.add('active');
+        views.renderPhase1View();
     } else if (state.currentView === 'benchmarks') {
         dom.benchmarksView.classList.remove('hidden');
         dom.benchmarksViewBtn.classList.add('active');
         views.renderBenchmarksView();
     } else if (state.currentView === 'waterfall') {
         dom.waterfallView.classList.remove('hidden');
-        dom.phaseSelector.classList.remove('hidden');
+        // dom.phaseSelector.classList.remove('hidden');
         dom.waterfallLegend.classList.remove('hidden');
         dom.waterfallViewBtn.classList.add('active');
         waterfall.renderWaterfallChart();
@@ -92,7 +98,7 @@ fileHandlers.setRender(render);
 fileHandlers.setYScale(yScale);
 slider.setDependencies({
     render: render,
-    renderProgramView: views.renderProgramView,
+    renderProgramView: views.renderPhase2ProgramView,
     updateSummary: ui.updateSummary,
     yScale: yScale
 });
@@ -125,10 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Phase and View Selector Handlers ---
     dom.phase1Btn.addEventListener('click', () => { state.currentPhase = 'phase1'; render(); });
     dom.phase2Btn.addEventListener('click', () => { state.currentPhase = 'phase2'; render(); });
-    dom.chartViewBtn.addEventListener('click', () => { state.currentView = 'chart'; render(); });
+    dom.chartViewBtn.addEventListener('click', () => { state.currentView = 'chart'; state.currentPhase = 'phase2'; render(); });
     dom.programViewBtn.addEventListener('click', () => { state.currentView = 'program'; render(); });
+    dom.phase1ViewBtn.addEventListener('click', () => { state.currentView = 'phase1'; render(); });
     dom.benchmarksViewBtn.addEventListener('click', () => { state.currentView = 'benchmarks'; state.selectedBenchmark = null; render(); });
-    dom.waterfallViewBtn.addEventListener('click', () => { state.currentView = 'waterfall'; render(); });
+    dom.waterfallViewBtn.addEventListener('click', () => { state.currentView = 'waterfall'; state.currentPhase = 'phase2'; render(); });
 
     // --- File Drop Zone Handlers ---
     dom.fileInput.addEventListener('change', (e) => fileHandlers.handleFile(e.target.files[0]));
