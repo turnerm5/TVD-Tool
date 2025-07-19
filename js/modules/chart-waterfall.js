@@ -273,7 +273,10 @@ export function updateSummary() {
     thead.innerHTML = `
         <tr class="text-xs text-gray-700 uppercase bg-gray-50">
             <th scope="col" class="px-6 py-3">Scenario</th>
-            <th scope="col" class="px-6 py-3 text-right">Scenario ROM</th>
+            <th scope="col" class="px-6 py-3 text-right">Estimate</th>
+            <th scope="col" class="px-6 py-3 text-right">Gross SF</th>
+            <th scope="col" class="px-6 py-3 text-right">Usable SF</th>
+            <th scope="col" class="px-6 py-3 text-right">$/SF</th>
             <th scope="col" class="px-6 py-3 text-right">Variance</th>
         </tr>
     `;
@@ -281,12 +284,19 @@ export function updateSummary() {
     const tbody = table.createTBody();
     allSeries.forEach(series => {
         const totalRom = d3.sum(series.components, c => c.current_rom * c.square_footage);
+        const grossSF = d3.sum(series.components, c => c.square_footage);
+        const usableSF = grossSF * 0.8;
+        const costPerSF = grossSF > 0 ? totalRom / grossSF : 0;
         const variance = totalRom - gmp;
+        
         const row = tbody.insertRow();
         row.className = 'bg-white border-b';
         row.innerHTML = `
             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${series.name}</td>
             <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(totalRom)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatNumber(usableSF)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerSF)}</td>
             <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
                 ${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}
             </td>
