@@ -108,7 +108,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
                 .text(d.name);
             row.append('td')
                 .attr('class', 'px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center editable-cell')
-                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
+                .append('input').attr('type', 'text').attr('class', 'program-table-input')
                 .attr('value', d.value.toLocaleString('en-US'))
                 .on('change', handleGrossSfCellChange);
         } else if (d.type === 'header') {
@@ -125,7 +125,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
             
             // Square Footage (editable)
             row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
-                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
+                .append('input').attr('type', 'text').attr('class', 'program-table-input')
                 .attr('value', d.square_footage.toLocaleString('en-US'))
                 .attr('data-phase', d.dataPhase)
                 .attr('data-name', d.name)
