@@ -250,7 +250,53 @@ export function renderChart() {
             d3.select(this).select('.benchmark-indicator-circle').attr('cx', '10%').attr('cy', yPos).attr('r', 6);
             d3.select(this).select('.benchmark-indicator-label').attr('x', '10%').attr('y', yPos).attr('dy', '0.35em').text(d.id);
         });
+        
+        // --- Benchmark Hover Tooltip Logic ---
+        let benchmarkHoverTimeout;
+        mergedIndicators
+            .on('mouseenter', function(event, d) {
+                clearTimeout(benchmarkHoverTimeout);
+                benchmarkHoverTimeout = setTimeout(() => {
+                    showBenchmarkTooltip(event, d);
+                }, 200);
+            })
+            .on('mouseleave', function() {
+                clearTimeout(benchmarkHoverTimeout);
+                hideBenchmarkTooltip();
+            });
     });
+}
+
+/**
+ * Shows a tooltip with benchmark project details.
+ * @param {MouseEvent} event - The mouse event for positioning.
+ * @param {object} benchmarkData - The data for the benchmark project.
+ */
+function showBenchmarkTooltip(event, benchmarkData) {
+    hideBenchmarkTooltip(); // Ensure no duplicates
+
+    const tooltip = d3.select('body').append('div')
+        .attr('class', 'benchmark-tooltip');
+
+    tooltip.append('img')
+        .attr('src', benchmarkData.image)
+        .style('width', '240px')
+        .style('height', '180px');
+
+    tooltip.append('div')
+        .attr('class', 'benchmark-tooltip-name')
+        .text(benchmarkData.name);
+    
+    // Position the tooltip near the cursor
+    tooltip.style('left', (event.pageX + 15) + 'px')
+           .style('top', (event.pageY + 15) + 'px');
+}
+
+/**
+ * Hides the benchmark tooltip.
+ */
+function hideBenchmarkTooltip() {
+    d3.select('.benchmark-tooltip').remove();
 }
 
 /**
