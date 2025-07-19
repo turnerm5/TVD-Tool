@@ -45,22 +45,55 @@ export function setCurrentPhase(phase) {
  * Updates the summary panel with the latest cost calculations for both phases.
  */
 export function updateSummary() {
-    // --- Phase 2 calculations ---
-    const p2_current = state.currentData.phases.phase2;
-    const p2_original = state.originalData.phases.phase2;
-    const snapshotRomP2 = d3.sum(p2_original.components, d => d.current_rom * d.square_footage);
-    const snapshotVarianceP2 = snapshotRomP2 - p2_original.totalProjectBudget;
-    const currentRomEstimateP2 = d3.sum(p2_current.components, d => d.current_rom * d.square_footage);
-    const varianceP2 = currentRomEstimateP2 - p2_current.totalProjectBudget;
-    document.getElementById('total-budget-p2').textContent = utils.formatCurrencyBig(p2_current.totalProjectBudget);
-    document.getElementById('snapshot-rom-p2').textContent = utils.formatCurrencyBig(snapshotRomP2);
-    const snapshotVarianceElP2 = document.getElementById('snapshot-variance-p2');
-    snapshotVarianceElP2.textContent = `${snapshotVarianceP2 >= 0 ? '+' : ''}${utils.formatCurrencyBig(snapshotVarianceP2)}`;
-    snapshotVarianceElP2.classList.toggle('text-red-600', snapshotVarianceP2 > 0);
-    snapshotVarianceElP2.classList.toggle('text-green-600', snapshotVarianceP2 <= 0);
-    document.getElementById('current-rom-estimate-p2').textContent = utils.formatCurrencyBig(currentRomEstimateP2);
-    const varianceElP2 = document.getElementById('variance-p2');
-    varianceElP2.textContent = `${varianceP2 >= 0 ? '+' : ''}${utils.formatCurrencyBig(varianceP2)}`;
-    varianceElP2.classList.toggle('text-red-600', varianceP2 > 0);
-    varianceElP2.classList.toggle('text-green-600', varianceP2 <= 0);
+    if (state.currentView !== 'waterfall') return;
+
+    const summaryPanel = document.getElementById('summary-panel');
+    summaryPanel.innerHTML = ''; // Clear previous content
+
+    const gmp = state.originalData.phases.phase2.totalProjectBudget;
+
+    // --- Header ---
+    const header = document.createElement('div');
+    header.className = 'text-center mb-4';
+    header.innerHTML = `
+        <h2 class="text-lg font-bold text-gray-700">Phase 2 Summary</h2>
+        <p class="text-xl font-bold text-gray-800">${utils.formatCurrencyBig(gmp)} <span class="text-sm font-medium text-gray-500">Total Project Budget</span></p>
+    `;
+    summaryPanel.appendChild(header);
+
+    // --- Data Series Table ---
+    const originalData = {
+        name: 'Imported Data',
+        components: state.originalData.phases.phase2.components
+    };
+    const allSeries = [originalData, ...state.snapshots];
+
+    const table = document.createElement('table');
+    table.className = 'w-full text-sm text-left text-gray-500';
+    
+    const thead = table.createTHead();
+    thead.innerHTML = `
+        <tr class="text-xs text-gray-700 uppercase bg-gray-50">
+            <th scope="col" class="px-6 py-3">Scenario</th>
+            <th scope="col" class="px-6 py-3 text-right">Scenario ROM</th>
+            <th scope="col" class="px-6 py-3 text-right">Variance</th>
+        </tr>
+    `;
+
+    const tbody = table.createTBody();
+    allSeries.forEach(series => {
+        const totalRom = d3.sum(series.components, c => c.current_rom * c.square_footage);
+        const variance = totalRom - gmp;
+        const row = tbody.insertRow();
+        row.className = 'bg-white border-b';
+        row.innerHTML = `
+            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${series.name}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(totalRom)}</td>
+            <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
+                ${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}
+            </td>
+        `;
+    });
+
+    summaryPanel.appendChild(table);
 } 

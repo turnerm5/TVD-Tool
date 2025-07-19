@@ -327,11 +327,6 @@ export function handleSquareFootageCellChange(event) {
  */
 function dragStarted(event, d) { 
     d3.select(this).raise().classed("active", true); 
-    // When dragging starts, check if the component is locked. If so, do nothing.
-    const key = `phase2-${d.name}`;
-    if (state.lockedComponents.has(key)) {
-        event.sourceEvent.stopPropagation(); // Stop the drag from starting
-    } 
 }
 
 /**
@@ -341,9 +336,6 @@ function dragStarted(event, d) {
  * @param {object} d - The data object for the dragged element.
  */
 function dragged(event, d) {
-    const key = `phase2-${d.name}`;
-    if (state.lockedComponents.has(key)) return;
-
     const newRom = yScale.invert(event.y);
     applyChangeAndBalance(d, newRom, 'phase2');
 }
@@ -353,7 +345,14 @@ function dragged(event, d) {
  * @param {Event} event - The d3 drag event.
  * @param {object} d - The data object for the dragged element.
  */
-function dragEnded() { d3.select(this).classed("active", false); }
+function dragEnded(event, d) {
+    d3.select(this).classed("active", false);
+    const key = `phase2-${d.name}`;
+    if (!state.lockedComponents.has(key)) {
+        state.lockedComponents.add(key);
+        render(); // Rerender to update the lock icon
+    }
+}
 
 /**
  * Automatically adjusts all unlocked components to meet the total project budget.

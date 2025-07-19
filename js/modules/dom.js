@@ -37,4 +37,5 @@ export const phaseSelector = document.getElementById('phase-selector');
 export const summaryPanel = document.getElementById('summary-panel');
 export const legend = document.getElementById('legend');
 export const waterfallLegend = document.getElementById('waterfall-legend');
-export const maximizeBtn = document.getElementById('maximize-gmp-btn'); 
+export const maximizeBtn = document.getElementById('maximize-gmp-btn');
+export const takeSnapshotBtn = document.getElementById('take-snapshot-btn'); 
