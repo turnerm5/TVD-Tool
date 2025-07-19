@@ -33,6 +33,128 @@ export function showMainContent() {
 }
 
 /**
+ * A generic dialog function that can be configured for different use cases.
+ * @param {object} config - The configuration object for the dialog.
+ * @param {string} config.title - The dialog title.
+ * @param {string} [config.message] - A message to display (for confirm dialogs).
+ * @param {string} [config.placeholder] - Placeholder for an input field (for modal dialogs).
+ * @param {string} config.confirmText - Text for the confirm button.
+ * @param {string} config.cancelText - Text for the cancel button.
+ * @param {boolean} [config.isConfirmation=false] - If true, shows a red confirm button.
+ * @returns {Promise<string|boolean|null>} - The result of the dialog interaction.
+ */
+function showDialog(config) {
+    return new Promise((resolve) => {
+        const { title, message, placeholder, confirmText, cancelText, isConfirmation } = config;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+
+        const modal = document.createElement('div');
+        modal.className = 'bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4';
+
+        const confirmButtonClass = isConfirmation 
+            ? 'bg-red-600 hover:bg-red-700' 
+            : 'bg-blue-600 hover:bg-blue-700';
+
+        let contentHtml = `
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
+            </div>
+        `;
+
+        if (message) {
+            contentHtml += `<div class="mb-6"><p class="text-gray-700">${message}</p></div>`;
+        }
+
+        if (placeholder) {
+            contentHtml += `
+                <div class="mb-6">
+                    <input type="text" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="${placeholder}"
+                           id="modal-input">
+                </div>
+            `;
+        }
+
+        contentHtml += `
+            <div class="flex justify-end space-x-3">
+        `;
+        if (cancelText) {
+            contentHtml += `
+                <button class="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" id="modal-cancel">
+                    ${cancelText}
+                </button>
+            `;
+        }
+        contentHtml += `
+                <button class="px-4 py-2 text-white rounded-md transition-colors ${confirmButtonClass}" id="modal-confirm">
+                    ${confirmText}
+                </button>
+            </div>
+        `;
+
+        modal.innerHTML = contentHtml;
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        const input = modal.querySelector('#modal-input');
+        if (input) {
+            input.focus();
+        }
+
+        const confirmBtn = modal.querySelector('#modal-confirm');
+        const cancelBtn = modal.querySelector('#modal-cancel');
+
+        const cleanup = () => {
+            confirmBtn.removeEventListener('click', handleConfirm);
+            if (cancelBtn) cancelBtn.removeEventListener('click', handleCancel);
+            if (input) input.removeEventListener('keydown', handleKeyPress);
+            else document.removeEventListener('keydown', handleKeyPress);
+            overlay.removeEventListener('click', handleOverlayClick);
+            document.body.removeChild(overlay);
+        };
+
+        const handleConfirm = () => {
+            const value = input ? input.value.trim() : true;
+            if (placeholder && !value) return;
+            cleanup();
+            resolve(placeholder ? value : true);
+        };
+
+        const handleCancel = () => {
+            cleanup();
+            resolve(placeholder ? null : false);
+        };
+
+        const handleKeyPress = (e) => {
+            if (e.key === 'Enter' && input) {
+                handleConfirm();
+            } else if (e.key === 'Escape') {
+                handleCancel();
+            }
+        };
+
+        const handleOverlayClick = (e) => {
+            if (e.target === overlay) {
+                handleCancel();
+            }
+        };
+
+        confirmBtn.addEventListener('click', handleConfirm);
+        if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
+        if (input) {
+            input.addEventListener('keydown', handleKeyPress);
+        } else {
+            document.addEventListener('keydown', handleKeyPress);
+        }
+        overlay.addEventListener('click', handleOverlayClick);
+    });
+}
+
+
+/**
  * Sets the current phase of the application (e.g., 'phase1' or 'phase2').
  * @param {string} phase - The phase to set as active.
  */
@@ -50,90 +172,29 @@ export function setCurrentPhase(phase) {
  * @returns {Promise<string|null>} - Returns the input value if confirmed, null if cancelled
  */
 export function showModalDialog(title, placeholder, confirmText = 'OK', cancelText = 'Cancel') {
-    return new Promise((resolve) => {
-        // Create modal overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-        
-        // Create modal container
-        const modal = document.createElement('div');
-        modal.className = 'bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4';
-        
-        // Create modal content
-        modal.innerHTML = `
-            <div class="mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
-            </div>
-            <div class="mb-6">
-                <input type="text" 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="${placeholder}"
-                       id="modal-input">
-            </div>
-            <div class="flex justify-end space-x-3">
-                <button class="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" id="modal-cancel">
-                    ${cancelText}
-                </button>
-                <button class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors" id="modal-confirm">
-                    ${confirmText}
-                </button>
-            </div>
-        `;
-        
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-        
-        // Focus the input field
-        const input = modal.querySelector('#modal-input');
-        input.focus();
-        
-        // Handle confirm button
-        const confirmBtn = modal.querySelector('#modal-confirm');
-        const handleConfirm = () => {
-            const value = input.value.trim();
-            if (value) {
-                cleanup();
-                resolve(value);
-            }
-        };
-        
-        // Handle cancel button
-        const cancelBtn = modal.querySelector('#modal-cancel');
-        const handleCancel = () => {
-            cleanup();
-            resolve(null);
-        };
-        
-        // Handle Enter key
-        const handleKeyPress = (e) => {
-            if (e.key === 'Enter') {
-                handleConfirm();
-            } else if (e.key === 'Escape') {
-                handleCancel();
-            }
-        };
-        
-        // Handle overlay click (close modal)
-        const handleOverlayClick = (e) => {
-            if (e.target === overlay) {
-                handleCancel();
-            }
-        };
-        
-        // Add event listeners
-        confirmBtn.addEventListener('click', handleConfirm);
-        cancelBtn.addEventListener('click', handleCancel);
-        input.addEventListener('keydown', handleKeyPress);
-        overlay.addEventListener('click', handleOverlayClick);
-        
-        // Cleanup function
-        const cleanup = () => {
-            confirmBtn.removeEventListener('click', handleConfirm);
-            cancelBtn.removeEventListener('click', handleCancel);
-            input.removeEventListener('keydown', handleKeyPress);
-            overlay.removeEventListener('click', handleOverlayClick);
-            document.body.removeChild(overlay);
-        };
+    return showDialog({
+        title,
+        placeholder,
+        confirmText,
+        cancelText,
+        isConfirmation: false
+    });
+}
+
+/**
+ * Shows a simple alert dialog with a title, message, and an OK button.
+ * @param {string} title - The dialog title.
+ * @param {string} message - The message to display.
+ * @param {string} [confirmText='OK'] - The text for the confirm button.
+ * @returns {Promise<boolean>} - Resolves when the dialog is closed.
+ */
+export function showAlert(title, message, confirmText = 'OK') {
+    return showDialog({
+        title,
+        message,
+        confirmText,
+        cancelText: null,
+        isConfirmation: false
     });
 }
 
@@ -146,77 +207,11 @@ export function showModalDialog(title, placeholder, confirmText = 'OK', cancelTe
  * @returns {Promise<boolean>} - Returns true if confirmed, false if cancelled
  */
 export function showConfirmDialog(title, message, confirmText = 'Yes', cancelText = 'No') {
-    return new Promise((resolve) => {
-        // Create modal overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-        
-        // Create modal container
-        const modal = document.createElement('div');
-        modal.className = 'bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4';
-        
-        // Create modal content
-        modal.innerHTML = `
-            <div class="mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
-            </div>
-            <div class="mb-6">
-                <p class="text-gray-700">${message}</p>
-            </div>
-            <div class="flex justify-end space-x-3">
-                <button class="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" id="modal-cancel">
-                    ${cancelText}
-                </button>
-                <button class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors" id="modal-confirm">
-                    ${confirmText}
-                </button>
-            </div>
-        `;
-        
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-        
-        // Handle confirm button
-        const confirmBtn = modal.querySelector('#modal-confirm');
-        const handleConfirm = () => {
-            cleanup();
-            resolve(true);
-        };
-        
-        // Handle cancel button
-        const cancelBtn = modal.querySelector('#modal-cancel');
-        const handleCancel = () => {
-            cleanup();
-            resolve(false);
-        };
-        
-        // Handle Escape key
-        const handleKeyPress = (e) => {
-            if (e.key === 'Escape') {
-                handleCancel();
-            }
-        };
-        
-        // Handle overlay click (close modal)
-        const handleOverlayClick = (e) => {
-            if (e.target === overlay) {
-                handleCancel();
-            }
-        };
-        
-        // Add event listeners
-        confirmBtn.addEventListener('click', handleConfirm);
-        cancelBtn.addEventListener('click', handleCancel);
-        document.addEventListener('keydown', handleKeyPress);
-        overlay.addEventListener('click', handleOverlayClick);
-        
-        // Cleanup function
-        const cleanup = () => {
-            confirmBtn.removeEventListener('click', handleConfirm);
-            cancelBtn.removeEventListener('click', handleCancel);
-            document.removeEventListener('keydown', handleKeyPress);
-            overlay.removeEventListener('click', handleOverlayClick);
-            document.body.removeChild(overlay);
-        };
+    return showDialog({
+        title,
+        message,
+        confirmText,
+        cancelText,
+        isConfirmation: true
     });
 } 

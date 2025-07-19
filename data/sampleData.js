@@ -41,6 +41,7 @@ const sampleData = {
         {
             "name": "The Monolith",
             "image": "https://placecats.com/g/400/320",
+            "projectAreaSF": 50000,
             "components": [
                 { "name": "A Substructure", "square_footage": 50000, "current_rom": 130.00 },
                 { "name": "B10 Superstructure", "square_footage": 50000, "current_rom": 78.00 },
@@ -56,6 +57,7 @@ const sampleData = {
         {
             "name": "The Canopy",
             "image": "https://placecats.com/g/401/300",
+            "projectAreaSF": 60000,
             "components": [
                 { "name": "A Substructure", "square_footage": 60000, "current_rom": 130.00 },
                 { "name": "B10 Superstructure", "square_footage": 60000, "current_rom": 78.00 },
@@ -71,6 +73,7 @@ const sampleData = {
         {
             "name": "The Courtyard",
             "image": "https://placecats.com/g/400/301",
+            "projectAreaSF": 45000,
             "components": [
                 { "name": "A Substructure", "square_footage": 45000, "current_rom": 130.00 },
                 { "name": "B10 Superstructure", "square_footage": 45000, "current_rom": 78.00 },
@@ -86,6 +89,7 @@ const sampleData = {
         {
             "name": "The Terraces",
             "image": "https://placecats.com/g/401/301",
+            "projectAreaSF": 55000,
             "components": [
                 { "name": "A Substructure", "square_footage": 55000, "current_rom": 130.00 },
                 { "name": "B10 Superstructure", "square_footage": 55000, "current_rom": 78.00 },
@@ -105,7 +109,7 @@ const sampleData = {
             "name": "OSU Johnson Hall",
             "image": "img/osu-johnson-hall.jpg",
             "overall_sf_cost": 939.20,
-            "square_footage": 65000,
+            "projectAreaSF": 65000,
             "components": [
                 { "name": "A Substructure", "cost": 176.06 },
                 { "name": "B10 Superstructure", "cost": 95 },
@@ -123,7 +127,7 @@ const sampleData = {
             "name": "WSU The Spark",
             "image": "img/wsu-spark.jpg",
             "overall_sf_cost": 721.17,
-            "square_footage": 83000,
+            "projectAreaSF": 83000,
             "components": [
                 { "name": "A Substructure", "cost": 125.78 },
                 { "name": "B10 Superstructure", "cost": 80 },
@@ -141,7 +145,7 @@ const sampleData = {
             "name": "WSU Everett",
             "image": "img/wsu-everett.jpg",
             "overall_sf_cost": 964.36,
-            "square_footage": 96000,
+            "projectAreaSF": 96000,
             "components": [
                 { "name": "A Substructure", "cost": 187.06 },
                 { "name": "B10 Superstructure", "cost": 72 },
@@ -159,7 +163,7 @@ const sampleData = {
             "name": "WSU Tri-Cities Collaboration Hall",
             "image": "img/wsu-tricities.jpg",
             "overall_sf_cost": 746.33,
-            "square_footage": 37300,
+            "projectAreaSF": 37300,
             "components": [
                 { "name": "A Substructure", "cost": 139.63 },
                 { "name": "B10 Superstructure", "cost": 78 },

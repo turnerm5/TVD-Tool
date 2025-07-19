@@ -1,6 +1,6 @@
 /**
- * @file chart-waterfall.js
- * @description Renders the waterfall chart view.
+ * @file chart-summary.js
+ * @description Renders the summary chart view.
  */
 import { state } from './state.js';
 import * as dom from './dom.js';
@@ -147,7 +147,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
         .text(d => d.value > 0 ? utils.formatCurrencySmall(d.value) : "");
         
     // --- Legend ---
-    const legendContainer = d3.select(dom.waterfallLegend);
+    const legendContainer = d3.select(dom.summaryLegend);
     legendContainer.html(""); // Clear existing legend
     
     const legendItems = legendContainer.selectAll(".legend-item")
@@ -288,7 +288,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpVa
  * Updates the summary panel with the latest cost calculations for both phases.
  */
 export function updateSummary() {
-    if (state.currentView !== 'waterfall') return;
+    if (state.currentView !== 'summary') return;
 
     const summaryPanel = dom.summaryPanel;
     summaryPanel.innerHTML = ''; // Clear previous content
@@ -307,9 +307,12 @@ export function updateSummary() {
     // --- Data Series Table ---
     const originalData = {
         name: 'Imported Data',
-        components: state.originalData.phases.phase2.components
+        components: state.originalData.phases.phase2.components,
+        projectAreaSF: state.originalData.projectAreaSF
     };
     const allSeries = [originalData, ...state.snapshots];
+
+    console.log('Rendering summary table. All series data:', allSeries);
 
     const table = document.createElement('table');
     table.className = 'w-full text-sm text-left text-gray-500';
@@ -329,7 +332,7 @@ export function updateSummary() {
     const tbody = table.createTBody();
     allSeries.forEach(series => {
         const totalRom = d3.sum(series.components, c => c.current_rom * c.square_footage);
-        const grossSF = d3.sum(series.components, c => c.square_footage);
+        const grossSF = series.projectAreaSF || 0; // Use the SF from the series data directly
         const usableSF = grossSF * 0.8;
         const costPerSF = grossSF > 0 ? totalRom / grossSF : 0;
         const variance = totalRom - gmp;

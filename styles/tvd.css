@@ -234,8 +234,26 @@ body {
     font-weight: 300;
 }
 
-tr.benchmark-warning {
-    background-color: #fee2e2; /* red-100 */
+#program-view td.editable-cell {
+    transition: background-color 1.5s ease-out, font-weight 1.5s ease-out;
+}
+
+@keyframes fade-green {
+    from { background-color: #dcfce7;}
+    to { background-color: transparent;}
+}
+
+@keyframes fade-red {
+    from { background-color: #fee2e2;}
+    to { background-color: transparent;}
+}
+
+.value-increase {
+    animation: fade-green 1.5s ease-out;
+}
+
+.value-decrease {
+    animation: fade-red 1.5s ease-out;
 }
 
 .benchmark-indicator-svg {
@@ -282,6 +300,10 @@ tr.benchmark-warning {
 
 .benchmark-caption {
     padding-top: 0.75rem;
+}
+
+.benchmark-caption p {
+    margin-top: 4px;
 }
 
 .benchmark-label {
@@ -379,14 +401,23 @@ tr.benchmark-warning {
 }
 
 .gmp-line {
-    stroke: #ef4444; /* red-500 */
+    stroke: #ef4444; /* Red-500 */
     stroke-width: 2;
+    stroke-dasharray: 4;
 }
-
 .gmp-label {
-    fill: #ef4444; /* red-500 */
-    font-weight: 600;
-    font-size: 0.875rem;
+    fill: #ef4444;
+    font-weight: bold;
+    font-size: 12px;
+}
+.x-axis .tick text {
+    font-size: 12px;
+}
+.bar-label {
+    font-size: 10px;
+    font-weight: 500;
+    text-anchor: middle;
+    fill: #4b5563; /* Gray-600 */
 }
 
 .legend-item .legend-content {
