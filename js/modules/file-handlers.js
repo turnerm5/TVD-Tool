@@ -64,6 +64,14 @@ export function loadData(data, fileName = 'Sample Data') {
 
     const processedData = processData(JSON.parse(JSON.stringify(data)));
 
+    state.clearSnapshots();
+    if (data.snapshots && Array.isArray(data.snapshots)) {
+        data.snapshots.forEach(snapshot => {
+            const processedSnapshot = processData({ ...data, phases: { phase2: snapshot } });
+            state.addSnapshot(processedSnapshot.phases.phase2);
+        });
+    }
+
     state.lockedComponents = new Set();
 
     // Lock components only for phase2
@@ -133,60 +141,30 @@ export function downloadTemplate() {
  * Triggers a download of the current project data as a JSON file.
  */
 export function exportJSON() {
-    if (!state.currentData) return;
-    // Create a clean copy of the data, removing transient state properties like 'locked'.
-    const dataToExport = JSON.parse(JSON.stringify(state.currentData));
+    if (!state.originalData) return;
+
+    // Start with a clean copy of the original data to preserve the imported values.
+    const dataToExport = JSON.parse(JSON.stringify(state.originalData));
+
+    // Clean up any transient properties.
     Object.values(dataToExport.phases).forEach(phase => {
         if (phase.components) {
             phase.components.forEach(c => delete c.locked);
         }
     });
+
+    // Replace the snapshots in the exported data with the current session's snapshots.
+    if (state.snapshots.length > 0) {
+        dataToExport.snapshots = JSON.parse(JSON.stringify(state.snapshots));
+    } else {
+        delete dataToExport.snapshots;
+    }
+    
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `tvd_export_${utils.getFormattedTimestamp()}.json`);
+    downloadAnchorNode.setAttribute("download", `tvd_save_${utils.getFormattedTimestamp()}.json`);
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
-}
-
-/**
- * Triggers a download of the current project data as a CSV file.
- */
-export function exportCSV() {
-    if (!state.currentData) return;
-
-    const headers = ["Phase", "Component", "Benchmark Low", "Benchmark High", "Snapshot Value", "Scenario ROM"];
-    let csvContent = headers.join(",") + "\n";
-
-    // Only export phase 2 data
-    const phaseKey = 'phase2';
-    const phase = state.currentData.phases[phaseKey];
-    const originalPhase = state.originalData.phases[phaseKey];
-
-    if (phase && phase.components) {
-        phase.components.forEach(component => {
-            const originalComponent = originalPhase.components.find(oc => oc.name === component.name);
-            const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
-            const row = [
-                phaseKey,
-                `"${component.name.replace(/"/g, '""')}"`,
-                component.benchmark_low,
-                component.benchmark_high,
-                snapshotValue,
-                component.current_rom
-            ].join(",");
-            csvContent += row + "\n";
-        });
-    }
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", url);
-    downloadAnchorNode.setAttribute("download", `tvd_export_${utils.getFormattedTimestamp()}.csv`);
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-    URL.revokeObjectURL(url);
 } 

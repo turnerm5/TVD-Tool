@@ -122,10 +122,16 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.downloadTemplateBtn.addEventListener('click', fileHandlers.downloadTemplate);
     dom.startOverBtn.addEventListener('click', ui.showSplashScreen);
     dom.exportJsonBtn.addEventListener('click', fileHandlers.exportJSON);
-    dom.exportCsvBtn.addEventListener('click', fileHandlers.exportCSV);
-    dom.resetButton.addEventListener('click', () => {
-        // Reload original data to reset all changes
-        fileHandlers.loadData(state.originalData);
+    dom.resetButton.addEventListener('click', async () => {
+        const confirmed = await ui.showConfirmDialog(
+            "Confirm Reset",
+            "Are you sure you want to reset all values to their original imported state? All unsaved changes will be lost.",
+            "Yes, Reset",
+            "Cancel"
+        );
+        if (confirmed) {
+            fileHandlers.loadData(state.originalData);
+        }
     });
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);
     dom.takeSnapshotBtn.addEventListener('click', async () => {

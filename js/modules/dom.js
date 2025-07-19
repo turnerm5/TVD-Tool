@@ -12,7 +12,6 @@ export const resetButton = document.getElementById('reset-button');
 export const startOverBtn = document.getElementById('start-over-btn');
 export const exportJsonBtn = document.getElementById('export-json-btn');
 export const useSampleDataBtn = document.getElementById('use-sample-data-btn');
-export const exportCsvBtn = document.getElementById('export-csv-btn');
 export const downloadTemplateBtn = document.getElementById('download-template-btn');
 export const fileDropZone = document.getElementById('file-drop-zone');
 export const fileInput = document.getElementById('file-input');
