@@ -14,6 +14,7 @@ import * as slider from './modules/chart-slider.js';
 import * as waterfall from './modules/chart-waterfall.js';
 import * as views from './modules/views.js';
 import * as sankey from './modules/chart-sankey.js';
+import * as program from './modules/chart-program.js';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
@@ -58,7 +59,7 @@ function render() {
     } else if (state.currentView === 'program') {
         dom.programView.classList.remove('hidden');
         dom.programViewBtn.classList.add('active');
-        views.renderPhase2ProgramView();
+        program.renderPhase2ProgramView();
     } else if (state.currentView === 'phase1') {
         dom.phase1View.classList.remove('hidden');
         dom.phase1ViewBtn.classList.add('active');
@@ -93,10 +94,14 @@ fileHandlers.setRender(render);
 fileHandlers.setYScale(yScale);
 slider.setDependencies({
     render: render,
-    renderProgramView: views.renderPhase2ProgramView,
     yScale: yScale
 });
 views.setDependencies({
+    render: render,
+    handleSquareFootageCellChange: slider.handleSquareFootageCellChange,
+    handleCurrentRomCellChange: slider.handleCurrentRomCellChange
+});
+program.setDependencies({
     render: render,
     handleSquareFootageCellChange: slider.handleSquareFootageCellChange,
     handleCurrentRomCellChange: slider.handleCurrentRomCellChange

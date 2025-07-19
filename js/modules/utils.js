@@ -26,7 +26,7 @@ export const formatCurrencySmall = (d) => {
     if (d >= 1000000) {
         return `$${(d / 1000000).toFixed(1)}M`;
     } else if (d >= 1000) {
-        return `$${(d / 1000).toFixed(1)}k`;
+        return `$${(d / 1000).toFixed(0)}k`;
     }
     return `$${d.toFixed(2)}`;
 };
