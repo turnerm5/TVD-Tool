@@ -40,7 +40,7 @@ const sampleData = {
     "schemes": [
         {
             "name": "The Monolith",
-            "image": "https://placecats.com/g/400/300",
+            "image": "https://placecats.com/g/400/320",
             "components": [
                 { "name": "A Substructure", "square_footage": 50000, "current_rom": 130.00 },
                 { "name": "B10 Superstructure", "square_footage": 50000, "current_rom": 78.00 },
@@ -55,7 +55,7 @@ const sampleData = {
         },
         {
             "name": "The Canopy",
-            "image": "https://placecats.com/g/400/300",
+            "image": "https://placecats.com/g/401/300",
             "components": [
                 { "name": "A Substructure", "square_footage": 60000, "current_rom": 130.00 },
                 { "name": "B10 Superstructure", "square_footage": 60000, "current_rom": 78.00 },
@@ -70,7 +70,7 @@ const sampleData = {
         },
         {
             "name": "The Courtyard",
-            "image": "https://placecats.com/g/400/300",
+            "image": "https://placecats.com/g/400/301",
             "components": [
                 { "name": "A Substructure", "square_footage": 45000, "current_rom": 130.00 },
                 { "name": "B10 Superstructure", "square_footage": 45000, "current_rom": 78.00 },
@@ -85,7 +85,7 @@ const sampleData = {
         },
         {
             "name": "The Terraces",
-            "image": "https://placecats.com/g/400/300",
+            "image": "https://placecats.com/g/401/301",
             "components": [
                 { "name": "A Substructure", "square_footage": 55000, "current_rom": 130.00 },
                 { "name": "B10 Superstructure", "square_footage": 55000, "current_rom": 78.00 },

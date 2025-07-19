@@ -146,6 +146,44 @@ export function renderPhase1View() {
 export function renderPhase2ProgramView() {
     d3.select(dom.programView).html(''); // Clear the view first
 
+    const schemesContainer = d3.select(dom.programView).append('div')
+        .attr('class', 'schemes-container mb-4 p-4 bg-gray-50 rounded-lg');
+
+    schemesContainer.append('h3')
+        .attr('class', 'text-xl font-bold text-gray-800 mb-4')
+        .text('Select a Scheme');
+
+    const schemeGrid = schemesContainer.append('div')
+        .attr('class', 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4');
+
+    const schemeData = state.currentData.schemes || [];
+
+    const schemeCards = schemeGrid.selectAll('.scheme-card')
+        .data(schemeData, d => d.name)
+        .join('div')
+        .attr('class', 'scheme-card relative rounded-lg overflow-hidden shadow-md cursor-pointer')
+        .on('click', (event, d) => {
+            // Update the phase 2 components with the selected scheme's data
+            state.currentData.phases.phase2.components.forEach(component => {
+                const schemeComponent = d.components.find(c => c.name === component.name);
+                if (schemeComponent) {
+                    component.square_footage = schemeComponent.square_footage;
+                    component.current_rom = schemeComponent.current_rom;
+                }
+            });
+            // Re-render the table
+            renderPhase2ProgramView();
+        });
+
+    schemeCards.append('img')
+        .attr('src', d => d.image)
+        .attr('alt', d => d.name)
+        .attr('class', 'w-full h-40 object-cover');
+
+    schemeCards.append('div')
+        .attr('class', 'absolute bottom-0 left-0 w-full p-2 bg-black bg-opacity-50 text-white font-semibold')
+        .text(d => d.name);
+
     const buttonContainer = d3.select(dom.programView).append('div')
         .attr('class', 'flex justify-end mb-4');
 
