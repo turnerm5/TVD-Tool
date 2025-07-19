@@ -10,10 +10,9 @@ body {
     gap: 0.5rem;
     padding-top: 1rem;
     padding-bottom: 4rem; /* Reduced padding as labels are no longer rotated */
+    padding-left: 3.5rem;
     width: 100%;
     height: 700px;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
     background-color: #f8fafc;
 }
 .component-column {
