@@ -17,10 +17,19 @@ export function renderPhase2ProgramView() {
     // Clear the program view before rendering new content
     d3.select(dom.programView).html('');
 
+    const twoColumnLayout = d3.select(dom.programView).append('div')
+        .attr('class', 'flex gap-4');
+
+    const leftColumn = twoColumnLayout.append('div')
+        .attr('class', 'w-2/3');
+    
+    const rightColumn = twoColumnLayout.append('div')
+        .attr('class', 'w-1/3');
+
     // --- SCHEME SELECTION UI ---
 
     // Create a container for the scheme selection cards
-    const schemesContainer = d3.select(dom.programView).append('div')
+    const schemesContainer = leftColumn.append('div')
         .attr('class', 'schemes-container mb-4 p-4 bg-gray-50 rounded-lg');
 
     // Add a heading for the scheme selection section
@@ -30,7 +39,7 @@ export function renderPhase2ProgramView() {
 
     // Create a grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
-        .attr('class', 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4');
+        .attr('class', 'grid grid-cols-2 gap-4');
 
     // Get the list of available schemes from the current data
     const schemeData = state.currentData.schemes || [];
@@ -42,25 +51,61 @@ export function renderPhase2ProgramView() {
         .attr('class', 'scheme-card relative rounded-lg overflow-hidden shadow-md cursor-pointer')
         .on('click', (event, d) => {
             // When a scheme card is clicked:
-            // Update the phase 2 components with the selected scheme's data
+            const updates = [];
+
+            // Determine changes before applying them
             state.currentData.phases.phase2.components.forEach(component => {
-                // Find the matching component in the selected scheme
                 const schemeComponent = d.components.find(c => c.name === component.name);
                 if (schemeComponent) {
+                    const old_sf = component.square_footage;
+                    const new_sf = schemeComponent.square_footage;
+                    const old_rom = component.current_rom;
+                    const new_rom = schemeComponent.current_rom;
+                    
+                    let sf_change = 'none';
+                    if (new_sf > old_sf) sf_change = 'increase';
+                    else if (new_sf < old_sf) sf_change = 'decrease';
+
+                    if (sf_change !== 'none') {
+                        updates.push({ name: component.name, sf_change });
+                    }
+
                     // Update the component's square footage and ROM value
-                    component.square_footage = schemeComponent.square_footage;
-                    component.current_rom = schemeComponent.current_rom;
+                    component.square_footage = new_sf;
+                    component.current_rom = new_rom;
                 }
             });
+
             // Re-render the program view to reflect the new scheme selection
             renderPhase2ProgramView();
+
+            // After rendering, apply animations
+            // Use a brief timeout to ensure the DOM is updated before we select elements
+            setTimeout(() => {
+                updates.forEach(update => {
+                    // Find row for component
+                    const row = d3.select(dom.programView).selectAll('tbody tr').filter(d_row => d_row && d_row.name === update.name);
+                    if (!row.empty()) {
+                        if (update.sf_change !== 'none') {
+                            const cell = row.select('td:nth-child(2)');
+                            if (!cell.empty()) {
+                                const className = `value-${update.sf_change}`;
+                                // Remove any existing animation classes before adding the new one
+                                cell.classed('value-increase', false).classed('value-decrease', false);
+                                // Add the new class to trigger the animation
+                                cell.classed(className, true);
+                            }
+                        }
+                    }
+                });
+            }, 100);
         });
 
     // Add the scheme image to each card
     schemeCards.append('img')
         .attr('src', d => d.image)
         .attr('alt', d => d.name)
-        .attr('class', 'w-full h-40 object-cover');
+        .attr('class', 'w-full h-60 object-cover');
 
     // Add the scheme name overlay to each card
     schemeCards.append('div')
@@ -70,7 +115,7 @@ export function renderPhase2ProgramView() {
     // --- SNAPSHOT BUTTON UI ---
 
     // Create a container for the snapshot button
-    const buttonContainer = d3.select(dom.programView).append('div')
+    const buttonContainer = rightColumn.append('div')
         .attr('class', 'flex justify-end mb-4');
 
     // Add the "Take Snapshot" button
@@ -120,12 +165,12 @@ export function renderPhase2ProgramView() {
     }
 
     // Create Table
-    const table = d3.select(dom.programView).append('table').attr('class', 'min-w-full divide-y divide-gray-200');
+    const table = rightColumn.append('table').attr('class', 'min-w-full divide-y divide-gray-200');
 
     // Create Header
     const thead = table.append('thead').attr('class', 'bg-gray-50');
     thead.append('tr').selectAll('th')
-        .data(['Lock', 'Component', 'Square Footage', 'Benchmark Low ($/sf)', 'Benchmark High ($/sf)', 'Starting ROM ($/sf)', 'Scenario ROM ($/sf)'])
+        .data(['Component', 'Square Footage'])
         .enter().append('th')
         .attr('class', 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider')
         .text(d => d);
@@ -138,30 +183,13 @@ export function renderPhase2ProgramView() {
         const row = d3.select(this);
         if (d.type === 'header') {
             row.attr('class', 'bg-gray-100');
-            row.append('td').attr('colspan', 7).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
+            row.append('td').attr('colspan', 2).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
         } else {
-            const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
-            
             if (d.current_rom === 0 || d.square_footage === 0) {
                 row.attr('class', 'zero-value-row');
             } else {
-                row.attr('class', 'bg-white').classed('benchmark-warning', isOutsideBenchmark);
+                row.attr('class', 'bg-white');
             }
-
-            const lockKey = `${d.dataPhase}-${d.name}`;
-            row.append('td').attr('class', 'py-4 px-2 text-center text-sm align-middle')
-                .append('span').attr('class', 'lock-icon cursor-pointer')
-                .style('opacity', state.lockedComponents.has(lockKey) ? 1 : 0.5)
-                .text(state.lockedComponents.has(lockKey) ? '🔒' : '🔓')
-                .on('click', (event, d_inner) => {
-                    const key = `${d_inner.dataPhase}-${d_inner.name}`;
-                    if (state.lockedComponents.has(key)) {
-                        state.lockedComponents.delete(key);
-                    } else {
-                        state.lockedComponents.add(key);
-                    }
-                    render();
-                });
 
             row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
             
@@ -172,23 +200,6 @@ export function renderPhase2ProgramView() {
                 .attr('data-phase', d.dataPhase)
                 .attr('data-name', d.name)
                 .on('change', handleSquareFootageCellChange);
-
-            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(utils.formatCurrency(d.benchmark_low));
-            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(utils.formatCurrency(d.benchmark_high));
-            
-            // Snapshot
-            const originalComponent = state.originalData.phases[d.dataPhase].components.find(c => c.name === d.name);
-            const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
-            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap text-center').text(utils.formatCurrency(snapshotValue));
-
-            // Current (editable)
-            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
-                .append('input').attr('type', 'number').attr('class', 'w-full text-center')
-                .attr('value', d.current_rom.toFixed(2))
-                .attr('step', 0.01)
-                .attr('data-phase', d.dataPhase)
-                .attr('data-name', d.name)
-                .on('change', handleCurrentRomCellChange);
         }
     });
 } 

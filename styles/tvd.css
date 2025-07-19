@@ -234,8 +234,26 @@ body {
     font-weight: 300;
 }
 
-tr.benchmark-warning {
-    background-color: #fee2e2; /* red-100 */
+#program-view td.editable-cell {
+    transition: background-color 1.5s ease-out, font-weight 1.5s ease-out;
+}
+
+@keyframes fade-green {
+    from { background-color: #dcfce7;}
+    to { background-color: transparent;}
+}
+
+@keyframes fade-red {
+    from { background-color: #fee2e2;}
+    to { background-color: transparent;}
+}
+
+.value-increase {
+    animation: fade-green 1.5s ease-out;
+}
+
+.value-decrease {
+    animation: fade-red 1.5s ease-out;
 }
 
 .benchmark-indicator-svg {
