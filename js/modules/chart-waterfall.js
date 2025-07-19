@@ -184,17 +184,47 @@ export function renderWaterfallChart() {
     const legendContainer = d3.select(dom.waterfallLegend);
     legendContainer.html(""); // Clear existing legend
     
-    const legend = legendContainer.selectAll(".legend-item")
+    const legendItems = legendContainer.selectAll(".legend-item")
         .data(seriesNames)
         .enter()
         .append("div")
-        .attr("class", "flex items-center gap-2");
+        .attr("class", "legend-item flex items-center gap-2 relative p-1 rounded")
+        .on('mouseenter', function(event, d) {
+            if (d !== 'Imported Data') {
+                d3.select(this).classed('hover-delete', true);
+            }
+        })
+        .on('mouseleave', function(event, d) {
+             if (d !== 'Imported Data') {
+                d3.select(this).classed('hover-delete', false);
+            }
+        })
+        .on('click', (event, d) => {
+            if (d !== 'Imported Data') {
+                if (confirm(`Are you sure you want to delete the "${d}" snapshot?`)) {
+                    state.deleteSnapshot(d);
+                    renderWaterfallChart();
+                }
+            }
+        });
+    
+    legendItems.filter(d => d !== 'Imported Data').classed('cursor-pointer', true);
 
-    legend.append("div")
+    // Content inside legend item (color and text)
+    const legendContent = legendItems.append('div')
+        .attr('class', 'legend-content flex items-center gap-2');
+
+    legendContent.append("div")
         .attr("class", "w-4 h-4")
         .style("background-color", d => color(d));
 
-    legend.append("span")
+    legendContent.append("span")
         .attr("class", "font-medium")
         .text(d => d);
+
+    // Delete overlay for deletable items
+    legendItems.filter(d => d !== 'Imported Data')
+        .append('div')
+        .attr('class', 'delete-overlay absolute inset-0 flex items-center justify-center font-bold text-white')
+        .text('DELETE');
 } 

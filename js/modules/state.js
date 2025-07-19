@@ -42,6 +42,9 @@ export const state = {
             _snapshots.push(snapshot);
         }
     },
+    deleteSnapshot(snapshotName) {
+        _snapshots = _snapshots.filter(s => s.name !== snapshotName);
+    },
     clearSnapshots() {
         _snapshots = [];
     }

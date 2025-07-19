@@ -387,4 +387,23 @@ tr.benchmark-warning {
     fill: #ef4444; /* red-500 */
     font-weight: 600;
     font-size: 0.875rem;
+}
+
+.legend-item .legend-content {
+    transition: opacity 0.2s ease-in-out;
+}
+
+.legend-item .delete-overlay {
+    background-color: rgba(239, 68, 68, 0.9); /* red-500 with opacity */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none; /* Allows click events to pass through */
+}
+
+.legend-item.hover-delete .legend-content {
+    opacity: 0.1;
+}
+
+.legend-item.hover-delete .delete-overlay {
+    opacity: 1;
 } 
