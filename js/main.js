@@ -12,9 +12,9 @@ import * as ui from './modules/ui.js';
 import * as fileHandlers from './modules/file-handlers.js';
 import * as slider from './modules/chart-slider.js';
 import * as summary from './modules/chart-summary.js';
-import * as views from './modules/views.js';
 import * as sankey from './modules/chart-sankey.js';
 import * as program from './modules/chart-program.js';
+import * as benchmarks from './modules/chart-benchmarks.js';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
@@ -63,14 +63,13 @@ function render() {
     } else if (state.currentView === 'phase1') {
         dom.phase1View.classList.remove('hidden');
         dom.phase1ViewBtn.classList.add('active');
-        views.renderPhase1View();
         requestAnimationFrame(() => {
             sankey.renderSankeyChart(state.currentData);
         });
     } else if (state.currentView === 'benchmarks') {
         dom.benchmarksView.classList.remove('hidden');
         dom.benchmarksViewBtn.classList.add('active');
-        views.renderBenchmarksView(render);
+        benchmarks.render(render);
     } else if (state.currentView === 'summary') {
         dom.summaryView.classList.remove('hidden');
         // dom.phaseSelector.classList.remove('hidden');
@@ -95,11 +94,6 @@ fileHandlers.setYScale(yScale);
 slider.setDependencies({
     render: render,
     yScale: yScale
-});
-views.setDependencies({
-    render: render,
-    handleSquareFootageCellChange: slider.handleSquareFootageCellChange,
-    handleCurrentRomCellChange: slider.handleCurrentRomCellChange
 });
 program.setDependencies({
     render: render,
