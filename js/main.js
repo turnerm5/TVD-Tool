@@ -133,8 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
         fileHandlers.loadData(JSON.parse(JSON.stringify(state.originalData)));
     });
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);
-    dom.takeSnapshotBtn.addEventListener('click', () => {
-        const snapshotName = prompt("Enter a name for this snapshot:");
+    dom.takeSnapshotBtn.addEventListener('click', async () => {
+        const snapshotName = await ui.showModalDialog(
+            "Take Snapshot",
+            "Enter a name for this snapshot",
+            "Create Snapshot",
+            "Cancel"
+        );
         if (snapshotName) {
             const phase2Components = state.currentData.phases.phase2.components;
             const snapshotComponents = phase2Components.map(c => ({
@@ -148,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             state.addSnapshot(snapshot);
             console.log('All snapshots:', state.snapshots);
+            render(); // Re-render to update the summary view
         }
     });
     

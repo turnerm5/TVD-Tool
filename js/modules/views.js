@@ -6,6 +6,7 @@
 import { state } from './state.js';
 import * as dom from './dom.js';
 import * as utils from './utils.js';
+import * as ui from './ui.js';
 
 // Forward-declare dependencies
 let handleSquareFootageCellChange, handleCurrentRomCellChange;
@@ -144,75 +145,108 @@ export function renderPhase1View() {
 }
 
 export function renderPhase2ProgramView() {
-    d3.select(dom.programView).html(''); // Clear the view first
+    // Clear the program view before rendering new content
+    d3.select(dom.programView).html('');
 
+    // --- SCHEME SELECTION UI ---
+
+    // Create a container for the scheme selection cards
     const schemesContainer = d3.select(dom.programView).append('div')
         .attr('class', 'schemes-container mb-4 p-4 bg-gray-50 rounded-lg');
 
+    // Add a heading for the scheme selection section
     schemesContainer.append('h3')
         .attr('class', 'text-xl font-bold text-gray-800 mb-4')
         .text('Select a Scheme');
 
+    // Create a grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4');
 
+    // Get the list of available schemes from the current data
     const schemeData = state.currentData.schemes || [];
 
+    // Render a card for each scheme
     const schemeCards = schemeGrid.selectAll('.scheme-card')
         .data(schemeData, d => d.name)
         .join('div')
         .attr('class', 'scheme-card relative rounded-lg overflow-hidden shadow-md cursor-pointer')
         .on('click', (event, d) => {
+            // When a scheme card is clicked:
             // Update the phase 2 components with the selected scheme's data
             state.currentData.phases.phase2.components.forEach(component => {
+                // Find the matching component in the selected scheme
                 const schemeComponent = d.components.find(c => c.name === component.name);
                 if (schemeComponent) {
+                    // Update the component's square footage and ROM value
                     component.square_footage = schemeComponent.square_footage;
                     component.current_rom = schemeComponent.current_rom;
                 }
             });
-            // Re-render the table
+            // Re-render the program view to reflect the new scheme selection
             renderPhase2ProgramView();
         });
 
+    // Add the scheme image to each card
     schemeCards.append('img')
         .attr('src', d => d.image)
         .attr('alt', d => d.name)
         .attr('class', 'w-full h-40 object-cover');
 
+    // Add the scheme name overlay to each card
     schemeCards.append('div')
         .attr('class', 'absolute bottom-0 left-0 w-full p-2 bg-black bg-opacity-50 text-white font-semibold')
         .text(d => d.name);
 
+    // --- SNAPSHOT BUTTON UI ---
+
+    // Create a container for the snapshot button
     const buttonContainer = d3.select(dom.programView).append('div')
         .attr('class', 'flex justify-end mb-4');
 
+    // Add the "Take Snapshot" button
     buttonContainer.append('button')
         .attr('id', 'program-view-snapshot-btn')
         .attr('class', 'bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition')
         .text('Take Snapshot')
-        .on('click', () => {
-            const snapshotName = prompt("Enter a name for this snapshot:");
+        .on('click', async () => {
+            // Show a nice modal dialog for the snapshot name
+            const snapshotName = await ui.showModalDialog(
+                "Take Snapshot",
+                "Enter a name for this snapshot",
+                "Create Snapshot",
+                "Cancel"
+            );
+            
             if (snapshotName) {
+                // Gather the current phase 2 component data for the snapshot
                 const phase2Components = state.currentData.phases.phase2.components;
                 const snapshotComponents = phase2Components.map(c => ({
                     name: c.name,
                     current_rom: c.current_rom,
                     square_footage: c.square_footage
                 }));
+                // Create the snapshot object
                 const snapshot = {
                     name: snapshotName,
                     components: snapshotComponents
                 };
+                // Add the snapshot to the state
                 state.addSnapshot(snapshot);
+                // Log all snapshots for debugging
                 console.log('All snapshots:', state.snapshots);
             }
         });
 
+    // --- TABLE DATA PREPARATION ---
+
+    // Prepare the data for the program table
     const tableData = [];
 
+    // Sort phase 2 components alphabetically by name
     const p2Components = state.currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
     if (p2Components.length > 0) {
+        // Add each component to the table data array, tagging with type and phase
         p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
     }
 

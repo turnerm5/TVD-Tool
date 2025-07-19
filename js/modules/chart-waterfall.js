@@ -4,6 +4,7 @@
  */
 import { state } from './state.js';
 import * as dom from './dom.js';
+import * as ui from './ui.js';
 
 /**
  * Wraps long SVG text labels.
@@ -40,59 +41,56 @@ function wrap(text, width) {
  * It visualizes the original data and up to three snapshots side-by-side.
  */
 export function renderWaterfallChart() {
+    // Select the container for the waterfall chart and clear any previous SVG/chart content
     const container = d3.select("#waterfall-chart-container");
     container.html(""); // Clear previous chart
 
+    // Set up chart margins and calculate the inner width and height for the drawing area
     const margin = { top: 20, right: 30, bottom: 80, left: 100 };
     const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
     const height = 700 - margin.top - margin.bottom;
 
+    // Create the SVG element and a group <g> translated by the margins
     const svg = container.append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // --- Data Processing ---
+    // --- Data Preparation ---
+
+    // Compose the "Imported Data" series from the original phase 2 components
     const originalData = {
         name: "Imported Data",
         components: state.originalData.phases.phase2.components
     };
+
+    // Combine the original data and all user-created snapshots into a single array of series
     const allSeriesData = [originalData, ...state.snapshots];
+
+    // Extract the names of all series (e.g., "Imported Data", "Snapshot 1", etc.)
     const seriesNames = allSeriesData.map(d => d.name);
 
-    const processedData = state.originalData.phases.phase2.components.map(c => {
-        const componentData = { name: c.name, values: [] };
-        let cumulativeTotals = seriesNames.map(() => 0);
-
-        seriesNames.forEach((seriesName, i) => {
-            const series = allSeriesData.find(s => s.name === seriesName);
-            const component = series.components.find(comp => comp.name === c.name);
-            const cost = component.current_rom * component.square_footage;
-            
-            componentData.values.push({
-                series: seriesName,
-                start: cumulativeTotals[i],
-                end: cumulativeTotals[i] + cost
-            });
-            cumulativeTotals[i] += cost;
-        });
-        return componentData;
-    });
-
+    // --- Main Data Structure for Rendering ---
+    // For each component, build an array of values (one per series) with cumulative start/end for stacking
     const finalComponentData = [];
-    let cumulativeValues = seriesNames.map(() => 0);
+    let cumulativeValues = seriesNames.map(() => 0); // Track running totals for each series
+
     state.originalData.phases.phase2.components.forEach(c => {
         const component = { name: c.name, values: [] };
         seriesNames.forEach((seriesName, i) => {
+            // Find the current series and the matching component by name
             const series = allSeriesData.find(s => s.name === seriesName);
             const compData = series.components.find(sc => sc.name === c.name);
+            // Calculate the absolute cost for this component in this series
             const cost = compData.current_rom * compData.square_footage;
+            // Store the start and end positions for the bar segment
             component.values.push({
                 series: seriesName,
                 start: cumulativeValues[i],
                 end: cumulativeValues[i] + cost,
             });
+            // Update the cumulative total for this series
             cumulativeValues[i] += cost;
         });
         finalComponentData.push(component);
@@ -199,9 +197,15 @@ export function renderWaterfallChart() {
                 d3.select(this).classed('hover-delete', false);
             }
         })
-        .on('click', (event, d) => {
+        .on('click', async (event, d) => {
             if (d !== 'Imported Data') {
-                if (confirm(`Are you sure you want to delete the "${d}" snapshot?`)) {
+                const confirmed = await ui.showConfirmDialog(
+                    "Delete Snapshot",
+                    `Are you sure you want to delete the "${d}" snapshot?`,
+                    "Delete",
+                    "Cancel"
+                );
+                if (confirmed) {
                     state.deleteSnapshot(d);
                     renderWaterfallChart();
                 }
