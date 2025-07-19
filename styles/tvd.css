@@ -363,18 +363,13 @@ tr.benchmark-warning {
     height: 700px;
 }
 
-.waterfall-bar.target {
-    fill: #22c55e; /* green-500 */
-}
-
-.waterfall-bar.current {
-    fill: #3b82f6; /* blue-500 */
+.waterfall-bar.original {
+    fill: #2563eb; /* blue-600 */
 }
 
 .waterfall-axis text {
-    font-size: 0.875rem; /* 14px */
-    font-weight: 600;
-    fill: #4b5563; /* gray-600 */
+    font-size: 0.8rem;
+    font-weight: 500;
 }
 
 .connector {

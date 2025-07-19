@@ -3,6 +3,7 @@
  * @description Renders the waterfall chart view.
  */
 import { state } from './state.js';
+import * as dom from './dom.js';
 
 /**
  * Wraps long SVG text labels.
@@ -36,13 +37,12 @@ function wrap(text, width) {
 /**
  * Renders the Waterfall Chart view.
  * This chart shows how individual component absolute costs (cost * SF) add up.
- * It visualizes both 'target' and 'current' values side-by-side.
+ * It visualizes the original data and up to three snapshots side-by-side.
  */
 export function renderWaterfallChart() {
     const container = d3.select("#waterfall-chart-container");
     container.html(""); // Clear previous chart
 
-    // Define chart dimensions and margins
     const margin = { top: 20, right: 30, bottom: 80, left: 100 };
     const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
     const height = 700 - margin.top - margin.bottom;
@@ -53,44 +53,72 @@ export function renderWaterfallChart() {
       .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const phaseData = state.currentData.phases.phase2;
-    const components = phaseData.components;
-    
-    // Process data for the waterfall structure.
-    // We calculate two cumulative totals: one for target costs and one for current costs.
-    let cumulativeTarget = 0;
-    let cumulativeCurrent = 0;
-    const originalPhaseData = state.originalData.phases.phase2;
-    const data = components.map(c => {
-        const originalComponent = originalPhaseData.components.find(oc => oc.name === c.name);
-        const snapshotValue = originalComponent ? originalComponent.current_rom : 0;
-        const targetValue = snapshotValue * c.square_footage;
-        const currentValue = c.current_rom * c.square_footage;
-        const d = {
-            name: c.name,
-            target_start: cumulativeTarget,
-            target_end: cumulativeTarget + targetValue,
-            current_start: cumulativeCurrent,
-            current_end: cumulativeCurrent + currentValue,
-        };
-        cumulativeTarget += targetValue;
-        cumulativeCurrent += currentValue;
-        return d;
+    // --- Data Processing ---
+    const originalData = {
+        name: "Imported Data",
+        components: state.originalData.phases.phase2.components
+    };
+    const allSeriesData = [originalData, ...state.snapshots];
+    const seriesNames = allSeriesData.map(d => d.name);
+
+    const processedData = state.originalData.phases.phase2.components.map(c => {
+        const componentData = { name: c.name, values: [] };
+        let cumulativeTotals = seriesNames.map(() => 0);
+
+        seriesNames.forEach((seriesName, i) => {
+            const series = allSeriesData.find(s => s.name === seriesName);
+            const component = series.components.find(comp => comp.name === c.name);
+            const cost = component.current_rom * component.square_footage;
+            
+            componentData.values.push({
+                series: seriesName,
+                start: cumulativeTotals[i],
+                end: cumulativeTotals[i] + cost
+            });
+            cumulativeTotals[i] += cost;
+        });
+        return componentData;
     });
 
-    // --- D3 Axes ---
-    // The primary X-axis for component names.
+    const finalComponentData = [];
+    let cumulativeValues = seriesNames.map(() => 0);
+    state.originalData.phases.phase2.components.forEach(c => {
+        const component = { name: c.name, values: [] };
+        seriesNames.forEach((seriesName, i) => {
+            const series = allSeriesData.find(s => s.name === seriesName);
+            const compData = series.components.find(sc => sc.name === c.name);
+            const cost = compData.current_rom * compData.square_footage;
+            component.values.push({
+                series: seriesName,
+                start: cumulativeValues[i],
+                end: cumulativeValues[i] + cost,
+            });
+            cumulativeValues[i] += cost;
+        });
+        finalComponentData.push(component);
+    });
+
+    // --- D3 Scales ---
     const x0 = d3.scaleBand()
         .range([0, width])
-        .domain(data.map(d => d.name))
+        .domain(finalComponentData.map(d => d.name))
         .padding(0.2);
-    
-    // The secondary X-axis to position the 'target' and 'current' bars within each component's band.
+
     const x1 = d3.scaleBand()
-        .domain(['target', 'current'])
+        .domain(seriesNames)
         .range([0, x0.bandwidth()])
         .padding(0.05);
 
+    const yMax = d3.max([d3.max(cumulativeValues), state.originalData.phases.phase2.totalProjectBudget]);
+    const y = d3.scaleLinear()
+        .domain([0, yMax * 1.05])
+        .range([height, 0]);
+
+    const color = d3.scaleOrdinal()
+        .domain(seriesNames)
+        .range(['#2563eb', '#db2777', '#f97316', '#84cc16']); // Blue, Pink, Orange, Green
+
+    // --- D3 Axes ---
     svg.append("g")
         .attr("class", "waterfall-axis")
         .attr("transform", `translate(0,${height})`)
@@ -98,43 +126,45 @@ export function renderWaterfallChart() {
         .selectAll(".tick text")
         .call(wrap, x0.bandwidth());
 
-    // The Y-axis for cost values. The domain is scaled to fit the largest value.
-    const yMax = Math.max(cumulativeTarget, cumulativeCurrent, phaseData.totalProjectBudget);
-    const y = d3.scaleLinear()
-        .domain([0, yMax * 1.05]) // Add 5% padding to the top
-        .range([height, 0]);
-
     svg.append("g")
         .attr("class", "waterfall-axis")
-        .call(d3.axisLeft(y).tickFormat(d => `$${(d / 1000000).toFixed(1)}M`)); // Format ticks as millions
+        .call(d3.axisLeft(y).tickFormat(d => `$${(d / 1000000).toFixed(1)}M`));
 
     // --- D3 Bar Rendering ---
-    // Create a group for each component to hold the two bars.
     const componentGroups = svg.selectAll(".component-group")
-        .data(data)
+        .data(finalComponentData)
         .enter()
         .append("g")
         .attr("class", "component-group")
         .attr("transform", d => `translate(${x0(d.name)},0)`);
 
-    // Render the green 'target' bars.
-    componentGroups.append("rect")
-        .attr("class", "waterfall-bar target")
-        .attr("x", d => x1('target'))
-        .attr("y", d => y(d.target_end))
-        .attr("height", d => y(d.target_start) - y(d.target_end))
-        .attr("width", x1.bandwidth());
-        
-    // Render the blue 'current' bars.
-    componentGroups.append("rect")
-        .attr("class", "waterfall-bar current")
-        .attr("x", d => x1('current'))
-        .attr("y", d => y(d.current_end))
-        .attr("height", d => y(d.current_start) - y(d.current_end))
-        .attr("width", x1.bandwidth());
+    componentGroups.selectAll("rect")
+        .data(d => d.values)
+        .enter().append("rect")
+        .attr("class", "waterfall-bar")
+        .attr("x", d => x1(d.series))
+        .attr("y", d => y(d.end))
+        .attr("height", d => y(d.start) - y(d.end))
+        .attr("width", x1.bandwidth())
+        .attr("fill", d => color(d.series));
+
+    // --- D3 Connector Line Rendering ---
+    seriesNames.forEach((seriesName, i) => {
+        const seriesData = finalComponentData.map(d => d.values[i]);
+        svg.selectAll(`.connector-${i}`)
+            .data(seriesData.filter((d, j) => j < seriesData.length - 1))
+            .enter()
+            .append("line")
+            .attr("class", "connector")
+            .attr("x1", (d, j) => x0(finalComponentData[j].name) + x1(d.series) + x1.bandwidth())
+            .attr("y1", d => y(d.end))
+            .attr("x2", (d, j) => x0(finalComponentData[j + 1].name) + x1(d.series))
+            .attr("y2", d => y(d.end))
+            .style("stroke", color(seriesName));
+    });
 
     // --- GMP Line ---
-    const gmpValue = phaseData.totalProjectBudget;
+    const gmpValue = state.originalData.phases.phase2.totalProjectBudget;
     svg.append("line")
         .attr("class", "gmp-line")
         .attr("x1", 0)
@@ -150,26 +180,21 @@ export function renderWaterfallChart() {
         .attr("text-anchor", "end")
         .text("GMP");
 
-    // --- D3 Connector Line Rendering ---
-    // Render connector lines for the 'target' waterfall.
-    svg.selectAll(".connector-target")
-        .data(data.filter((d, i) => i < data.length - 1))
+    // --- Legend ---
+    const legendContainer = d3.select(dom.waterfallLegend);
+    legendContainer.html(""); // Clear existing legend
+    
+    const legend = legendContainer.selectAll(".legend-item")
+        .data(seriesNames)
         .enter()
-        .append("line")
-        .attr("class", "connector")
-        .attr("x1", d => x0(d.name) + x1('target') + x1.bandwidth())
-        .attr("y1", d => y(d.target_end))
-        .attr("x2", d => x0(data[data.indexOf(d) + 1].name) + x1('target'))
-        .attr("y2", d => y(d.target_end));
-        
-    // Render connector lines for the 'current' waterfall.
-    svg.selectAll(".connector-current")
-        .data(data.filter((d, i) => i < data.length - 1))
-        .enter()
-        .append("line")
-        .attr("class", "connector")
-        .attr("x1", d => x0(d.name) + x1('current') + x1.bandwidth())
-        .attr("y1", d => y(d.current_end))
-        .attr("x2", d => x0(data[data.indexOf(d) + 1].name) + x1('current'))
-        .attr("y2", d => y(d.current_end));
+        .append("div")
+        .attr("class", "flex items-center gap-2");
+
+    legend.append("div")
+        .attr("class", "w-4 h-4")
+        .style("background-color", d => color(d));
+
+    legend.append("span")
+        .attr("class", "font-medium")
+        .text(d => d);
 } 
