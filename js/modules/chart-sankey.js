@@ -92,8 +92,8 @@ export function renderSankeyChart(data) {
     const height = 600;
 
     const sankey = d3.sankey()
-        .nodeWidth(30) // Increased node width
-        .nodePadding(10) // Adjusted node padding
+        .nodeWidth(20) // Increased node width
+        .nodePadding(20) // Adjusted node padding
         .extent([[1, 1], [width - 1, height - 5]]);
 
     const { nodes: graphNodes, links: graphLinks } = sankey({
@@ -104,7 +104,33 @@ export function renderSankeyChart(data) {
     const svg = container.append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`);
 
-    // Draw links
+    // --- Assign colors to nodes based on link gradients ---
+
+    // 1. Assign colors to nodes based on their role in the Sankey
+    // We'll use the same logic for both links and nodes, so colors match.
+    const color = d3.scaleOrdinal(d3.schemeTableau10);
+
+    // Helper to get node color
+    function getNodeColor(node) {
+        if (node.name === 'Total Project Budget') return "#FBBF24"; // Amber-400
+        if (node.name === 'Unallocated') return "#981e32"; // WSU Crimson
+        if (node.depth === 1) return color(node.name);
+        // For subcategories, inherit from parent if possible
+        if (node.depth === 2 && node.targetLinks && node.targetLinks.length > 0) {
+            // Use the color of the first parent category
+            const parent = node.targetLinks[0].source;
+            return parent.color || color(parent.name);
+        }
+        // Fallback
+        return "#A8A29E";
+    }
+
+    // Assign color property to all nodes
+    graphNodes.forEach(node => {
+        node.color = getNodeColor(node);
+    });
+
+    // 2. Draw links with gradients that match node colors
     svg.append("g")
         .attr("fill", "none")
         .attr("stroke-opacity", 0.5)
@@ -114,24 +140,43 @@ export function renderSankeyChart(data) {
         .style("mix-blend-mode", "multiply")
         .append("path")
         .attr("d", d3.sankeyLinkHorizontal())
-        .attr("stroke", d => {
-            // Color based on the source node
-            if (d.source.name === 'Total Project Budget') return "#FBBF24"; // Amber-400
-            return d.source.color || "#A8A29E"; // Stone-400
+        .attr("stroke", function(d, i) {
+            // Use node colors for gradient
+            const gradientId = `sankey-gradient-${i}`;
+            const svgEl = d3.select(this.ownerSVGElement);
+
+            // Remove any existing gradient with this id (for rerenders)
+            svgEl.select(`#${gradientId}`).remove();
+
+            // Use assigned node colors
+            let sourceColor = d.source.color;
+            let targetColor = d.target.color;
+
+            // Add the gradient definition to the SVG's <defs>
+            const defs = svgEl.select("defs").empty() ? svgEl.insert("defs", ":first-child") : svgEl.select("defs");
+            const grad = defs.append("linearGradient")
+                .attr("id", gradientId)
+                .attr("gradientUnits", "userSpaceOnUse")
+                .attr("x1", d.source.x1)
+                .attr("x2", d.target.x0)
+                .attr("y1", (d.source.y0 + d.source.y1) / 2)
+                .attr("y2", (d.target.y0 + d.target.y1) / 2);
+
+            grad.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", sourceColor);
+
+            grad.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", targetColor);
+
+            return `url(#${gradientId})`;
         })
         .attr("stroke-width", d => Math.max(1, d.width))
         .append("title") // Add tooltip for links
         .text(d => `${d.source.name} → ${d.target.name}\n${d3.format("$,.0f")(d.value)}`);
 
-    // Assign colors to categories to be used for nodes and links
-    const color = d3.scaleOrdinal(d3.schemeTableau10);
-    graphNodes.forEach(node => {
-        if (node.depth === 1) { // Categories
-            node.color = color(node.name);
-        }
-    });
-
-    // Draw nodes
+    // 3. Draw nodes using the same color as the gradient start/end
     svg.append("g")
         .attr("stroke", "#000")
         .selectAll("rect")
@@ -141,11 +186,7 @@ export function renderSankeyChart(data) {
         .attr("y", d => d.y0)
         .attr("height", d => d.y1 - d.y0)
         .attr("width", d => d.x1 - d.x0)
-        .attr("fill", d => {
-            if (d.name === 'Total Project Budget') return "#F59E0B"; // Amber-500
-            if (d.name === 'Unallocated') return "#D6D3D1"; // Stone-300
-            return d.color || "#78716C"; // Stone-500
-        })
+        .attr("fill", d => d.color)
         .append("title") // Add tooltip for nodes
         .text(d => `${d.name}\n${d3.format("$,.0f")(d.value)}`);
 
