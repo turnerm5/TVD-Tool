@@ -43,15 +43,15 @@ const sampleData = {
             "image": "https://placecats.com/g/400/320",
             "projectAreaSF": 50000,
             "components": [
-                { "name": "A Substructure", "square_footage": 50000, "current_rom": 130.00 },
-                { "name": "B10 Superstructure", "square_footage": 50000, "current_rom": 78.00 },
-                { "name": "B20 Enclosure", "square_footage": 50000, "current_rom": 78.00 },
-                { "name": "B30 Roofing", "square_footage": 12500, "current_rom": 39.00 },
-                { "name": "C Interiors", "square_footage": 50000, "current_rom": 95.00 },
-                { "name": "D Services", "square_footage": 50000, "current_rom": 220.00 },
-                { "name": "E Equipment and Furnishings", "square_footage": 50000, "current_rom": 50.00 },
-                { "name": "F Special Construction", "square_footage": 11000, "current_rom": 84.00 },
-                { "name": "G Building Sitework", "square_footage": 50000, "current_rom": 41.00 }
+                { "name": "A Substructure", "square_footage": 50000 },
+                { "name": "B10 Superstructure", "square_footage": 50000 },
+                { "name": "B20 Enclosure", "square_footage": 50000 },
+                { "name": "B30 Roofing", "square_footage": 12500 },
+                { "name": "C Interiors", "square_footage": 50000 },
+                { "name": "D Services", "square_footage": 50000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
+                { "name": "F Special Construction", "square_footage": 11000 },
+                { "name": "G Building Sitework", "square_footage": 50000 }
             ]
         },
         {
@@ -59,15 +59,15 @@ const sampleData = {
             "image": "https://placecats.com/g/401/300",
             "projectAreaSF": 60000,
             "components": [
-                { "name": "A Substructure", "square_footage": 60000, "current_rom": 130.00 },
-                { "name": "B10 Superstructure", "square_footage": 60000, "current_rom": 78.00 },
-                { "name": "B20 Enclosure", "square_footage": 60000, "current_rom": 78.00 },
-                { "name": "B30 Roofing", "square_footage": 20000, "current_rom": 39.00 },
-                { "name": "C Interiors", "square_footage": 60000, "current_rom": 95.00 },
-                { "name": "D Services", "square_footage": 60000, "current_rom": 220.00 },
-                { "name": "E Equipment and Furnishings", "square_footage": 60000, "current_rom": 50.00 },
-                { "name": "F Special Construction", "square_footage": 15000, "current_rom": 84.00 },
-                { "name": "G Building Sitework", "square_footage": 60000, "current_rom": 41.00 }
+                { "name": "A Substructure", "square_footage": 60000 },
+                { "name": "B10 Superstructure", "square_footage": 60000 },
+                { "name": "B20 Enclosure", "square_footage": 60000 },
+                { "name": "B30 Roofing", "square_footage": 20000 },
+                { "name": "C Interiors", "square_footage": 60000 },
+                { "name": "D Services", "square_footage": 60000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 60000 },
+                { "name": "F Special Construction", "square_footage": 15000 },
+                { "name": "G Building Sitework", "square_footage": 60000 }
             ]
         },
         {
@@ -75,15 +75,15 @@ const sampleData = {
             "image": "https://placecats.com/g/400/301",
             "projectAreaSF": 45000,
             "components": [
-                { "name": "A Substructure", "square_footage": 45000, "current_rom": 130.00 },
-                { "name": "B10 Superstructure", "square_footage": 45000, "current_rom": 78.00 },
-                { "name": "B20 Enclosure", "square_footage": 45000, "current_rom": 78.00 },
-                { "name": "B30 Roofing", "square_footage": 10000, "current_rom": 39.00 },
-                { "name": "C Interiors", "square_footage": 45000, "current_rom": 95.00 },
-                { "name": "D Services", "square_footage": 45000, "current_rom": 220.00 },
-                { "name": "E Equipment and Furnishings", "square_footage": 45000, "current_rom": 50.00 },
-                { "name": "F Special Construction", "square_footage": 8000, "current_rom": 84.00 },
-                { "name": "G Building Sitework", "square_footage": 45000, "current_rom": 41.00 }
+                { "name": "A Substructure", "square_footage": 45000 },
+                { "name": "B10 Superstructure", "square_footage": 45000 },
+                { "name": "B20 Enclosure", "square_footage": 45000 },
+                { "name": "B30 Roofing", "square_footage": 10000 },
+                { "name": "C Interiors", "square_footage": 45000 },
+                { "name": "D Services", "square_footage": 45000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 45000 },
+                { "name": "F Special Construction", "square_footage": 8000 },
+                { "name": "G Building Sitework", "square_footage": 45000 }
             ]
         },
         {
@@ -91,15 +91,15 @@ const sampleData = {
             "image": "https://placecats.com/g/401/301",
             "projectAreaSF": 55000,
             "components": [
-                { "name": "A Substructure", "square_footage": 55000, "current_rom": 130.00 },
-                { "name": "B10 Superstructure", "square_footage": 55000, "current_rom": 78.00 },
-                { "name": "B20 Enclosure", "square_footage": 55000, "current_rom": 78.00 },
-                { "name": "B30 Roofing", "square_footage": 15000, "current_rom": 39.00 },
-                { "name": "C Interiors", "square_footage": 55000, "current_rom": 95.00 },
-                { "name": "D Services", "square_footage": 55000, "current_rom": 220.00 },
-                { "name": "E Equipment and Furnishings", "square_footage": 55000, "current_rom": 50.00 },
-                { "name": "F Special Construction", "square_footage": 12000, "current_rom": 84.00 },
-                { "name": "G Building Sitework", "square_footage": 55000, "current_rom": 41.00 }
+                { "name": "A Substructure", "square_footage": 55000 },
+                { "name": "B10 Superstructure", "square_footage": 55000 },
+                { "name": "B20 Enclosure", "square_footage": 55000 },
+                { "name": "B30 Roofing", "square_footage": 15000 },
+                { "name": "C Interiors", "square_footage": 55000 },
+                { "name": "D Services", "square_footage": 55000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 55000 },
+                { "name": "F Special Construction", "square_footage": 12000 },
+                { "name": "G Building Sitework", "square_footage": 55000 }
             ]
         }
     ],

@@ -349,10 +349,24 @@ body {
 }
 
 #file-drop-zone.dragover {
-    background-color: #e0f2fe;
-    border-color: #38bdf8;
+    border-color: #2563eb;
+    background-color: #eff6ff;
+}
+
+@keyframes fadeInGreen {
+    from { background-color: #dcfce7; }
+    to { background-color: transparent; }
+}
+
+@keyframes fadeInRed {
+    from { background-color: #fee2e2; }
+    to { background-color: transparent; }
+}
+
+.value-increase {
+    animation: fadeInGreen 1s ease-out;
 }
 
 .value-decrease {
-    animation: fade-red 1.5s ease-out;
+    animation: fadeInRed 1s ease-out;
 }
