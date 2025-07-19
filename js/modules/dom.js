@@ -17,8 +17,6 @@ export const downloadTemplateBtn = document.getElementById('download-template-bt
 export const fileDropZone = document.getElementById('file-drop-zone');
 export const fileInput = document.getElementById('file-input');
 export const fileNameDisplay = document.getElementById('file-name');
-export const phase1Btn = document.getElementById('phase1-btn');
-export const phase2Btn = document.getElementById('phase2-btn');
 export const chartViewBtn = document.getElementById('chart-view-btn');
 export const programViewBtn = document.getElementById('program-view-btn');
 export const benchmarksViewBtn = document.getElementById('benchmarks-view-btn');
@@ -32,8 +30,6 @@ export const benchmarksView = document.getElementById('benchmarks-view');
 export const waterfallView = document.getElementById('waterfall-view');
 export const phase1View = document.getElementById('phase1-view');
 
-// Phase Selector
-export const phaseSelector = document.getElementById('phase-selector');
 export const summaryPanel = document.getElementById('summary-panel');
 export const legend = document.getElementById('legend');
 export const waterfallLegend = document.getElementById('waterfall-legend');

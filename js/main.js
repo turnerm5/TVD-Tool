@@ -34,7 +34,6 @@ function render() {
     dom.phase1View.classList.add('hidden');
     dom.benchmarksView.classList.add('hidden');
     dom.waterfallView.classList.add('hidden');
-    dom.phaseSelector.classList.add('hidden');
     dom.legend.classList.add('hidden');
     dom.waterfallLegend.classList.add('hidden');
     dom.maximizeBtn.classList.add('hidden');
@@ -79,18 +78,7 @@ function render() {
         waterfall.renderWaterfallChart();
     }
 
-    // --- 3. Update Phase button styles ---
-    if (state.currentPhase === 'phase1') {
-        dom.phase1Btn.classList.add('bg-blue-600', 'text-white');
-        dom.phase1Btn.classList.remove('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
-        dom.phase2Btn.classList.add('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
-        dom.phase2Btn.classList.remove('bg-blue-600', 'text-white');
-    } else {
-        dom.phase2Btn.classList.add('bg-blue-600', 'text-white');
-        dom.phase2Btn.classList.remove('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
-        dom.phase1Btn.classList.add('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
-        dom.phase1Btn.classList.remove('bg-blue-600', 'text-white');
-    }
+
     
     // --- 4. Update summary panel and reset button state ---
     ui.updateSummary(); 
@@ -157,9 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // --- Phase and View Selector Handlers ---
-    dom.phase1Btn.addEventListener('click', () => { state.currentPhase = 'phase1'; render(); });
-    dom.phase2Btn.addEventListener('click', () => { state.currentPhase = 'phase2'; render(); });
+    // --- View Selector Handlers ---
     dom.chartViewBtn.addEventListener('click', () => { state.currentView = 'chart'; state.currentPhase = 'phase2'; render(); });
     dom.programViewBtn.addEventListener('click', () => { state.currentView = 'program'; render(); });
     dom.phase1ViewBtn.addEventListener('click', () => { state.currentView = 'phase1'; render(); });
