@@ -14,6 +14,126 @@ export function setDependencies(fns) {
 }
 
 
+function updatePhase2ProgramTable(container, initialRender = false) {
+    container.html('');
+
+    // --- SNAPSHOT BUTTON UI ---
+
+    // Create a container for the snapshot button
+    const buttonContainer = container.append('div')
+        .attr('class', 'flex justify-end mb-4');
+
+    // Add the "Take Snapshot" button
+    buttonContainer.append('button')
+        .attr('id', 'program-view-snapshot-btn')
+        .attr('class', 'bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition')
+        .text('Take Snapshot')
+        .on('click', async () => {
+            if (state.snapshots.length >= 3) {
+                ui.showAlert(
+                    "Snapshot Limit Reached",
+                    "You can only save up to 3 snapshots. Please delete an existing snapshot to save a new one."
+                );
+                return;
+            }
+            // Show a nice modal dialog for the snapshot name
+            const snapshotName = await ui.showModalDialog(
+                "Take Snapshot",
+                "Enter a name for this snapshot",
+                "Create Snapshot",
+                "Cancel"
+            );
+            
+            if (snapshotName) {
+                // Gather the current phase 2 component data for the snapshot
+                const phase2Components = state.currentData.phases.phase2.components;
+                const snapshotComponents = phase2Components.map(c => ({
+                    name: c.name,
+                    current_rom: c.current_rom,
+                    square_footage: c.square_footage
+                }));
+                // Create the snapshot object
+                const snapshot = {
+                    name: snapshotName,
+                    projectAreaSF: state.currentData.projectAreaSF,
+                    components: snapshotComponents
+                };
+                // Add the snapshot to the state
+                state.addSnapshot(snapshot);
+                // Log all snapshots for debugging
+                console.log('All snapshots:', state.snapshots);
+            }
+        });
+
+    // --- TABLE DATA PREPARATION ---
+
+    // Prepare the data for the program table
+    const tableData = [];
+
+    // Add Gross SF row data
+    tableData.push({
+        type: 'gross-sf',
+        name: 'Gross SF',
+        value: state.currentData.projectAreaSF || 0
+    });
+
+    // Sort phase 2 components alphabetically by name
+    const p2Components = state.currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
+    if (p2Components.length > 0) {
+        // Add each component to the table data array, tagging with type and phase
+        p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
+    }
+
+    // Create Table
+    const table = container.append('table').attr('class', 'min-w-full divide-y divide-gray-200');
+
+    // Create Header
+    const thead = table.append('thead').attr('class', 'bg-gray-50');
+    thead.append('tr').selectAll('th')
+        .data(['Component', 'Square Footage'])
+        .enter().append('th')
+        .attr('class', 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider')
+        .text(d => d);
+
+    // Create Body
+    const tbody = table.append('tbody');
+    const rows = tbody.selectAll('tr').data(tableData).enter().append('tr');
+
+    rows.each(function(d) {
+        const row = d3.select(this);
+        if (d.type === 'gross-sf') {
+            row.attr('class', 'bg-white font-bold');
+            row.append('td')
+                .attr('class', 'px-6 py-4 whitespace-nowrap text-sm text-gray-900')
+                .text(d.name);
+            row.append('td')
+                .attr('class', 'px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center editable-cell')
+                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
+                .attr('value', d.value.toLocaleString('en-US'))
+                .on('change', handleGrossSfCellChange);
+        } else if (d.type === 'header') {
+            row.attr('class', 'bg-gray-100');
+            row.append('td').attr('colspan', 2).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
+        } else {
+            if (d.current_rom === 0 || d.square_footage === 0) {
+                row.attr('class', 'zero-value-row');
+            } else {
+                row.attr('class', 'bg-white');
+            }
+
+            row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
+            
+            // Square Footage (editable)
+            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
+                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
+                .attr('value', d.square_footage.toLocaleString('en-US'))
+                .attr('data-phase', d.dataPhase)
+                .attr('data-name', d.name)
+                .on('change', handleSquareFootageCellChange);
+        }
+    });
+}
+
 export function renderPhase2ProgramView() {
     // Clear the program view before rendering new content
     d3.select(dom.programView).html('');
@@ -84,12 +204,14 @@ export function renderPhase2ProgramView() {
 
                     // Update the component's square footage and ROM value
                     component.square_footage = new_sf;
-                    component.current_rom = new_rom;
+                    if (schemeComponent.current_rom !== undefined) {
+                        component.current_rom = new_rom;
+                    }
                 }
             });
 
             // Re-render the program view to reflect the new scheme selection
-            renderPhase2ProgramView();
+            updatePhase2ProgramTable(rightColumn);
 
             // After rendering, apply animations
             // Use a brief timeout to ensure the DOM is updated before we select elements
@@ -124,119 +246,5 @@ export function renderPhase2ProgramView() {
         .attr('class', 'absolute bottom-0 left-0 w-full p-2 bg-black bg-opacity-50 text-white font-semibold')
         .text(d => d.name);
 
-    // --- SNAPSHOT BUTTON UI ---
-
-    // Create a container for the snapshot button
-    const buttonContainer = rightColumn.append('div')
-        .attr('class', 'flex justify-end mb-4');
-
-    // Add the "Take Snapshot" button
-    buttonContainer.append('button')
-        .attr('id', 'program-view-snapshot-btn')
-        .attr('class', 'bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition')
-        .text('Take Snapshot')
-        .on('click', async () => {
-            if (state.snapshots.length >= 3) {
-                ui.showAlert(
-                    "Snapshot Limit Reached",
-                    "You can only save up to 3 snapshots. Please delete an existing snapshot to save a new one."
-                );
-                return;
-            }
-            // Show a nice modal dialog for the snapshot name
-            const snapshotName = await ui.showModalDialog(
-                "Take Snapshot",
-                "Enter a name for this snapshot",
-                "Create Snapshot",
-                "Cancel"
-            );
-            
-            if (snapshotName) {
-                // Gather the current phase 2 component data for the snapshot
-                const phase2Components = state.currentData.phases.phase2.components;
-                const snapshotComponents = phase2Components.map(c => ({
-                    name: c.name,
-                    current_rom: c.current_rom,
-                    square_footage: c.square_footage
-                }));
-                // Create the snapshot object
-                const snapshot = {
-                    name: snapshotName,
-                    projectAreaSF: state.currentData.projectAreaSF,
-                    components: snapshotComponents
-                };
-                // Add the snapshot to the state
-                state.addSnapshot(snapshot);
-                // Log all snapshots for debugging
-                console.log('All snapshots:', state.snapshots);
-            }
-        });
-
-    // --- TABLE DATA PREPARATION ---
-
-    // Prepare the data for the program table
-    const tableData = [];
-
-    // Add Gross SF row data
-    tableData.push({
-        type: 'gross-sf',
-        name: 'Gross SF',
-        value: state.currentData.projectAreaSF || 0
-    });
-
-    // Sort phase 2 components alphabetically by name
-    const p2Components = state.currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
-    if (p2Components.length > 0) {
-        // Add each component to the table data array, tagging with type and phase
-        p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
-    }
-
-    // Create Table
-    const table = rightColumn.append('table').attr('class', 'min-w-full divide-y divide-gray-200');
-
-    // Create Header
-    const thead = table.append('thead').attr('class', 'bg-gray-50');
-    thead.append('tr').selectAll('th')
-        .data(['Component', 'Square Footage'])
-        .enter().append('th')
-        .attr('class', 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider')
-        .text(d => d);
-
-    // Create Body
-    const tbody = table.append('tbody');
-    const rows = tbody.selectAll('tr').data(tableData).enter().append('tr');
-
-    rows.each(function(d) {
-        const row = d3.select(this);
-        if (d.type === 'gross-sf') {
-            row.attr('class', 'bg-white font-bold');
-            row.append('td')
-                .attr('class', 'px-6 py-4 whitespace-nowrap text-sm text-gray-900')
-                .text(d.name);
-            row.append('td')
-                .attr('class', 'px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center editable-cell')
-                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
-                .attr('value', d.value.toLocaleString('en-US'))
-                .on('change', handleGrossSfCellChange);
-        } else if (d.type === 'header') {
-            row.attr('class', 'bg-gray-100');
-            row.append('td').attr('colspan', 2).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
-        } else {
-            if (d.current_rom === 0 || d.square_footage === 0) {
-                row.attr('class', 'zero-value-row');
-            } else {
-                row.attr('class', 'bg-white');
-            }
-
-            row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
-            
-            // Square Footage (editable)
-            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
-                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
-                .attr('value', d.square_footage.toLocaleString('en-US'))
-                .attr('data-phase', d.dataPhase)
-                .attr('data-name', d.name)
-                .on('change', handleSquareFootageCellChange);
-        }
-    });
+    updatePhase2ProgramTable(rightColumn, true);
 } 

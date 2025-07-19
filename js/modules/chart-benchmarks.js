@@ -1,26 +1,18 @@
 /**
- * @file views.js
- * @description Renders the different views of the application like the program table and benchmarks grid.
+ * @file chart-benchmarks.js
+ * @description Renders the Benchmarks view.
  */
 
 import { state } from './state.js';
 import * as dom from './dom.js';
 import * as utils from './utils.js';
-import * as ui from './ui.js';
-
-// Forward-declare dependencies
-let handleSquareFootageCellChange, handleCurrentRomCellChange;
-export function setDependencies(fns) {
-    handleSquareFootageCellChange = fns.handleSquareFootageCellChange;
-    handleCurrentRomCellChange = fns.handleCurrentRomCellChange;
-}
 
 /**
  * Renders the Benchmarks view.
  * This function handles the logic for displaying either the main grid of four projects
  * or the detailed view for a single selected project.
  */
-export function renderBenchmarksView(render) {
+export function render(render) {
     const detailContainer = document.getElementById('benchmark-detail-container');
     const benchmarkGrid = d3.select('.benchmark-grid');
 
@@ -132,14 +124,4 @@ export function renderBenchmarksView(render) {
         // Move the detail container back to its original position
         dom.benchmarksView.appendChild(detailContainer);
     }
-}
-
-
-/**
- * Renders the main data program view with detailed component information.
- */
-export function renderPhase1View() {
-    // This function now only ensures the view is visible.
-    // The Sankey chart is rendered by main.js into the existing container.
-    dom.phase1View.classList.remove('hidden');
 } 

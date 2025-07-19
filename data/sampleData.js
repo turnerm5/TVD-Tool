@@ -43,15 +43,15 @@ const sampleData = {
             "image": "https://placecats.com/g/400/320",
             "projectAreaSF": 50000,
             "components": [
-                { "name": "A Substructure", "square_footage": 50000, "current_rom": 130.00 },
-                { "name": "B10 Superstructure", "square_footage": 50000, "current_rom": 78.00 },
-                { "name": "B20 Enclosure", "square_footage": 50000, "current_rom": 78.00 },
-                { "name": "B30 Roofing", "square_footage": 12500, "current_rom": 39.00 },
-                { "name": "C Interiors", "square_footage": 50000, "current_rom": 95.00 },
-                { "name": "D Services", "square_footage": 50000, "current_rom": 220.00 },
-                { "name": "E Equipment and Furnishings", "square_footage": 50000, "current_rom": 50.00 },
-                { "name": "F Special Construction", "square_footage": 11000, "current_rom": 84.00 },
-                { "name": "G Building Sitework", "square_footage": 50000, "current_rom": 41.00 }
+                { "name": "A Substructure", "square_footage": 50000 },
+                { "name": "B10 Superstructure", "square_footage": 50000 },
+                { "name": "B20 Enclosure", "square_footage": 50000 },
+                { "name": "B30 Roofing", "square_footage": 12500 },
+                { "name": "C Interiors", "square_footage": 50000 },
+                { "name": "D Services", "square_footage": 50000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
+                { "name": "F Special Construction", "square_footage": 11000 },
+                { "name": "G Building Sitework", "square_footage": 50000 }
             ]
         },
         {
@@ -59,15 +59,15 @@ const sampleData = {
             "image": "https://placecats.com/g/401/300",
             "projectAreaSF": 60000,
             "components": [
-                { "name": "A Substructure", "square_footage": 60000, "current_rom": 130.00 },
-                { "name": "B10 Superstructure", "square_footage": 60000, "current_rom": 78.00 },
-                { "name": "B20 Enclosure", "square_footage": 60000, "current_rom": 78.00 },
-                { "name": "B30 Roofing", "square_footage": 20000, "current_rom": 39.00 },
-                { "name": "C Interiors", "square_footage": 60000, "current_rom": 95.00 },
-                { "name": "D Services", "square_footage": 60000, "current_rom": 220.00 },
-                { "name": "E Equipment and Furnishings", "square_footage": 60000, "current_rom": 50.00 },
-                { "name": "F Special Construction", "square_footage": 15000, "current_rom": 84.00 },
-                { "name": "G Building Sitework", "square_footage": 60000, "current_rom": 41.00 }
+                { "name": "A Substructure", "square_footage": 60000 },
+                { "name": "B10 Superstructure", "square_footage": 60000 },
+                { "name": "B20 Enclosure", "square_footage": 60000 },
+                { "name": "B30 Roofing", "square_footage": 20000 },
+                { "name": "C Interiors", "square_footage": 60000 },
+                { "name": "D Services", "square_footage": 60000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 60000 },
+                { "name": "F Special Construction", "square_footage": 15000 },
+                { "name": "G Building Sitework", "square_footage": 60000 }
             ]
         },
         {
@@ -75,15 +75,15 @@ const sampleData = {
             "image": "https://placecats.com/g/400/301",
             "projectAreaSF": 45000,
             "components": [
-                { "name": "A Substructure", "square_footage": 45000, "current_rom": 130.00 },
-                { "name": "B10 Superstructure", "square_footage": 45000, "current_rom": 78.00 },
-                { "name": "B20 Enclosure", "square_footage": 45000, "current_rom": 78.00 },
-                { "name": "B30 Roofing", "square_footage": 10000, "current_rom": 39.00 },
-                { "name": "C Interiors", "square_footage": 45000, "current_rom": 95.00 },
-                { "name": "D Services", "square_footage": 45000, "current_rom": 220.00 },
-                { "name": "E Equipment and Furnishings", "square_footage": 45000, "current_rom": 50.00 },
-                { "name": "F Special Construction", "square_footage": 8000, "current_rom": 84.00 },
-                { "name": "G Building Sitework", "square_footage": 45000, "current_rom": 41.00 }
+                { "name": "A Substructure", "square_footage": 45000 },
+                { "name": "B10 Superstructure", "square_footage": 45000 },
+                { "name": "B20 Enclosure", "square_footage": 45000 },
+                { "name": "B30 Roofing", "square_footage": 10000 },
+                { "name": "C Interiors", "square_footage": 45000 },
+                { "name": "D Services", "square_footage": 45000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 45000 },
+                { "name": "F Special Construction", "square_footage": 8000 },
+                { "name": "G Building Sitework", "square_footage": 45000 }
             ]
         },
         {
@@ -91,15 +91,15 @@ const sampleData = {
             "image": "https://placecats.com/g/401/301",
             "projectAreaSF": 55000,
             "components": [
-                { "name": "A Substructure", "square_footage": 55000, "current_rom": 130.00 },
-                { "name": "B10 Superstructure", "square_footage": 55000, "current_rom": 78.00 },
-                { "name": "B20 Enclosure", "square_footage": 55000, "current_rom": 78.00 },
-                { "name": "B30 Roofing", "square_footage": 15000, "current_rom": 39.00 },
-                { "name": "C Interiors", "square_footage": 55000, "current_rom": 95.00 },
-                { "name": "D Services", "square_footage": 55000, "current_rom": 220.00 },
-                { "name": "E Equipment and Furnishings", "square_footage": 55000, "current_rom": 50.00 },
-                { "name": "F Special Construction", "square_footage": 12000, "current_rom": 84.00 },
-                { "name": "G Building Sitework", "square_footage": 55000, "current_rom": 41.00 }
+                { "name": "A Substructure", "square_footage": 55000 },
+                { "name": "B10 Superstructure", "square_footage": 55000 },
+                { "name": "B20 Enclosure", "square_footage": 55000 },
+                { "name": "B30 Roofing", "square_footage": 15000 },
+                { "name": "C Interiors", "square_footage": 55000 },
+                { "name": "D Services", "square_footage": 55000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 55000 },
+                { "name": "F Special Construction", "square_footage": 12000 },
+                { "name": "G Building Sitework", "square_footage": 55000 }
             ]
         }
     ],
@@ -108,18 +108,18 @@ const sampleData = {
             "id": "A",
             "name": "OSU Johnson Hall",
             "image": "img/osu-johnson-hall.jpg",
-            "overall_sf_cost": 939.20,
-            "projectAreaSF": 65000,
+            "overall_sf_cost": 991.69,
+            "projectAreaSF": 61886,
             "components": [
-                { "name": "A Substructure", "cost": 176.06 },
-                { "name": "B10 Superstructure", "cost": 95 },
-                { "name": "B20 Enclosure", "cost": 90 },
-                { "name": "B30 Roofing", "cost": 45 },
-                { "name": "C Interiors", "cost": 108.12 },
-                { "name": "D Services", "cost": 227.34 },
-                { "name": "E Equipment and Furnishings", "cost": 49.06 },
-                { "name": "F Special Construction", "cost": 98.11 },
-                { "name": "G Building Sitework", "cost": 63 }
+                { "name": "A Substructure", "cost": 185.34 },
+                { "name": "B10 Superstructure", "cost": 100.06 },
+                { "name": "B20 Enclosure", "cost": 94.81 },
+                { "name": "B30 Roofing", "cost": 47.40 },
+                { "name": "C Interiors", "cost": 113.85 },
+                { "name": "D Services", "cost": 239.39 },
+                { "name": "E Equipment and Furnishings", "cost": 51.67 },
+                { "name": "F Special Construction", "cost": 103.33 },
+                { "name": "G Building Sitework", "cost": 66.34 }
             ]
         },
         {
@@ -160,20 +160,92 @@ const sampleData = {
         },
         {
             "id": "D",
-            "name": "WSU Tri-Cities Collaboration Hall",
-            "image": "img/wsu-tricities.jpg",
-            "overall_sf_cost": 746.33,
-            "projectAreaSF": 37300,
+            "name": "UW Nanoengineering",
+            "image": "img/uw-nano.jpg",
+            "overall_sf_cost": 1011.65,
+            "projectAreaSF": 78374,
             "components": [
-                { "name": "A Substructure", "cost": 139.63 },
-                { "name": "B10 Superstructure", "cost": 78 },
-                { "name": "B20 Enclosure", "cost": 70 },
-                { "name": "B30 Roofing", "cost": 35 },
-                { "name": "C Interiors", "cost": 87.06 },
-                { "name": "D Services", "cost": 205.45 },
-                { "name": "E Equipment and Furnishings", "cost": 85.21 },
-                { "name": "F Special Construction", "cost": 80.67 },
-                { "name": "G Building Sitework", "cost": 50 }
+                { "name": "A Substructure", "cost": 189.09 },
+                { "name": "B10 Superstructure", "cost": 102.07 },
+                { "name": "B20 Enclosure", "cost": 96.71 },
+                { "name": "B30 Roofing", "cost": 48.36 },
+                { "name": "C Interiors", "cost": 116.14 },
+                { "name": "D Services", "cost": 244.21 },
+                { "name": "E Equipment and Furnishings", "cost": 52.71 },
+                { "name": "F Special Construction", "cost": 105.41 },
+                { "name": "G Building Sitework", "cost": 67.68 }
+            ]
+        },
+        {
+            "id": "E",
+            "name": "UI Integrated Research Building",
+            "image": "img/ui-iric.jpg",
+            "overall_sf_cost": 908.77,
+            "projectAreaSF": 78267,
+            "components": [
+                { "name": "A Substructure", "cost": 169.89 },
+                { "name": "B10 Superstructure", "cost": 91.69 },
+                { "name": "B20 Enclosure", "cost": 86.88 },
+                { "name": "B30 Roofing", "cost": 43.44 },
+                { "name": "C Interiors", "cost": 104.33 },
+                { "name": "D Services", "cost": 219.36 },
+                { "name": "E Equipment and Furnishings", "cost": 47.35 },
+                { "name": "F Special Construction", "cost": 94.69 },
+                { "name": "G Building Sitework", "cost": 60.80 }
+            ]
+        },
+        {
+            "id": "F",
+            "name": "BSU Materials Science",
+            "image": "img/bsu-mat.jpg",
+            "overall_sf_cost": 735.78,
+            "projectAreaSF": 89314,
+            "components": [
+                { "name": "A Substructure", "cost": 137.52 },
+                { "name": "B10 Superstructure", "cost": 74.24 },
+                { "name": "B20 Enclosure", "cost": 70.34 },
+                { "name": "B30 Roofing", "cost": 35.17 },
+                { "name": "C Interiors", "cost": 84.47 },
+                { "name": "D Services", "cost": 177.63 },
+                { "name": "E Equipment and Furnishings", "cost": 38.33 },
+                { "name": "F Special Construction", "cost": 76.67 },
+                { "name": "G Building Sitework", "cost": 49.22 }
+            ]
+        },
+        {
+            "id": "G",
+            "name": "UO Knight Campus",
+            "image": "img/uo-knight.jpg",
+            "overall_sf_cost": 1377.17,
+            "projectAreaSF": 166714,
+            "components": [
+                { "name": "A Substructure", "cost": 257.37 },
+                { "name": "B10 Superstructure", "cost": 138.96 },
+                { "name": "B20 Enclosure", "cost": 131.66 },
+                { "name": "B30 Roofing", "cost": 65.83 },
+                { "name": "C Interiors", "cost": 158.10 },
+                { "name": "D Services", "cost": 332.50 },
+                { "name": "E Equipment and Furnishings", "cost": 71.75 },
+                { "name": "F Special Construction", "cost": 143.50 },
+                { "name": "G Building Sitework", "cost": 92.13 }
+            ]
+        },
+        {
+            "id": "H",
+            "name": "WSU Tri-Cities",
+            "image": "img/wsu-tricities.jpg",
+            "overall_sf_cost": 780.44,
+            "projectAreaSF": 37031,
+            "components": [
+                { "name": "A Substructure", "cost": 145.88 },
+                { "name": "B10 Superstructure", "cost": 78.75 },
+                { "name": "B20 Enclosure", "cost": 74.61 },
+                { "name": "B30 Roofing", "cost": 37.31 },
+                { "name": "C Interiors", "cost": 89.60 },
+                { "name": "D Services", "cost": 188.42 },
+                { "name": "E Equipment and Furnishings", "cost": 40.66 },
+                { "name": "F Special Construction", "cost": 81.32 },
+                { "name": "G Building Sitework", "cost": 52.21 }
             ]
         }
     ]

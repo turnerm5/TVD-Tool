@@ -287,9 +287,29 @@ function showBenchmarkTooltip(event, benchmarkData) {
         .attr('class', 'benchmark-tooltip-name')
         .text(benchmarkData.name);
     
-    // Position the tooltip near the cursor
-    tooltip.style('left', (event.pageX + 15) + 'px')
-           .style('top', (event.pageY + 15) + 'px');
+    const tooltipNode = tooltip.node();
+    const tooltipWidth = tooltipNode.offsetWidth;
+    const tooltipHeight = tooltipNode.offsetHeight;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let left = event.pageX + 15;
+    let top = event.pageY + 15;
+
+    // If the tooltip would go off the right edge, display it to the left of the cursor.
+    if (left + tooltipWidth > viewportWidth) {
+        left = event.pageX - tooltipWidth - 15;
+    }
+
+    // If the tooltip would go off the bottom edge, display it above the cursor.
+    if (top + tooltipHeight > viewportHeight) {
+        top = event.pageY - tooltipHeight - 15;
+    }
+    
+    // Position the tooltip
+    tooltip.style('left', left + 'px')
+           .style('top', top + 'px');
 }
 
 /**

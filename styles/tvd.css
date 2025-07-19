@@ -10,10 +10,9 @@ body {
     gap: 0.5rem;
     padding-top: 1rem;
     padding-bottom: 4rem; /* Reduced padding as labels are no longer rotated */
+    padding-left: 3.5rem;
     width: 100%;
-    height: 700px;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
+    height: 600px;
     background-color: #f8fafc;
 }
 .component-column {
@@ -27,15 +26,13 @@ body {
     width: 1px;
     background-color: #cbd5e1;
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    left: calc(50% - 0.5px);
     z-index: 0;
 }
 /* New Benchmark Range Styling */
 .benchmark-range {
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    left: calc(50% - 0.5px);
     width: 1px;
     background-color: #38bdf8; /* a pleasant blue */
     z-index: 1;
@@ -131,130 +128,6 @@ body {
     padding: 1px 4px;
     border-radius: 3px;
 }
-#file-drop-zone.dragover {
-    background-color: #e0f2fe;
-    border-color: #38bdf8;
-}
-.y-axis-labels {
-    position: absolute;
-    left: -40px;
-    top: 0;
-    height: calc(100% - 7rem); /* Match container padding */
-    width: 30px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: #475569;
-    /* Removed transform to un-rotate labels */
-}
-.view-btn.active {
-    border-color: #2563eb; /* blue-600 */
-    color: #2563eb;
-}
-.view-btn {
-    border-color: transparent;
-    transition: all 0.2s;
-}
-
-#program-view table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-#program-view th, #program-view td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb; /* gray-200 */
-}
-#program-view th {
-    background-color: #f9fafb; /* gray-50 */
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: #4b5563; /* gray-600 */
-}
-#program-view td {
-    font-size: 0.875rem;
-    color: #111827; /* gray-900 */
-}
-#program-view tbody tr:last-child td {
-    border-bottom: none;
-}
-#program-view .component-name {
-    font-weight: 500;
-}
-#program-view .editable-cell input {
-    width: 100%;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    border: 1px dashed #d1d5db; /* gray-300 */
-    background-color: transparent;
-    transition: border-color 0.2s, box-shadow 0.2s, border-style 0.2s;
-    font-style: italic;
-    color: #6b7280; /* gray-500 */
-}
-
-#program-view .editable-cell input:hover {
-    border-style: solid;
-    border-color: #9ca3af; /* gray-400 */
-}
-
-/* Hide spin buttons on number inputs */
-#program-view .editable-cell input::-webkit-outer-spin-button,
-#program-view .editable-cell input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-#program-view .editable-cell input[type=number] {
-    -moz-appearance: textfield;
-}
-
-#program-view .editable-cell input:focus {
-    outline: none;
-    border-color: #2563eb; /* blue-600 */
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
-}
-#program-view .na-cell {
-    color: #9ca3af; /* gray-400 */
-    font-style: italic;
-} 
-
-#program-view .zero-value-row td {
-    color: #d1d5db; /* lighter gray-300 */
-    font-style: italic;
-    font-weight: 300;
-}
-#program-view .zero-value-row .editable-cell input {
-    color: #a8a8a8; /* lighter gray-300 */
-    font-style: italic;
-    font-weight: 300;
-}
-
-#program-view td.editable-cell {
-    transition: background-color 1.5s ease-out, font-weight 1.5s ease-out;
-}
-
-@keyframes fade-green {
-    from { background-color: #dcfce7;}
-    to { background-color: transparent;}
-}
-
-@keyframes fade-red {
-    from { background-color: #fee2e2;}
-    to { background-color: transparent;}
-}
-
-.value-increase {
-    animation: fade-green 1.5s ease-out;
-}
-
-.value-decrease {
-    animation: fade-red 1.5s ease-out;
-}
 
 .benchmark-indicator-svg {
     position: absolute;
@@ -262,16 +135,16 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 10; /* Increased z-index */
+    z-index: 2; /* Position it below the drag handle but above the range lines */
+    pointer-events: none; /* Let clicks pass through the SVG container */
 }
-
 .benchmark-indicator-group {
-    pointer-events: auto; /* Make sure the group is clickable */
     cursor: pointer;
+    pointer-events: all; /* Make sure the group itself is interactive */
 }
 
 .benchmark-indicator-line {
-    stroke: #38bdf8;
+    stroke: #9ca3af; /* gray-400 */
     stroke-width: 1;
     stroke-dasharray: 2 2;
 }
@@ -297,7 +170,7 @@ body {
 }
 
 .benchmark-card img {
-    height: 360px;
+    height: 250px;
     width: 100%;
     object-fit: cover; /* Ensures the image covers the area without distortion */
 }
@@ -342,6 +215,9 @@ body {
     display: block; /* Show the selected card */
     width: 50%; 
     pointer-events: auto;
+}
+#benchmarks-view.detail-active .benchmark-card.selected img {
+    height: 400px;
 }
 
 #benchmark-detail-container {
@@ -448,28 +324,51 @@ body {
 /* ----------------------------------------- */
 
 .benchmark-tooltip {
-    position: absolute; /* Changed from fixed to absolute */
+    position: absolute;
     background-color: white;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     padding: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    text-align: center;
-    z-index: 1000;
-    pointer-events: none; /* So the tooltip doesn't interfere with other mouse events */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+    pointer-events: none;
     transition: opacity 0.2s;
-    opacity: 1;
+    font-size: 0.875rem;
 }
-
 .benchmark-tooltip img {
     display: block;
-    max-width: 100%;
-    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    border-radius: 0.25rem;
 }
-
 .benchmark-tooltip-name {
-    margin-top: 0.75rem;
-    font-size: 1rem;
     font-weight: 600;
     color: #1f2937;
-} 
+}
+
+#file-drop-zone {
+    border: 2px dashed #d1d5db; /* gray-300 */
+    padding: 2rem;
+}
+
+#file-drop-zone.dragover {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+}
+
+@keyframes fadeInGreen {
+    from { background-color: #dcfce7; }
+    to { background-color: transparent; }
+}
+
+@keyframes fadeInRed {
+    from { background-color: #fee2e2; }
+    to { background-color: transparent; }
+}
+
+.value-increase {
+    animation: fadeInGreen 1s ease-out;
+}
+
+.value-decrease {
+    animation: fadeInRed 1s ease-out;
+}
