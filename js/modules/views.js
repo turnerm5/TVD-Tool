@@ -144,7 +144,32 @@ export function renderPhase1View() {
 }
 
 export function renderPhase2ProgramView() {
-    d3.select(dom.programView).select('table').remove();
+    d3.select(dom.programView).html(''); // Clear the view first
+
+    const buttonContainer = d3.select(dom.programView).append('div')
+        .attr('class', 'flex justify-end mb-4');
+
+    buttonContainer.append('button')
+        .attr('id', 'program-view-snapshot-btn')
+        .attr('class', 'bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition')
+        .text('Take Snapshot')
+        .on('click', () => {
+            const snapshotName = prompt("Enter a name for this snapshot:");
+            if (snapshotName) {
+                const phase2Components = state.currentData.phases.phase2.components;
+                const snapshotComponents = phase2Components.map(c => ({
+                    name: c.name,
+                    current_rom: c.current_rom,
+                    square_footage: c.square_footage
+                }));
+                const snapshot = {
+                    name: snapshotName,
+                    components: snapshotComponents
+                };
+                state.addSnapshot(snapshot);
+                console.log('All snapshots:', state.snapshots);
+            }
+        });
 
     const tableData = [];
 
