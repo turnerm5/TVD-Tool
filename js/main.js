@@ -76,12 +76,10 @@ function render() {
         dom.waterfallLegend.classList.remove('hidden');
         dom.waterfallViewBtn.classList.add('active');
         waterfall.renderWaterfallChart();
+        waterfall.updateSummary();
     }
 
-
-    
-    // --- 4. Update summary panel and reset button state ---
-    ui.updateSummary(); 
+    // --- 3. Update reset button state ---
     dom.resetButton.disabled = JSON.stringify(state.originalData) === JSON.stringify(state.currentData);
 }
 
@@ -93,7 +91,6 @@ fileHandlers.setYScale(yScale);
 slider.setDependencies({
     render: render,
     renderProgramView: views.renderPhase2ProgramView,
-    updateSummary: ui.updateSummary,
     yScale: yScale
 });
 views.setDependencies({
@@ -101,6 +98,7 @@ views.setDependencies({
     handleSquareFootageCellChange: slider.handleSquareFootageCellChange,
     handleCurrentRomCellChange: slider.handleCurrentRomCellChange
 });
+waterfall.setRender(render);
 
 
 // --- GLOBAL EVENT LISTENERS ---
