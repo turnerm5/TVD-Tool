@@ -114,7 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Button Click Handlers ---
     dom.useSampleDataBtn.addEventListener('click', () => fileHandlers.loadData(sampleData));
     dom.downloadTemplateBtn.addEventListener('click', fileHandlers.downloadTemplate);
-    dom.startOverBtn.addEventListener('click', ui.showSplashScreen);
+    dom.startOverBtn.addEventListener('click', async () => {
+        const confirmed = await ui.showConfirmDialog(
+            "Confirm Start Over",
+            "Are you sure you want to start over? All unsaved changes will be lost.",
+            "Yes, Start Over",
+            "Cancel"
+        );
+        if (confirmed) {
+            ui.showSplashScreen();
+        }
+    });
     dom.exportJsonBtn.addEventListener('click', fileHandlers.exportJSON);
     dom.resetButton.addEventListener('click', async () => {
         const confirmed = await ui.showConfirmDialog(
