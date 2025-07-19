@@ -26,7 +26,7 @@ function wrap(text, width) {
             lineNumber = 0,
             lineHeight = 1.1, // ems
             y = text.attr("y"),
-            dy = parseFloat(text.attr("dy")),
+            dy = parseFloat(text.attr("dy")) || 0,
             tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
         while (word = words.pop()) {
             line.push(word);
@@ -42,70 +42,51 @@ function wrap(text, width) {
 }
 
 /**
- * Renders the Waterfall Chart view.
- * This chart shows how individual component absolute costs (cost * SF) add up.
- * It visualizes the original data and up to three snapshots side-by-side.
+ * Renders the new Summary view, including the grouped and stacked bar charts.
  */
-export function renderWaterfallChart() {
-    // Select the container for the waterfall chart and clear any previous SVG/chart content
-    const container = d3.select("#waterfall-chart-container");
-    container.html(""); // Clear previous chart
-
-    // Set up chart margins and calculate the inner width and height for the drawing area
-    const margin = { top: 20, right: 30, bottom: 80, left: 100 };
-    const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
-    const height = 700 - margin.top - margin.bottom;
-
-    // Create the SVG element and a group <g> translated by the margins
-    const svg = container.append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    // --- Data Preparation ---
-
-    // Compose the "Imported Data" series from the original phase 2 components
+export function renderSummaryCharts() {
+    // --- 1. Data Preparation ---
     const originalData = {
         name: "Imported Data",
         components: state.originalData.phases.phase2.components
     };
-
-    // Combine the original data and all user-created snapshots into a single array of series
     const allSeriesData = [originalData, ...state.snapshots];
-
-    // Extract the names of all series (e.g., "Imported Data", "Snapshot 1", etc.)
     const seriesNames = allSeriesData.map(d => d.name);
+    const componentNames = state.originalData.phases.phase2.components.map(c => c.name);
+    const gmpValue = state.originalData.phases.phase2.totalProjectBudget;
+    
+    // --- Render Left Chart ---
+    renderGroupedBarChart(allSeriesData, seriesNames, componentNames);
 
-    // --- Main Data Structure for Rendering ---
-    // For each component, build an array of values (one per series) with cumulative start/end for stacking
-    const finalComponentData = [];
-    let cumulativeValues = seriesNames.map(() => 0); // Track running totals for each series
+    // --- Render Right Chart (will be implemented next) ---
+    renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpValue);
+}
 
-    state.originalData.phases.phase2.components.forEach(c => {
-        const component = { name: c.name, values: [] };
-        seriesNames.forEach((seriesName, i) => {
-            // Find the current series and the matching component by name
-            const series = allSeriesData.find(s => s.name === seriesName);
-            const compData = series.components.find(sc => sc.name === c.name);
-            // Calculate the absolute cost for this component in this series
-            const cost = compData.current_rom * compData.square_footage;
-            // Store the start and end positions for the bar segment
-            component.values.push({
-                series: seriesName,
-                start: cumulativeValues[i],
-                end: cumulativeValues[i] + cost,
-            });
-            // Update the cumulative total for this series
-            cumulativeValues[i] += cost;
-        });
-        finalComponentData.push(component);
-    });
+/**
+ * Renders the grouped bar chart (left side).
+ * @param {Array} allSeriesData - The array of all data series (original + snapshots).
+ * @param {Array} seriesNames - The names of the series.
+ * @param {Array} componentNames - The names of the components.
+ */
+function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
+    const container = d3.select("#summary-bar-chart-container");
+    container.html("");
+
+    const margin = { top: 20, right: 20, bottom: 50, left: 60 };
+    const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
+    const height = 600 - margin.top - margin.bottom;
+
+    const svg = container.append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+        
+    const g = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // --- D3 Scales ---
     const x0 = d3.scaleBand()
+        .domain(componentNames)
         .range([0, width])
-        .domain(finalComponentData.map(d => d.name))
         .padding(0.2);
 
     const x1 = d3.scaleBand()
@@ -113,77 +94,58 @@ export function renderWaterfallChart() {
         .range([0, x0.bandwidth()])
         .padding(0.05);
 
-    const yMax = d3.max([d3.max(cumulativeValues), state.originalData.phases.phase2.totalProjectBudget]);
+    const yMax = d3.max(allSeriesData, series => 
+        d3.max(series.components, c => c.current_rom * c.square_footage)
+    );
+    
     const y = d3.scaleLinear()
-        .domain([0, yMax * 1.05])
+        .domain([0, yMax * 1.1]).nice()
         .range([height, 0]);
-
+        
     const color = d3.scaleOrdinal()
         .domain(seriesNames)
-        .range(['#2563eb', '#db2777', '#f97316', '#84cc16']); // Blue, Pink, Orange, Green
+        .range(['#2563eb', '#db2777', '#f97316', '#84cc16']);
 
     // --- D3 Axes ---
-    svg.append("g")
-        .attr("class", "waterfall-axis")
+    g.append("g")
+        .attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x0))
-        .selectAll(".tick text")
+        .selectAll("text")
+        .style("text-anchor", "middle")
         .call(wrap, x0.bandwidth());
 
-    svg.append("g")
-        .attr("class", "waterfall-axis")
-        .call(d3.axisLeft(y).tickFormat(d => `$${(d / 1000000).toFixed(1)}M`));
-
     // --- D3 Bar Rendering ---
-    const componentGroups = svg.selectAll(".component-group")
-        .data(finalComponentData)
-        .enter()
-        .append("g")
+    const componentGroup = g.selectAll(".component-group")
+        .data(componentNames)
+        .enter().append("g")
         .attr("class", "component-group")
-        .attr("transform", d => `translate(${x0(d.name)},0)`);
+        .attr("transform", d => `translate(${x0(d)},0)`);
 
-    componentGroups.selectAll("rect")
-        .data(d => d.values)
-        .enter().append("rect")
-        .attr("class", "waterfall-bar")
-        .attr("x", d => x1(d.series))
-        .attr("y", d => y(d.end))
-        .attr("height", d => y(d.start) - y(d.end))
+    const bars = componentGroup.selectAll("g.bar-group")
+        .data(componentName => allSeriesData.map(series => {
+            const comp = series.components.find(c => c.name === componentName);
+            return {
+                seriesName: series.name,
+                value: comp ? comp.current_rom * comp.square_footage : 0
+            };
+        }))
+        .enter().append("g").attr("class", "bar-group");
+        
+    bars.append("rect")
+        .attr("x", d => x1(d.seriesName))
+        .attr("y", d => y(d.value))
         .attr("width", x1.bandwidth())
-        .attr("fill", d => color(d.series));
+        .attr("height", d => height - y(d.value))
+        .attr("fill", d => color(d.seriesName));
 
-    // --- D3 Connector Line Rendering ---
-    seriesNames.forEach((seriesName, i) => {
-        const seriesData = finalComponentData.map(d => d.values[i]);
-        svg.selectAll(`.connector-${i}`)
-            .data(seriesData.filter((d, j) => j < seriesData.length - 1))
-            .enter()
-            .append("line")
-            .attr("class", "connector")
-            .attr("x1", (d, j) => x0(finalComponentData[j].name) + x1(d.series) + x1.bandwidth())
-            .attr("y1", d => y(d.end))
-            .attr("x2", (d, j) => x0(finalComponentData[j + 1].name) + x1(d.series))
-            .attr("y2", d => y(d.end))
-            .style("stroke", color(seriesName));
-    });
-
-    // --- GMP Line ---
-    const gmpValue = state.originalData.phases.phase2.totalProjectBudget;
-    svg.append("line")
-        .attr("class", "gmp-line")
-        .attr("x1", 0)
-        .attr("x2", width)
-        .attr("y1", y(gmpValue))
-        .attr("y2", y(gmpValue));
-    
-    svg.append("text")
-        .attr("class", "gmp-label")
-        .attr("x", width)
-        .attr("y", y(gmpValue))
-        .attr("dy", -4)
-        .attr("text-anchor", "end")
-        .text("GMP");
-
+    // --- Bar Labels ---
+    bars.append("text")
+        .attr("class", "bar-label")
+        .attr("x", d => x1(d.seriesName) + x1.bandwidth() / 2)
+        .attr("y", d => y(d.value) - 5)
+        .text(d => d.value > 0 ? utils.formatCurrencySmall(d.value) : "");
+        
     // --- Legend ---
     const legendContainer = d3.select(dom.waterfallLegend);
     legendContainer.html(""); // Clear existing legend
@@ -220,7 +182,6 @@ export function renderWaterfallChart() {
     
     legendItems.filter(d => d !== 'Imported Data').classed('cursor-pointer', true);
 
-    // Content inside legend item (color and text)
     const legendContent = legendItems.append('div')
         .attr('class', 'legend-content flex items-center gap-2');
 
@@ -232,12 +193,96 @@ export function renderWaterfallChart() {
         .attr("class", "font-medium")
         .text(d => d);
 
-    // Delete overlay for deletable items
     legendItems.filter(d => d !== 'Imported Data')
         .append('div')
         .attr('class', 'delete-overlay absolute inset-0 flex items-center justify-center font-bold text-white')
         .text('DELETE');
 }
+
+/**
+ * Renders the stacked bar chart (right side).
+ * @param {Array} allSeriesData - The array of all data series (original + snapshots).
+ * @param {Array} seriesNames - The names of the series.
+ * @param {Array} componentNames - The names of the components.
+ * @param {number} gmpValue - The total project budget.
+ */
+function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpValue) {
+    const container = d3.select("#summary-stacked-chart-container");
+    container.html("");
+
+    const margin = { top: 20, right: 20, bottom: 50, left: 40 };
+    const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
+    const height = 600 - margin.top - margin.bottom;
+
+    const svg = container.append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+        
+    const g = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // --- Data Transformation for Stacking ---
+    const stackedData = allSeriesData.map(series => {
+        let cumulative = 0;
+        const components = componentNames.map(compName => {
+            const component = series.components.find(c => c.name === compName);
+            const value = component ? component.current_rom * component.square_footage : 0;
+            const start = cumulative;
+            cumulative += value;
+            return { name: compName, value, start, end: cumulative };
+        });
+        return { name: series.name, components, total: cumulative };
+    });
+
+    // --- D3 Scales ---
+    const x = d3.scaleBand()
+        .domain(seriesNames)
+        .range([0, width])
+        .padding(0.3);
+
+    const yMax = d3.max([gmpValue, d3.max(stackedData, d => d.total)]);
+    const y = d3.scaleLinear()
+        .domain([0, yMax * 1.1]).nice()
+        .range([height, 0]);
+
+    const componentColor = d3.scaleOrdinal(d3.schemeTableau10).domain(componentNames);
+
+    // --- D3 Axes ---
+    g.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "middle")
+        .call(wrap, x.bandwidth());
+
+    g.append("g").call(d3.axisLeft(y).tickFormat(d => `$${d3.format("~s")(d)}`));
+
+    // --- D3 Bar Rendering ---
+    const seriesGroup = g.selectAll(".series-group")
+        .data(stackedData)
+        .enter().append("g")
+        .attr("class", "series-group")
+        .attr("transform", d => `translate(${x(d.name)},0)`);
+
+    seriesGroup.selectAll("rect")
+        .data(d => d.components)
+        .enter().append("rect")
+        .attr("y", d => y(d.end))
+        .attr("height", d => y(d.start) - y(d.end))
+        .attr("width", x.bandwidth())
+        .attr("fill", d => componentColor(d.name))
+        .append("title")
+        .text(d => `${d.name}: ${utils.formatCurrency(d.value)}`);
+
+    // --- GMP Line ---
+    g.append("line")
+        .attr("class", "gmp-line")
+        .attr("x1", 0)
+        .attr("x2", width)
+        .attr("y1", y(gmpValue))
+        .attr("y2", y(gmpValue));
+}
+
 
 /**
  * Updates the summary panel with the latest cost calculations for both phases.

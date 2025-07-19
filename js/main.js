@@ -75,8 +75,11 @@ function render() {
         // dom.phaseSelector.classList.remove('hidden');
         dom.waterfallLegend.classList.remove('hidden');
         dom.waterfallViewBtn.classList.add('active');
-        waterfall.renderWaterfallChart();
-        waterfall.updateSummary();
+        // Ensure the view is painted before trying to measure its dimensions
+        requestAnimationFrame(() => {
+            waterfall.renderSummaryCharts();
+            waterfall.updateSummary();
+        });
     }
 
     // --- 3. Update reset button state ---

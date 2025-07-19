@@ -18,6 +18,20 @@ export const formatCurrency = (d) => `$${d.toFixed(2)}`;
 export const formatCurrencyBig = (d) => `$${Math.round(d).toLocaleString('en-US')}`;
 
 /**
+ * Formats a large number into a smallcurrency string with no decimal places (e.g., $1.2M or $200k).
+ * @param {number} d - The number to format.
+ * @returns {string} The formatted currency string.
+ */
+export const formatCurrencySmall = (d) => {
+    if (d >= 1000000) {
+        return `$${(d / 1000000).toFixed(1)}M`;
+    } else if (d >= 1000) {
+        return `$${(d / 1000).toFixed(1)}k`;
+    }
+    return `$${d.toFixed(2)}`;
+};
+
+/**
  * Formats a number to a string with thousands separators.
  * @param {number} d - The number to format.
  * @returns {string} The formatted number string.

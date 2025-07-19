@@ -284,6 +284,10 @@ tr.benchmark-warning {
     padding-top: 0.75rem;
 }
 
+.benchmark-caption p {
+    margin-top: 4px;
+}
+
 .benchmark-label {
     position: absolute;
     top: -12px;
@@ -379,14 +383,23 @@ tr.benchmark-warning {
 }
 
 .gmp-line {
-    stroke: #ef4444; /* red-500 */
+    stroke: #ef4444; /* Red-500 */
     stroke-width: 2;
+    stroke-dasharray: 4;
 }
-
 .gmp-label {
-    fill: #ef4444; /* red-500 */
-    font-weight: 600;
-    font-size: 0.875rem;
+    fill: #ef4444;
+    font-weight: bold;
+    font-size: 12px;
+}
+.x-axis .tick text {
+    font-size: 12px;
+}
+.bar-label {
+    font-size: 10px;
+    font-weight: 500;
+    text-anchor: middle;
+    fill: #4b5563; /* Gray-600 */
 }
 
 .legend-item .legend-content {
