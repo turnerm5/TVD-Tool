@@ -135,6 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);
     dom.takeSnapshotBtn.addEventListener('click', async () => {
+        if (state.snapshots.length >= 3) {
+            ui.showAlert(
+                "Snapshot Limit Reached",
+                "You can only save up to 3 snapshots. Please delete an existing snapshot to save a new one."
+            );
+            return;
+        }
         const snapshotName = await ui.showModalDialog(
             "Take Snapshot",
             "Enter a name for this snapshot",

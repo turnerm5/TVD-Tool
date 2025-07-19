@@ -136,6 +136,13 @@ export function renderPhase2ProgramView() {
         .attr('class', 'bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition')
         .text('Take Snapshot')
         .on('click', async () => {
+            if (state.snapshots.length >= 3) {
+                ui.showAlert(
+                    "Snapshot Limit Reached",
+                    "You can only save up to 3 snapshots. Please delete an existing snapshot to save a new one."
+                );
+                return;
+            }
             // Show a nice modal dialog for the snapshot name
             const snapshotName = await ui.showModalDialog(
                 "Take Snapshot",

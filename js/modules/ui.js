@@ -80,9 +80,15 @@ function showDialog(config) {
 
         contentHtml += `
             <div class="flex justify-end space-x-3">
+        `;
+        if (cancelText) {
+            contentHtml += `
                 <button class="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" id="modal-cancel">
                     ${cancelText}
                 </button>
+            `;
+        }
+        contentHtml += `
                 <button class="px-4 py-2 text-white rounded-md transition-colors ${confirmButtonClass}" id="modal-confirm">
                     ${confirmText}
                 </button>
@@ -103,7 +109,7 @@ function showDialog(config) {
 
         const cleanup = () => {
             confirmBtn.removeEventListener('click', handleConfirm);
-            cancelBtn.removeEventListener('click', handleCancel);
+            if (cancelBtn) cancelBtn.removeEventListener('click', handleCancel);
             if (input) input.removeEventListener('keydown', handleKeyPress);
             else document.removeEventListener('keydown', handleKeyPress);
             overlay.removeEventListener('click', handleOverlayClick);
@@ -137,7 +143,7 @@ function showDialog(config) {
         };
 
         confirmBtn.addEventListener('click', handleConfirm);
-        cancelBtn.addEventListener('click', handleCancel);
+        if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
         if (input) {
             input.addEventListener('keydown', handleKeyPress);
         } else {
@@ -171,6 +177,23 @@ export function showModalDialog(title, placeholder, confirmText = 'OK', cancelTe
         placeholder,
         confirmText,
         cancelText,
+        isConfirmation: false
+    });
+}
+
+/**
+ * Shows a simple alert dialog with a title, message, and an OK button.
+ * @param {string} title - The dialog title.
+ * @param {string} message - The message to display.
+ * @param {string} [confirmText='OK'] - The text for the confirm button.
+ * @returns {Promise<boolean>} - Resolves when the dialog is closed.
+ */
+export function showAlert(title, message, confirmText = 'OK') {
+    return showDialog({
+        title,
+        message,
+        confirmText,
+        cancelText: null,
         isConfirmation: false
     });
 }
