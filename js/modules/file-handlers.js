@@ -77,7 +77,11 @@ export function loadData(data, fileName = 'Sample Data') {
     }
 
     state.originalData = JSON.parse(JSON.stringify(processedData));
+    state.originalData.projectAreaSF = data.phases.phase2.projectAreaSF || 0;
     state.currentData = processedData;
+    state.currentData.projectAreaSF = data.phases.phase2.projectAreaSF || 0;
+    
+    console.log('Data loaded. Original Gross SF:', state.originalData.projectAreaSF, 'Current Gross SF:', state.currentData.projectAreaSF);
 
     // Dynamically set the Y-axis domain based on phase 2 data only
     const allComponents = processedData.phases.phase2.components;

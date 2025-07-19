@@ -316,6 +316,18 @@ export function handleSquareFootageCellChange(event) {
     }
 }
 
+/**
+ * Handles changes to the gross square footage input in the program view.
+ * @param {Event} event - The input change event.
+ */
+export function handleGrossSfCellChange(event) {
+    const newValue = parseFloat(event.target.value.replace(/,/g, ''));
+    if (!isNaN(newValue)) {
+        state.currentData.projectAreaSF = newValue;
+        render();
+    }
+}
+
 
 // --- DRAG-AND-DROP LOGIC ---
 

@@ -32,11 +32,14 @@ export const formatCurrencySmall = (d) => {
 };
 
 /**
- * Formats a number to a string with thousands separators.
- * @param {number} d - The number to format.
+ * Formats a number with commas as thousands separators.
+ * @param {number} num - The number to format.
  * @returns {string} The formatted number string.
  */
-export const formatNumber = (d) => d.toLocaleString('en-US');
+export function formatNumber(num) {
+    if (num === undefined || num === null) return 'N/A';
+    return num.toLocaleString('en-US');
+}
 
 /**
  * Generates a formatted timestamp string (e.g., "2023-10-27_15-30").

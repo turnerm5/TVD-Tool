@@ -5,11 +5,12 @@ import * as utils from './utils.js';
 import * as ui from './ui.js';
 
 // Forward-declare dependencies
-let handleSquareFootageCellChange, handleCurrentRomCellChange, render;
+let handleSquareFootageCellChange, handleCurrentRomCellChange, render, handleGrossSfCellChange;
 export function setDependencies(fns) {
     handleSquareFootageCellChange = fns.handleSquareFootageCellChange;
     handleCurrentRomCellChange = fns.handleCurrentRomCellChange;
     render = fns.render;
+    handleGrossSfCellChange = fns.handleGrossSfCellChange;
 }
 
 
@@ -53,6 +54,17 @@ export function renderPhase2ProgramView() {
             // When a scheme card is clicked:
             const updates = [];
 
+            // Animate Gross SF change
+            const oldGrossSf = state.currentData.projectAreaSF;
+            const newGrossSf = d.projectAreaSF;
+            let grossSf_change = 'none';
+            if (newGrossSf > oldGrossSf) grossSf_change = 'increase';
+            else if (newGrossSf < oldGrossSf) grossSf_change = 'decrease';
+            if (grossSf_change !== 'none') {
+                updates.push({ name: 'Gross SF', sf_change: grossSf_change });
+            }
+            state.currentData.projectAreaSF = newGrossSf;
+
             // Determine changes before applying them
             state.currentData.phases.phase2.components.forEach(component => {
                 const schemeComponent = d.components.find(c => c.name === component.name);
@@ -87,7 +99,7 @@ export function renderPhase2ProgramView() {
                     const row = d3.select(dom.programView).selectAll('tbody tr').filter(d_row => d_row && d_row.name === update.name);
                     if (!row.empty()) {
                         if (update.sf_change !== 'none') {
-                            const cell = row.select('td:nth-child(2)');
+                            const cell = row.select(update.name === 'Gross SF' ? 'td:nth-child(2)' : 'td:nth-child(2)');
                             if (!cell.empty()) {
                                 const className = `value-${update.sf_change}`;
                                 // Remove any existing animation classes before adding the new one
@@ -143,6 +155,7 @@ export function renderPhase2ProgramView() {
                 // Create the snapshot object
                 const snapshot = {
                     name: snapshotName,
+                    projectAreaSF: state.currentData.projectAreaSF,
                     components: snapshotComponents
                 };
                 // Add the snapshot to the state
@@ -156,6 +169,13 @@ export function renderPhase2ProgramView() {
 
     // Prepare the data for the program table
     const tableData = [];
+
+    // Add Gross SF row data
+    tableData.push({
+        type: 'gross-sf',
+        name: 'Gross SF',
+        value: state.currentData.projectAreaSF || 0
+    });
 
     // Sort phase 2 components alphabetically by name
     const p2Components = state.currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
@@ -181,7 +201,17 @@ export function renderPhase2ProgramView() {
 
     rows.each(function(d) {
         const row = d3.select(this);
-        if (d.type === 'header') {
+        if (d.type === 'gross-sf') {
+            row.attr('class', 'bg-white font-bold');
+            row.append('td')
+                .attr('class', 'px-6 py-4 whitespace-nowrap text-sm text-gray-900')
+                .text(d.name);
+            row.append('td')
+                .attr('class', 'px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center editable-cell')
+                .append('input').attr('type', 'text').attr('class', 'w-full text-center')
+                .attr('value', d.value.toLocaleString('en-US'))
+                .on('change', handleGrossSfCellChange);
+        } else if (d.type === 'header') {
             row.attr('class', 'bg-gray-100');
             row.append('td').attr('colspan', 2).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
         } else {

@@ -71,7 +71,7 @@
             <button id="phase1-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Phase 1 Costs</button>
             <button id="program-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Phase 2 Program</button>
             <button id="chart-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Target Values</button>
-            <button id="waterfall-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Summary</button>
+            <button id="summary-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Summary</button>
         </div>
 
         <div id="controls-container" class="flex justify-center items-center gap-6 my-4 text-sm text-gray-600 flex-wrap">
@@ -82,7 +82,7 @@
             </div>
             <button id="maximize-gmp-btn" class="bg-indigo-600 text-white py-1 px-3 text-sm rounded-md font-medium hover:bg-indigo-700 transition">Balance to GMP</button>
             <button id="take-snapshot-btn" class="bg-blue-600 text-white py-1 px-3 text-sm rounded-md font-medium hover:bg-blue-700 transition">Take Snapshot</button>
-            <div id="waterfall-legend" class="flex items-center gap-6">
+            <div id="summary-legend" class="flex items-center gap-6">
                 <div class="flex items-center gap-2"><div class="w-4 h-4" style="background-color: #2563eb;"></div><span class="font-medium">Imported Data</span></div>
             </div>
         </div>
@@ -99,7 +99,7 @@
             <div id="program-view" class="hidden">
                 <!-- Table will be rendered here by D3 -->
             </div>
-            <div id="waterfall-view" class="hidden">
+            <div id="summary-view" class="hidden">
                 <div class="grid grid-cols-5 gap-4">
                     <!-- Left column for the new grouped bar chart -->
                     <div id="summary-bar-chart-container" class="col-span-4"></div>

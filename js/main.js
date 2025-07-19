@@ -11,7 +11,7 @@ import * as dom from './modules/dom.js';
 import * as ui from './modules/ui.js';
 import * as fileHandlers from './modules/file-handlers.js';
 import * as slider from './modules/chart-slider.js';
-import * as waterfall from './modules/chart-waterfall.js';
+import * as summary from './modules/chart-summary.js';
 import * as views from './modules/views.js';
 import * as sankey from './modules/chart-sankey.js';
 import * as program from './modules/chart-program.js';
@@ -34,9 +34,9 @@ function render() {
     dom.programView.classList.add('hidden');
     dom.phase1View.classList.add('hidden');
     dom.benchmarksView.classList.add('hidden');
-    dom.waterfallView.classList.add('hidden');
+    dom.summaryView.classList.add('hidden');
     dom.legend.classList.add('hidden');
-    dom.waterfallLegend.classList.add('hidden');
+    dom.summaryLegend.classList.add('hidden');
     dom.maximizeBtn.classList.add('hidden');
     dom.takeSnapshotBtn.classList.add('hidden');
 
@@ -44,7 +44,7 @@ function render() {
     dom.programViewBtn.classList.remove('active');
     dom.phase1ViewBtn.classList.remove('active');
     dom.benchmarksViewBtn.classList.remove('active');
-    dom.waterfallViewBtn.classList.remove('active');
+    dom.summaryViewBtn.classList.remove('active');
 
     // --- 2. Show the active view and call its render function ---
     if (state.currentView === 'chart') {
@@ -71,15 +71,15 @@ function render() {
         dom.benchmarksView.classList.remove('hidden');
         dom.benchmarksViewBtn.classList.add('active');
         views.renderBenchmarksView(render);
-    } else if (state.currentView === 'waterfall') {
-        dom.waterfallView.classList.remove('hidden');
+    } else if (state.currentView === 'summary') {
+        dom.summaryView.classList.remove('hidden');
         // dom.phaseSelector.classList.remove('hidden');
-        dom.waterfallLegend.classList.remove('hidden');
-        dom.waterfallViewBtn.classList.add('active');
+        dom.summaryLegend.classList.remove('hidden');
+        dom.summaryViewBtn.classList.add('active');
         // Ensure the view is painted before trying to measure its dimensions
         requestAnimationFrame(() => {
-            waterfall.renderSummaryCharts();
-            waterfall.updateSummary();
+            summary.renderSummaryCharts();
+            summary.updateSummary();
         });
     }
 
@@ -104,9 +104,10 @@ views.setDependencies({
 program.setDependencies({
     render: render,
     handleSquareFootageCellChange: slider.handleSquareFootageCellChange,
-    handleCurrentRomCellChange: slider.handleCurrentRomCellChange
+    handleCurrentRomCellChange: slider.handleCurrentRomCellChange,
+    handleGrossSfCellChange: slider.handleGrossSfCellChange
 });
-waterfall.setRender(render);
+summary.setRender(render);
 
 
 // --- GLOBAL EVENT LISTENERS ---
@@ -124,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.exportCsvBtn.addEventListener('click', fileHandlers.exportCSV);
     dom.resetButton.addEventListener('click', () => {
         // Reload original data to reset all changes
-        fileHandlers.loadData(JSON.parse(JSON.stringify(state.originalData)));
+        fileHandlers.loadData(state.originalData);
     });
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);
     dom.takeSnapshotBtn.addEventListener('click', async () => {
@@ -143,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
             const snapshot = {
                 name: snapshotName,
+                projectAreaSF: state.currentData.projectAreaSF,
                 components: snapshotComponents
             };
             state.addSnapshot(snapshot);
@@ -156,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.programViewBtn.addEventListener('click', () => { state.currentView = 'program'; render(); });
     dom.phase1ViewBtn.addEventListener('click', () => { state.currentView = 'phase1'; render(); });
     dom.benchmarksViewBtn.addEventListener('click', () => { state.currentView = 'benchmarks'; state.selectedBenchmark = null; render(); });
-    dom.waterfallViewBtn.addEventListener('click', () => { state.currentView = 'waterfall'; state.currentPhase = 'phase2'; render(); });
+    dom.summaryViewBtn.addEventListener('click', () => { state.currentView = 'summary'; state.currentPhase = 'phase2'; render(); });
 
     // --- File Drop Zone Handlers ---
     dom.fileInput.addEventListener('change', (e) => fileHandlers.handleFile(e.target.files[0]));
