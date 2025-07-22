@@ -174,7 +174,7 @@ export function renderInteriorsView() {
     // Move target budget here - use the value from when we entered the detail view
     rightPanel.append('label').attr('class', 'block text-sm font-medium text-gray-700 mb-2').text('Starting Target Budget');
     const entryInteriorsData = state.interiorsEntryState || originalInteriorsData;
-    const targetBudget = entryInteriorsData.current_rom * entryInteriorsData.square_footage;
+            const targetBudget = entryInteriorsData.target_value * entryInteriorsData.square_footage;
     rightPanel.append('div')
         .attr('id', 'target-budget-display')
         .attr('class', 'mb-6 p-3 bg-gray-100 rounded-md border text-lg font-semibold')
@@ -221,7 +221,7 @@ function recalculateAndUpdate() {
 
     const newTotalCost = interiorsData.breakdown.reduce((acc, item) => acc + (item.sf * item.cost), 0);
     if (interiorsData.square_footage > 0) {
-        interiorsData.current_rom = newTotalCost / interiorsData.square_footage;
+        interiorsData.target_value = newTotalCost / interiorsData.square_footage;
     }
 
     renderInteriorsView();

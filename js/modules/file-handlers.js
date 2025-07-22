@@ -77,7 +77,7 @@ export function loadData(data, fileName = 'Sample Data') {
     // Lock components only for phase2
     if (processedData.phases.phase2 && processedData.phases.phase2.components) {
         processedData.phases.phase2.components.forEach(component => {
-            if (component.current_rom === 0 || component.square_footage === 0) {
+            if (component.target_value === 0 || component.square_footage === 0) {
                 const lockKey = `phase2-${component.name}`;
                 state.lockedComponents.add(lockKey);
             }
@@ -93,7 +93,7 @@ export function loadData(data, fileName = 'Sample Data') {
 
     // Dynamically set the Y-axis domain based on phase 2 data only
     const allComponents = processedData.phases.phase2.components;
-    const maxVal = d3.max(allComponents, d => Math.max(d.benchmark_high, d.current_rom));
+            const maxVal = d3.max(allComponents, d => Math.max(d.benchmark_high, d.target_value));
     state.yDomainMax = Math.ceil(maxVal / 10) * 10 + 20;
     yScale.domain([0, state.yDomainMax]);
 

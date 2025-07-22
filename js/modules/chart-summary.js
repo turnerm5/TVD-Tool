@@ -95,7 +95,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
         .padding(0.05);
 
     const yMax = d3.max(allSeriesData, series => 
-        d3.max(series.components, c => c.current_rom * c.square_footage)
+                        d3.max(series.components, c => c.target_value * c.square_footage)
     );
     
     const y = d3.scaleLinear()
@@ -127,7 +127,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
             const comp = series.components.find(c => c.name === componentName);
             return {
                 seriesName: series.name,
-                value: comp ? comp.current_rom * comp.square_footage : 0
+                value: comp ? comp.target_value * comp.square_footage : 0
             };
         }))
         .enter().append("g").attr("class", "bar-group");
@@ -226,7 +226,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpVa
         let cumulative = 0;
         const components = componentNames.map(compName => {
             const component = series.components.find(c => c.name === compName);
-            const value = component ? component.current_rom * component.square_footage : 0;
+            const value = component ? component.target_value * component.square_footage : 0;
             const start = cumulative;
             cumulative += value;
             return { name: compName, value, start, end: cumulative };
@@ -331,7 +331,7 @@ export function updateSummary() {
 
     const tbody = table.createTBody();
     allSeries.forEach(series => {
-        const totalRom = d3.sum(series.components, c => c.current_rom * c.square_footage);
+        const totalRom = d3.sum(series.components, c => c.target_value * c.square_footage);
         const grossSF = series.projectAreaSF || 0; // Use the SF from the series data directly
         const usableSF = grossSF * 0.8;
         const costPerSF = grossSF > 0 ? totalRom / grossSF : 0;

@@ -55,7 +55,7 @@ export function getFormattedTimestamp() {
 /**
  * Calculates the total cost for a given set of components.
  * @param {Array} components - An array of component objects.
- * @param {string} key - The key to use for the cost calculation (e.g., 'current_rom').
+ * @param {string} key - The key to use for the cost calculation (e.g., 'target_value').
  * @returns {number} The total calculated cost.
  */
 export function calculateTotal(components, key) {

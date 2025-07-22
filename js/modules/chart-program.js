@@ -49,7 +49,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
                 const phase2Components = state.currentData.phases.phase2.components;
                 const snapshotComponents = phase2Components.map(c => ({
                     name: c.name,
-                    current_rom: c.current_rom,
+                    target_value: c.target_value,
                     square_footage: c.square_footage
                 }));
                 // Create the snapshot object
@@ -107,11 +107,11 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     // Calculate totals first
     phaseComponents.forEach(d => {
         totalSquareFootage += d.square_footage;
-        totalCurrentCost += (d.current_rom * d.square_footage);
+        totalCurrentCost += (d.target_value * d.square_footage);
         
         const originalComponent = originalComponents.find(c => c.name === d.name);
         if (originalComponent) {
-            totalTargetValue += (originalComponent.current_rom * d.square_footage);
+            totalTargetValue += (originalComponent.target_value * d.square_footage);
         }
     });
 
@@ -147,7 +147,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     romCells.append('input')
         .attr('type', 'text')
         .attr('class', 'program-table-input')
-        .attr('value', d => utils.formatCurrency(d.current_rom))
+                    .attr('value', d => utils.formatCurrency(d.target_value))
         .attr('data-phase', 'phase2')
         .attr('data-name', d => d.name)
         .on('change', function(event, d) {
@@ -159,7 +159,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         .attr('class', 'px-6 py-4')
         .text(d => {
             const originalComponent = originalComponents.find(c => c.name === d.name);
-            return originalComponent ? utils.formatCurrency(originalComponent.current_rom) : '-';
+            return originalComponent ? utils.formatCurrency(originalComponent.target_value) : '-';
         });
 
     // Target Value (Target Value/SF * Square Footage)
@@ -168,7 +168,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         .text(d => {
             const originalComponent = originalComponents.find(c => c.name === d.name);
             if (originalComponent) {
-                const targetValue = originalComponent.current_rom * d.square_footage;
+                const targetValue = originalComponent.target_value * d.square_footage;
                 return utils.formatCurrencyBig(targetValue);
             }
             return '-';
@@ -178,7 +178,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     rows.append('td')
         .attr('class', 'px-6 py-4')
         .text(d => {
-            return utils.formatCurrencyBig(d.current_rom * d.square_footage);
+            return utils.formatCurrencyBig(d.target_value * d.square_footage);
         });
 
     // Add totals row

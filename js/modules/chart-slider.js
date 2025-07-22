@@ -21,14 +21,14 @@ export function setDependencies(fns) {
  * When a component's value is changed, this function calculates the delta
  * and distributes the inverse of that delta proportionally across all other unlocked components.
  * @param {object} changedComponent - The component object that was directly modified.
- * @param {number} newValue - The new `current_rom` value for the changed component.
+ * @param {number} newValue - The new `target_value` value for the changed component.
  * @param {string} phaseKey - The key for the current phase ('phase1' or 'phase2').
  */
 function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     const phase = state.currentData.phases[phaseKey];
 
     // 1. Calculate the initial change in absolute cost from the user's action.
-    const originalRom = changedComponent.current_rom;
+    const originalRom = changedComponent.target_value;
     const newRom = Math.max(0, newValue); // Ensure new value isn't negative
     const initialCostChange = (newRom - originalRom) * changedComponent.square_footage;
 
@@ -42,13 +42,13 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
 
     // If no components can absorb the change, just apply it and let the total cost drift.
     if (unlockedComponents.length === 0) {
-        changedComponent.current_rom = newRom;
+        changedComponent.target_value = newRom;
         render();
         return;
     }
 
     // 3. Set the target component to its new value.
-    changedComponent.current_rom = newRom;
+            changedComponent.target_value = newRom;
 
     // 4. Calculate the total cost that needs to be absorbed by the other components.
     const costToAbsorb = -initialCostChange;
@@ -67,7 +67,7 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
         const nextComponentsAvailable = [];
 
         componentsAvailableToAbsorb.forEach(comp => {
-            const currentCompRom = comp.current_rom;
+            const currentCompRom = comp.target_value;
             const sf = comp.square_footage;
             const romChangeForComp = costShare / sf;
             const newCompRom = currentCompRom + romChangeForComp;
@@ -76,10 +76,10 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
                 // This component can't absorb its full share. Absorb what it can down to 0.
                 const absorbedCost = -currentCompRom * sf;
                 remainingCostToAbsorb += (costShare - absorbedCost); // Add the un-absorbed amount to the remainder.
-                comp.current_rom = 0;
+                comp.target_value = 0;
             } else {
                 // This component can absorb its full share for this iteration.
-                comp.current_rom = newCompRom;
+                comp.target_value = newCompRom;
                 nextComponentsAvailable.push(comp); // This component is still available for future adjustments.
             }
         });
@@ -92,8 +92,8 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // apply it back to the originally changed component to maintain the total budget.
     if (Math.abs(remainingCostToAbsorb) > 0.01 && changedComponent.square_footage > 0) {
         const leftoverRomChange = remainingCostToAbsorb / changedComponent.square_footage;
-        changedComponent.current_rom += leftoverRomChange;
-        changedComponent.current_rom = Math.max(0, changedComponent.current_rom);
+        changedComponent.target_value += leftoverRomChange;
+        changedComponent.target_value = Math.max(0, changedComponent.target_value);
     }
 
     render();
@@ -149,13 +149,13 @@ export function renderChart() {
     // updateGroup.select(".target-value").style("top", d => yScale(d.target_value) + "px").style("bottom", null); // REMOVED
     
     updateGroup.select(".current-rom")
-        .style("top", d => yScale(d.current_rom) - 3 + "px")
+        .style("top", d => yScale(d.target_value) - 3 + "px")
         .style("bottom", null)
         .each(function(d) {
             const bar = d3.select(this);
-            const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
+            const isOutsideBenchmark = d.target_value < d.benchmark_low || d.target_value > d.benchmark_high;
 
-            if (d.current_rom === 0) {
+            if (d.target_value === 0) {
                 bar.style("background", "none")
                    .style("border", "2px dashed #9ca3af") // gray-400
                    .classed('zero-rom-bar', true);
@@ -176,19 +176,19 @@ export function renderChart() {
         
         // Update the value labels
         const valueGroup = d3.select(this).select(".value-label-group");
-        valueGroup.select(".current-value-label").text(utils.formatCurrency(d.current_rom));
-        valueGroup.style("top", yScale(d.current_rom) - 10 + "px").style("bottom", null);
+        valueGroup.select(".current-value-label").text(utils.formatCurrency(d.target_value));
+        valueGroup.style("top", yScale(d.target_value) - 10 + "px").style("bottom", null);
 
         // Position the ghost bar
         const ghostBar = d3.select(this).select(".ghost-rom");
-        ghostBar.style("top", yScale(original.current_rom) - 3 + "px").style("bottom", null);
+        ghostBar.style("top", yScale(original.target_value) - 3 + "px").style("bottom", null);
 
         // Show/hide and update the delta label
         const deltaLabel = valueGroup.select(".delta-label");
-        if (d.current_rom !== original.current_rom) {
+        if (d.target_value !== original.target_value) {
             ghostBar.style("display", "block");
-            const delta = d.current_rom - original.current_rom;
-            const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
+            const delta = d.target_value - original.target_value;
+            const isOutsideBenchmark = d.target_value < d.benchmark_low || d.target_value > d.benchmark_high;
             deltaLabel.style("display", "block")
                 .text(`${delta > 0 ? '+' : ''}${utils.formatCurrency(delta)}`)
                 .style("color", isOutsideBenchmark ? '#dc2626' : '#16a34a'); // Red if outside, green if inside
@@ -467,7 +467,7 @@ export function balanceToGmp() {
         return;
     }
 
-    const currentRomTotal = utils.calculateTotal(phase.components, 'current_rom');
+            const currentRomTotal = utils.calculateTotal(phase.components, 'target_value');
     const targetBudget = phase.totalProjectBudget;
     const difference = targetBudget - currentRomTotal;
 
@@ -492,13 +492,13 @@ export function balanceToGmp() {
         const componentsForNextRound = [];
 
         componentsAvailable.forEach(c => {
-            const newRom = c.current_rom + costPerSf;
+            const newRom = c.target_value + costPerSf;
             if (newRom < 0) {
-                const absorbedCost = -c.current_rom * c.square_footage;
+                const absorbedCost = -c.target_value * c.square_footage;
                 costRemainingToDistribute += (costPerSf * c.square_footage - absorbedCost);
-                c.current_rom = 0;
+                c.target_value = 0;
             } else {
-                c.current_rom = newRom;
+                c.target_value = newRom;
                 componentsForNextRound.push(c);
             }
         });

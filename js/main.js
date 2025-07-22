@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const phase2Components = state.currentData.phases.phase2.components;
             const snapshotComponents = phase2Components.map(c => ({
                 name: c.name,
-                current_rom: c.current_rom,
+                target_value: c.target_value,
                 square_footage: c.square_footage
             }));
             const snapshot = {
