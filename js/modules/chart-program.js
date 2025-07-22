@@ -5,10 +5,9 @@ import * as utils from './utils.js';
 import * as ui from './ui.js';
 
 // Forward-declare dependencies
-let handleSquareFootageCellChange, handleCurrentRomCellChange, render, handleGrossSfCellChange;
+let handleSquareFootageCellChange, render, handleGrossSfCellChange;
 export function setDependencies(fns) {
     handleSquareFootageCellChange = fns.handleSquareFootageCellChange;
-    handleCurrentRomCellChange = fns.handleCurrentRomCellChange;
     render = fns.render;
     handleGrossSfCellChange = fns.handleGrossSfCellChange;
 }
@@ -79,10 +78,8 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     const headers = [
         'Component',
         'Square Footage',
-        'Current ROM ($/SF)',
         'Target Value / SF',
-        'Target Value',
-        'Total Cost'
+        'Target Value'
     ];
 
     headerRow.selectAll('th')
@@ -99,7 +96,6 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     // Calculate totals for the footer
     let totalSquareFootage = 0;
     let totalTargetValue = 0;
-    let totalCurrentCost = 0;
 
     const phaseComponents = state.currentData.phases.phase2.components;
     const originalComponents = state.originalData.phases.phase2.components;
@@ -107,7 +103,6 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     // Calculate totals first
     phaseComponents.forEach(d => {
         totalSquareFootage += d.square_footage;
-        totalCurrentCost += (d.target_value * d.square_footage);
         
         const originalComponent = originalComponents.find(c => c.name === d.name);
         if (originalComponent) {
@@ -140,20 +135,6 @@ function updatePhase2ProgramTable(container, initialRender = false) {
             handleSquareFootageCellChange(event);
         });
 
-    // Current ROM ($/SF) (editable)
-    const romCells = rows.append('td')
-        .attr('class', 'px-6 py-4');
-
-    romCells.append('input')
-        .attr('type', 'text')
-        .attr('class', 'program-table-input')
-                    .attr('value', d => utils.formatCurrency(d.target_value))
-        .attr('data-phase', 'phase2')
-        .attr('data-name', d => d.name)
-        .on('change', function(event, d) {
-            handleCurrentRomCellChange(event);
-        });
-
     // Target Value / SF (from original data)
     rows.append('td')
         .attr('class', 'px-6 py-4')
@@ -174,13 +155,6 @@ function updatePhase2ProgramTable(container, initialRender = false) {
             return '-';
         });
 
-    // Total Cost (Current ROM * Square Footage)
-    rows.append('td')
-        .attr('class', 'px-6 py-4')
-        .text(d => {
-            return utils.formatCurrencyBig(d.target_value * d.square_footage);
-        });
-
     // Add totals row
     const totalsRow = tbody.append('tr')
         .attr('class', 'bg-gray-100 border-t-2 border-gray-300 font-semibold');
@@ -195,11 +169,6 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         .attr('class', 'px-6 py-4 font-bold')
         .text(totalSquareFootage.toLocaleString('en-US'));
 
-    // Current ROM (empty for totals)
-    totalsRow.append('td')
-        .attr('class', 'px-6 py-4')
-        .text('-');
-
     // Target Value / SF (empty for totals)
     totalsRow.append('td')
         .attr('class', 'px-6 py-4')
@@ -209,11 +178,6 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     totalsRow.append('td')
         .attr('class', 'px-6 py-4 font-bold')
         .text(utils.formatCurrencyBig(totalTargetValue));
-
-    // Total Current Cost
-    totalsRow.append('td')
-        .attr('class', 'px-6 py-4 font-bold')
-        .text(utils.formatCurrencyBig(totalCurrentCost));
 }
 
 export function renderPhase2ProgramView() {

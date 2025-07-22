@@ -352,25 +352,6 @@ export function renderYAxisLabels() {
 }
 
 /**
- * Handles changes to the "Current ROM" input cells in the Program View table.
- */
-export function handleCurrentRomCellChange(event) {
-    const input = event.target;
-    const newValue = parseFloat(input.value);
-    const componentName = input.dataset.name;
-    const phaseKey = 'phase2';
-
-    if (isNaN(newValue)) return;
-
-    const phase = state.currentData.phases[phaseKey];
-    const component = phase.components.find(c => c.name === componentName);
-
-    if (component) {
-        applyChangeAndBalance(component, newValue, phaseKey);
-    }
-}
-
-/**
  * Handles changes to the square footage inputs in the Program View table.
  */
 export function handleSquareFootageCellChange(event) {

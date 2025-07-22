@@ -106,7 +106,6 @@ slider.setDependencies({
 program.setDependencies({
     render: render,
     handleSquareFootageCellChange: slider.handleSquareFootageCellChange,
-    handleCurrentRomCellChange: slider.handleCurrentRomCellChange,
     handleGrossSfCellChange: slider.handleGrossSfCellChange
 });
 summary.setRender(render);
