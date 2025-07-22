@@ -65,102 +65,178 @@ function updatePhase2ProgramTable(container, initialRender = false) {
             }
         });
 
-    // --- TABLE DATA PREPARATION ---
+    // --- PROGRAM TABLE ---
 
-    // Prepare the data for the program table
-    const tableData = [];
+    const table = container.append('table')
+        .attr('class', 'w-full text-sm text-left text-gray-500 border border-gray-200 bg-white rounded-lg shadow-sm overflow-hidden');
 
-    // Add Gross SF row data
-    tableData.push({
-        type: 'gross-sf',
-        name: 'Gross SF',
-        value: state.currentData.projectAreaSF || 0
-    });
+    // Header
+    const thead = table.append('thead');
+    const headerRow = thead.append('tr')
+        .attr('class', 'text-xs text-gray-700 uppercase bg-gray-50');
 
-    // Sort phase 2 components alphabetically by name
-    const p2Components = state.currentData.phases.phase2.components.sort((a, b) => a.name.localeCompare(b.name));
-    if (p2Components.length > 0) {
-        // Add each component to the table data array, tagging with type and phase
-        p2Components.forEach(c => tableData.push({ ...c, type: 'component', dataPhase: 'phase2' }));
-    }
+    // Define the headers
+    const headers = [
+        'Component',
+        'Square Footage',
+        'Current ROM ($/SF)',
+        'Target Value / SF',
+        'Target Value',
+        'Total Cost'
+    ];
 
-    // Create Table
-    const table = container.append('table').attr('class', 'min-w-full divide-y divide-gray-200');
-
-    // Create Header
-    const thead = table.append('thead').attr('class', 'bg-gray-50');
-    thead.append('tr').selectAll('th')
-        .data(['Component', 'Square Footage'])
-        .enter().append('th')
-        .attr('class', 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider')
+    headerRow.selectAll('th')
+        .data(headers)
+        .enter()
+        .append('th')
+        .attr('scope', 'col')
+        .attr('class', 'px-6 py-3')
         .text(d => d);
 
-    // Create Body
+    // Body
     const tbody = table.append('tbody');
-    const rows = tbody.selectAll('tr').data(tableData).enter().append('tr');
 
-    rows.each(function(d) {
-        const row = d3.select(this);
-        if (d.type === 'gross-sf') {
-            row.attr('class', 'bg-white font-bold');
-            row.append('td')
-                .attr('class', 'px-6 py-4 whitespace-nowrap text-sm text-gray-900')
-                .text(d.name);
-            row.append('td')
-                .attr('class', 'px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center editable-cell')
-                .append('input').attr('type', 'text').attr('class', 'program-table-input')
-                .attr('value', d.value.toLocaleString('en-US'))
-                .on('change', handleGrossSfCellChange);
-        } else if (d.type === 'header') {
-            row.attr('class', 'bg-gray-100');
-            row.append('td').attr('colspan', 2).attr('class', 'py-2 px-6 text-sm font-bold text-gray-700').text(d.name);
-        } else {
-            if (d.current_rom === 0 || d.square_footage === 0) {
-                row.attr('class', 'zero-value-row');
-            } else {
-                row.attr('class', 'bg-white');
-            }
+    // Calculate totals for the footer
+    let totalSquareFootage = 0;
+    let totalTargetValue = 0;
+    let totalCurrentCost = 0;
 
-            row.append('td').attr('class', 'py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap').text(d.name);
-            
-            // Square Footage (editable)
-            row.append('td').attr('class', 'py-4 px-6 text-sm text-gray-500 whitespace-nowrap editable-cell')
-                .append('input').attr('type', 'text').attr('class', 'program-table-input')
-                .attr('value', d.square_footage.toLocaleString('en-US'))
-                .attr('data-phase', d.dataPhase)
-                .attr('data-name', d.name)
-                .on('change', handleSquareFootageCellChange);
+    const phaseComponents = state.currentData.phases.phase2.components;
+    const originalComponents = state.originalData.phases.phase2.components;
+
+    // Calculate totals first
+    phaseComponents.forEach(d => {
+        totalSquareFootage += d.square_footage;
+        totalCurrentCost += (d.current_rom * d.square_footage);
+        
+        const originalComponent = originalComponents.find(c => c.name === d.name);
+        if (originalComponent) {
+            totalTargetValue += (originalComponent.current_rom * d.square_footage);
         }
     });
+
+    const rows = tbody.selectAll('tr')
+        .data(phaseComponents)
+        .enter()
+        .append('tr')
+        .attr('class', 'bg-white border-b hover:bg-gray-50');
+
+    // Component Name
+    rows.append('td')
+        .attr('class', 'px-6 py-4 font-medium text-gray-900 whitespace-nowrap')
+        .text(d => d.name);
+
+    // Square Footage (editable)
+    const sfCells = rows.append('td')
+        .attr('class', 'px-6 py-4');
+
+    sfCells.append('input')
+        .attr('type', 'text')
+        .attr('class', 'program-table-input')
+        .attr('value', d => d.square_footage.toLocaleString('en-US'))
+        .attr('data-phase', 'phase2')
+        .attr('data-name', d => d.name)
+        .on('change', function(event, d) {
+            handleSquareFootageCellChange(event);
+        });
+
+    // Current ROM ($/SF) (editable)
+    const romCells = rows.append('td')
+        .attr('class', 'px-6 py-4');
+
+    romCells.append('input')
+        .attr('type', 'text')
+        .attr('class', 'program-table-input')
+        .attr('value', d => utils.formatCurrency(d.current_rom))
+        .attr('data-phase', 'phase2')
+        .attr('data-name', d => d.name)
+        .on('change', function(event, d) {
+            handleCurrentRomCellChange(event);
+        });
+
+    // Target Value / SF (from original data)
+    rows.append('td')
+        .attr('class', 'px-6 py-4')
+        .text(d => {
+            const originalComponent = originalComponents.find(c => c.name === d.name);
+            return originalComponent ? utils.formatCurrency(originalComponent.current_rom) : '-';
+        });
+
+    // Target Value (Target Value/SF * Square Footage)
+    rows.append('td')
+        .attr('class', 'px-6 py-4')
+        .text(d => {
+            const originalComponent = originalComponents.find(c => c.name === d.name);
+            if (originalComponent) {
+                const targetValue = originalComponent.current_rom * d.square_footage;
+                return utils.formatCurrencyBig(targetValue);
+            }
+            return '-';
+        });
+
+    // Total Cost (Current ROM * Square Footage)
+    rows.append('td')
+        .attr('class', 'px-6 py-4')
+        .text(d => {
+            return utils.formatCurrencyBig(d.current_rom * d.square_footage);
+        });
+
+    // Add totals row
+    const totalsRow = tbody.append('tr')
+        .attr('class', 'bg-gray-100 border-t-2 border-gray-300 font-semibold');
+
+    // Component Name (Total label)
+    totalsRow.append('td')
+        .attr('class', 'px-6 py-4 font-bold text-gray-900')
+        .text('TOTALS');
+
+    // Total Square Footage
+    totalsRow.append('td')
+        .attr('class', 'px-6 py-4 font-bold')
+        .text(totalSquareFootage.toLocaleString('en-US'));
+
+    // Current ROM (empty for totals)
+    totalsRow.append('td')
+        .attr('class', 'px-6 py-4')
+        .text('-');
+
+    // Target Value / SF (empty for totals)
+    totalsRow.append('td')
+        .attr('class', 'px-6 py-4')
+        .text('-');
+
+    // Total Target Value
+    totalsRow.append('td')
+        .attr('class', 'px-6 py-4 font-bold')
+        .text(utils.formatCurrencyBig(totalTargetValue));
+
+    // Total Current Cost
+    totalsRow.append('td')
+        .attr('class', 'px-6 py-4 font-bold')
+        .text(utils.formatCurrencyBig(totalCurrentCost));
 }
 
 export function renderPhase2ProgramView() {
     // Clear the program view before rendering new content
     d3.select(dom.programView).html('');
 
-    const twoColumnLayout = d3.select(dom.programView).append('div')
-        .attr('class', 'flex gap-4');
+    const mainContainer = d3.select(dom.programView);
 
-    const leftColumn = twoColumnLayout.append('div')
-        .attr('class', 'w-2/3');
-    
-    const rightColumn = twoColumnLayout.append('div')
-        .attr('class', 'w-1/3');
-
-    // --- SCHEME SELECTION UI ---
+    // --- SCHEME SELECTION UI (Horizontal Row) ---
 
     // Create a container for the scheme selection cards
-    const schemesContainer = leftColumn.append('div')
+    const schemesContainer = mainContainer.append('div')
         .attr('class', 'schemes-container mb-4 p-4 bg-gray-50 rounded-lg');
 
     // Add a heading for the scheme selection section
     schemesContainer.append('h3')
-        .attr('class', 'text-xl font-bold text-gray-800 mb-4')
+        .attr('class', 'text-lg font-bold text-gray-800 mb-3')
         .text('Select a Scheme');
 
-    // Create a grid layout for the scheme cards
+    // Create a horizontal grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
-        .attr('class', 'grid grid-cols-2 gap-4');
+        .attr('class', 'grid grid-cols-4 gap-4')
+        .style('height', '100px');
 
     // Get the list of available schemes from the current data
     const schemeData = state.currentData.schemes || [];
@@ -169,7 +245,7 @@ export function renderPhase2ProgramView() {
     const schemeCards = schemeGrid.selectAll('.scheme-card')
         .data(schemeData, d => d.name)
         .join('div')
-        .attr('class', 'scheme-card relative rounded-lg overflow-hidden shadow-md cursor-pointer')
+        .attr('class', 'scheme-card relative rounded-lg overflow-hidden shadow-md cursor-pointer h-full')
         .on('click', (event, d) => {
             // When a scheme card is clicked:
             const updates = [];
@@ -185,66 +261,41 @@ export function renderPhase2ProgramView() {
             }
             state.currentData.projectAreaSF = newGrossSf;
 
-            // Determine changes before applying them
-            state.currentData.phases.phase2.components.forEach(component => {
-                const schemeComponent = d.components.find(c => c.name === component.name);
-                if (schemeComponent) {
-                    const old_sf = component.square_footage;
-                    const new_sf = schemeComponent.square_footage;
-                    const old_rom = component.current_rom;
-                    const new_rom = schemeComponent.current_rom;
-                    
+            // Animate each component's square footage change
+            d.components.forEach(schemeComponent => {
+                const currentComponent = state.currentData.phases.phase2.components.find(c => c.name === schemeComponent.name);
+                if (currentComponent) {
+                    const oldSf = currentComponent.square_footage;
+                    const newSf = schemeComponent.square_footage;
                     let sf_change = 'none';
-                    if (new_sf > old_sf) sf_change = 'increase';
-                    else if (new_sf < old_sf) sf_change = 'decrease';
-
+                    if (newSf > oldSf) sf_change = 'increase';
+                    else if (newSf < oldSf) sf_change = 'decrease';
                     if (sf_change !== 'none') {
-                        updates.push({ name: component.name, sf_change });
+                        updates.push({ name: currentComponent.name, sf_change });
                     }
-
-                    // Update the component's square footage and ROM value
-                    component.square_footage = new_sf;
-                    if (schemeComponent.current_rom !== undefined) {
-                        component.current_rom = new_rom;
-                    }
+                    currentComponent.square_footage = newSf;
                 }
             });
 
-            // Re-render the program view to reflect the new scheme selection
-            updatePhase2ProgramTable(rightColumn);
-
-            // After rendering, apply animations
-            // Use a brief timeout to ensure the DOM is updated before we select elements
-            setTimeout(() => {
-                updates.forEach(update => {
-                    // Find row for component
-                    const row = d3.select(dom.programView).selectAll('tbody tr').filter(d_row => d_row && d_row.name === update.name);
-                    if (!row.empty()) {
-                        if (update.sf_change !== 'none') {
-                            const cell = row.select(update.name === 'Gross SF' ? 'td:nth-child(2)' : 'td:nth-child(2)');
-                            if (!cell.empty()) {
-                                const className = `value-${update.sf_change}`;
-                                // Remove any existing animation classes before adding the new one
-                                cell.classed('value-increase', false).classed('value-decrease', false);
-                                // Add the new class to trigger the animation
-                                cell.classed(className, true);
-                            }
-                        }
-                    }
-                });
-            }, 100);
+            render();
         });
 
-    // Add the scheme image to each card
+    // Add image to each card
     schemeCards.append('img')
         .attr('src', d => d.image)
         .attr('alt', d => d.name)
-        .attr('class', 'w-full h-60 object-cover');
+        .attr('class', 'w-full h-full object-cover');
 
-    // Add the scheme name overlay to each card
+    // Add title overlay
     schemeCards.append('div')
-        .attr('class', 'absolute bottom-0 left-0 w-full p-2 bg-black bg-opacity-50 text-white font-semibold')
+        .attr('class', 'absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-2 text-center')
+        .append('h4')
+        .attr('class', 'font-semibold text-sm')
         .text(d => d.name);
 
-    updatePhase2ProgramTable(rightColumn, true);
+    // --- PROGRAM TABLE (Full Width) ---
+    const tableContainer = mainContainer.append('div')
+        .attr('class', 'program-table-container');
+
+    updatePhase2ProgramTable(tableContainer, true);
 } 
