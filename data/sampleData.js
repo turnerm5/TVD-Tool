@@ -31,14 +31,14 @@ const sampleData = {
                 { "Category": "Permits", "Subcategory": "Building Permit", "Total": 136000 }
             ],
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 49050, "target_value": 134.85 },
-                { "name": "B10 Superstructure", "square_footage": 49050, "target_value": 82.85 },
-                { "name": "B20 Enclosure", "square_footage": 49050, "target_value": 82.85 },
-                { "name": "B30 Roofing", "square_footage": 12263, "target_value": 43.00 },
+                { "name": "A Substructure", "square_footage": 49050, "target_value": 33.50 },
+                { "name": "B10 Superstructure", "square_footage": 49050, "target_value": 98 },
+                { "name": "B20 Enclosure", "square_footage": 49050, "target_value": 100 },
+                { "name": "B30 Roofing", "square_footage": 12263, "target_value": 15 },
                 { 
                     "name": "C Interiors", 
                     "square_footage": 49050, 
-                    "target_value": 132.44,
+                    "target_value": 115,
                     "building_efficiency": 0.60,
                     "breakdown": [
                         { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 12000 },
@@ -47,10 +47,10 @@ const sampleData = {
                         { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 5000 }
                     ]
                 },
-                { "name": "D Services", "square_footage": 49050, "target_value": 224.85 },
+                { "name": "D Services", "square_footage": 49050, "target_value": 265 },
                 { "name": "E Equipment and Furnishings", "square_footage": 49050, "target_value": 50.00 },
-                { "name": "F Special Construction", "square_footage": 10000, "target_value": 84 },
-                { "name": "G Building Sitework", "square_footage": 49050, "target_value": 41 }
+                { "name": "F Special Construction", "square_footage": 10000, "target_value": 20 },
+                { "name": "G Building Sitework", "square_footage": 49050, "target_value": 42 }
             ]
         }
     },

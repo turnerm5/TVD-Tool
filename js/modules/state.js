@@ -1,55 +1,89 @@
 /**
  * @file state.js
  * @description Manages the global state for the TVD Tool application.
- * This includes the core data, UI state, and user selections.
- * State is exposed via getters and setters to control mutations.
  */
-
-let _originalData = null;
-let _currentData = null;
-let _yDomainMax = 100;
-let _currentPhase = 'phase1';
-let _currentView = 'benchmarks';
-let _selectedBenchmark = null;
-let _lockedCostOfWork = new Set();
-let _snapshots = [];
-let _interiorsEntryState = null;
+import * as utils from './utils.js';
 
 export const state = {
-    get originalData() { return _originalData; },
-    set originalData(data) { _originalData = data; },
+    currentData: null,
+    originalData: null,
+    lockedCostOfWork: new Set(),
+    currentView: 'summary', // 'summary', 'slider', 'interiors', 'program'
+    interiorsEntryState: null,
+    snapshots: [],
+    indirectCostPercentages: [],
 
-    get currentData() { return _currentData; },
-    set currentData(data) { _currentData = data; },
+    /**
+     * Initializes the application state.
+     * @param {object} data - The initial data loaded from sampleData.js.
+     */
+    init(data) {
+        this.originalData = data;
+        this.currentData = JSON.parse(JSON.stringify(data)); // Deep copy
+        this.snapshots = [];
+        this.lockedCostOfWork.clear();
+        this.calculateIndirectCostPercentages();
+    },
 
-    get yDomainMax() { return _yDomainMax; },
-    set yDomainMax(value) { _yDomainMax = value; },
-
-    get currentPhase() { return _currentPhase; },
-    set currentPhase(phase) { _currentPhase = phase; },
-
-    get currentView() { return _currentView; },
-    set currentView(view) { _currentView = view; },
-
-    get selectedBenchmark() { return _selectedBenchmark; },
-    set selectedBenchmark(id) { _selectedBenchmark = id; },
-
-    get lockedCostOfWork() { return _lockedCostOfWork; },
-    set lockedCostOfWork(costOfWork) { _lockedCostOfWork = costOfWork; },
-
-    get interiorsEntryState() { return _interiorsEntryState; },
-    set interiorsEntryState(state) { _interiorsEntryState = state; },
-
-    get snapshots() { return _snapshots; },
-    addSnapshot(snapshot) {
-        if (_snapshots.length < 3) {
-            _snapshots.push(snapshot);
+    /**
+     * Calculates the indirect cost percentages based on the original data.
+     * This establishes a baseline for how indirect costs relate to COW.
+     */
+    calculateIndirectCostPercentages() {
+        const phase2 = this.originalData.phases.phase2;
+        if (!phase2.indirectCosts || !phase2.costOfWork) {
+            this.indirectCostPercentages = [];
+            return;
         }
+        const totalCow = utils.calculateTotalCostOfWork(phase2.costOfWork);
+        this.indirectCostPercentages = phase2.indirectCosts.map(item => ({
+            name: item.Subcategory,
+            percentage: totalCow > 0 ? item.Total / totalCow : 0
+        }));
     },
+
+    /**
+     * Resets the current data to the original loaded data, clearing any snapshots or locks.
+     */
+    resetToOriginal() {
+        this.currentData = JSON.parse(JSON.stringify(this.originalData));
+        this.snapshots = [];
+        this.lockedCostOfWork.clear();
+        // Recalculating percentages isn't strictly necessary if they are based on original data,
+        // but it's good practice to ensure consistency.
+        this.calculateIndirectCostPercentages();
+    },
+
+    /**
+     * Adds a new snapshot of the current data state.
+     * @param {string} name - The name for the new snapshot.
+     */
+    addSnapshot(name) {
+        if (this.snapshots.length >= 3) {
+            // Maybe show a user notification here in a real app
+            console.warn("Maximum number of snapshots (3) reached.");
+            return;
+        }
+        const snapshot = {
+            name: name,
+            costOfWork: JSON.parse(JSON.stringify(this.currentData.phases.phase2.costOfWork)),
+            projectAreaSF: this.currentData.projectAreaSF
+        };
+        this.snapshots.push(snapshot);
+    },
+
+    /**
+     * Deletes a snapshot by its name.
+     * @param {string} snapshotName - The name of the snapshot to delete.
+     */
     deleteSnapshot(snapshotName) {
-        _snapshots = _snapshots.filter(s => s.name !== snapshotName);
+        this.snapshots = this.snapshots.filter(s => s.name !== snapshotName);
     },
+
+    /**
+     * Clears all snapshots from the state.
+     */
     clearSnapshots() {
-        _snapshots = [];
+        this.snapshots = [];
     }
 }; 

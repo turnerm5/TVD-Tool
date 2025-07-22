@@ -223,15 +223,32 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
 
     // --- Data Transformation for Stacking ---
     const stackedData = allSeriesData.map(series => {
+        const cowTotal = utils.calculateTotalCostOfWork(series.costOfWork);
+        
         let cumulative = 0;
-        const costOfWork = costOfWorkNames.map(compName => {
-            const component = series.costOfWork.find(c => c.name === compName);
-            const value = component ? component.target_value * component.square_footage : 0;
+        // 1. Direct Cost of Work Components
+        const directCostItems = series.costOfWork.map(comp => {
+            const value = (comp.name === 'C Interiors' && comp.building_efficiency) 
+                ? (comp.square_footage / comp.building_efficiency) * comp.target_value
+                : comp.target_value * comp.square_footage;
             const start = cumulative;
             cumulative += value;
-            return { name: compName, value, start, end: cumulative };
+            return { name: comp.name, value, start, end: cumulative, isIndirect: false };
         });
-        return { name: series.name, costOfWork, total: cumulative };
+
+        // 2. Indirect Cost Components
+        const indirectCostItems = state.indirectCostPercentages.map(indirect => {
+            const value = indirect.percentage * cowTotal;
+            const start = cumulative;
+            cumulative += value;
+            return { name: indirect.name, value, start, end: cumulative, isIndirect: true };
+        });
+
+        return { 
+            name: series.name, 
+            components: [...directCostItems, ...indirectCostItems],
+            total: cumulative 
+        };
     });
 
     // --- D3 Scales ---
@@ -245,7 +262,8 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
         .domain([0, yMax * 1.1]).nice()
         .range([height, 0]);
 
-    const componentColor = d3.scaleOrdinal(d3.schemeTableau10).domain(costOfWorkNames);
+    const directColor = d3.scaleOrdinal(d3.schemeTableau10).domain(costOfWorkNames);
+    const indirectColor = d3.scaleOrdinal(d3.schemeSet3).domain(state.indirectCostPercentages.map(d => d.name));
 
     // --- D3 Axes ---
     g.append("g")
@@ -265,12 +283,15 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
         .attr("transform", d => `translate(${x(d.name)},0)`);
 
     seriesGroup.selectAll("rect")
-        .data(d => d.costOfWork)
+        .data(d => d.components)
         .enter().append("rect")
         .attr("y", d => y(d.end))
-        .attr("height", d => y(d.start) - y(d.end))
+        .attr("height", d => Math.max(0, y(d.start) - y(d.end)))
         .attr("width", x.bandwidth())
-        .attr("fill", d => componentColor(d.name))
+        .attr("fill", d => d.isIndirect ? indirectColor(d.name) : directColor(d.name))
+        .attr("stroke", d => d.isIndirect ? "#a3a3a3" : "none")
+        .attr("stroke-dasharray", d => d.isIndirect ? "3, 3" : "none")
+        .attr("fill-opacity", d => d.isIndirect ? 0.7 : 1.0)
         .append("title")
         .text(d => `${d.name}: ${utils.formatCurrency(d.value)}`);
 
@@ -331,17 +352,20 @@ export function updateSummary() {
 
     const tbody = table.createTBody();
     allSeries.forEach(series => {
-        const totalRom = d3.sum(series.costOfWork, c => c.target_value * c.square_footage);
-        const grossSF = series.projectAreaSF || 0; // Use the SF from the series data directly
-        const usableSF = grossSF * 0.8;
-        const costPerSF = grossSF > 0 ? totalRom / grossSF : 0;
-        const variance = totalRom - gmp;
+        const cowTotal = utils.calculateTotalCostOfWork(series.costOfWork);
+        const indirectTotal = d3.sum(state.indirectCostPercentages, p => p.percentage * cowTotal);
+        const totalProjectCost = cowTotal + indirectTotal;
+
+        const grossSF = series.projectAreaSF || 0;
+        const usableSF = utils.calculateUsableSF(grossSF, series.costOfWork);
+        const costPerSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
+        const variance = totalProjectCost - gmp;
         
         const row = tbody.insertRow();
         row.className = 'bg-white border-b';
         row.innerHTML = `
             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${series.name}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(totalRom)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(totalProjectCost)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(usableSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerSF)}</td>

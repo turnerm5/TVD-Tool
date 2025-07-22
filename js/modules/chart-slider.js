@@ -450,35 +450,74 @@ export function balanceToGmp() {
         return;
     }
 
-            const currentRomTotal = utils.calculateTotal(phase.costOfWork, 'target_value');
+    const totalIndirectPercentage = d3.sum(state.indirectCostPercentages, p => p.percentage);
+    const totalCow = utils.calculateTotalCostOfWork(phase.costOfWork);
+    const currentIndirectCosts = totalCow * totalIndirectPercentage;
+    const currentTotalCost = totalCow + currentIndirectCosts;
     const targetBudget = phase.totalProjectBudget;
-    const difference = targetBudget - currentRomTotal;
+    const difference = targetBudget - currentTotalCost;
 
     if (Math.abs(difference) < 1) {
         alert("Already balanced to GMP.");
         return;
     }
 
-    const totalUnlockedSf = unlockedComponents.reduce((acc, c) => acc + c.square_footage, 0);
-    const costChangePerSf = difference / totalUnlockedSf;
+    // We need to find the change in COW that will result in the desired total cost change.
+    // Let deltaCOW be the change needed in the total Cost of Work.
+    // newTotalCost = (totalCow + deltaCOW) + (totalCow + deltaCOW) * totalIndirectPercentage
+    // newTotalCost = (totalCow + deltaCOW) * (1 + totalIndirectPercentage)
+    // We want newTotalCost to be targetBudget.
+    // targetBudget = (totalCow + deltaCOW) * (1 + totalIndirectPercentage)
+    // targetBudget / (1 + totalIndirectPercentage) = totalCow + deltaCOW
+    // deltaCOW = (targetBudget / (1 + totalIndirectPercentage)) - totalCow
+    const requiredCowTotal = targetBudget / (1 + totalIndirectPercentage);
+    const cowDifference = requiredCowTotal - totalCow;
 
-    let costRemainingToDistribute = difference;
+
+    // Now distribute cowDifference across unlocked components
+    const totalUnlockedSf = unlockedComponents.reduce((acc, c) => {
+        if (c.name === 'C Interiors' && c.building_efficiency) {
+            return acc + (c.square_footage / c.building_efficiency);
+        }
+        return acc + c.square_footage;
+    }, 0);
+
+    if (totalUnlockedSf === 0) {
+        alert("Cannot balance: total square footage of unlocked components is zero.");
+        return;
+    }
+
+    const costChangePerEffectiveSf = cowDifference / totalUnlockedSf;
+
+    let costRemainingToDistribute = cowDifference;
 
     const componentsAvailable = [...unlockedComponents];
     let iterations = 0;
     while(Math.abs(costRemainingToDistribute) > 1 && iterations < 5) {
-        const sfAvailable = componentsAvailable.reduce((acc, c) => acc + c.square_footage, 0);
+        const sfAvailable = componentsAvailable.reduce((acc, c) => {
+             if (c.name === 'C Interiors' && c.building_efficiency) {
+                return acc + (c.square_footage / c.building_efficiency);
+            }
+            return acc + c.square_footage;
+        }, 0);
         if (sfAvailable === 0) break;
+        
         const costPerSf = costRemainingToDistribute / sfAvailable;
 
         costRemainingToDistribute = 0;
         const componentsForNextRound = [];
 
         componentsAvailable.forEach(c => {
-            const newRom = c.target_value + costPerSf;
+            const effectiveSf = (c.name === 'C Interiors' && c.building_efficiency) 
+                ? c.square_footage / c.building_efficiency
+                : c.square_footage;
+            
+            const romChange = costPerSf; // change in $/SF
+            const newRom = c.target_value + romChange;
+            
             if (newRom < 0) {
-                const absorbedCost = -c.target_value * c.square_footage;
-                costRemainingToDistribute += (costPerSf * c.square_footage - absorbedCost);
+                const costToMakeZero = -c.target_value * effectiveSf;
+                costRemainingToDistribute += (costPerSf * effectiveSf - costToMakeZero);
                 c.target_value = 0;
             } else {
                 c.target_value = newRom;

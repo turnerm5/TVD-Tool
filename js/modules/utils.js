@@ -53,11 +53,30 @@ export function getFormattedTimestamp() {
 }
 
 /**
- * Calculates the total cost for a given set of components.
- * @param {Array} items - An array of component objects.
- * @param {string} key - The key to use for the cost calculation (e.g., 'target_value').
- * @returns {number} The total calculated cost.
+ * Calculates the total usable square footage based on building efficiency.
+ * @param {number} grossSF - The gross square footage.
+ * @param {Array} costOfWorkItems - The array of cost of work items.
+ * @returns {number} The calculated usable square footage.
  */
-export function calculateTotal(items, key) {
-    return items.reduce((acc, c) => acc + (c[key] * c.square_footage), 0);
-} 
+export function calculateUsableSF(grossSF, costOfWorkItems) {
+    const costOfWork = costOfWorkItems.find(d => d.name === 'C Interiors');
+    if (costOfWork && costOfWork.building_efficiency) {
+        return grossSF / costOfWork.building_efficiency;
+    }
+    return grossSF * 0.8; // Default if not found or no efficiency specified
+}
+
+/**
+ * Calculates the total cost of work for a given set of components.
+ * It accounts for the special case of 'C Interiors'.
+ * @param {Array} costOfWorkItems - Array of cost of work objects.
+ * @returns {number} The total cost of work.
+ */
+export function calculateTotalCostOfWork(costOfWorkItems) {
+    return d3.sum(costOfWorkItems, c => {
+        if (c.name === 'C Interiors' && c.building_efficiency) {
+            return (c.square_footage / c.building_efficiency) * c.target_value;
+        }
+        return c.target_value * c.square_footage;
+    });
+}
