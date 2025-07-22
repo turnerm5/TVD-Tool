@@ -56,25 +56,25 @@ const sampleData = {
     },
     "schemes": [
         {
-            "name": "Larger + Shell Space",
-            "description": "A larger building with a shell space for future expansion. Smaller amount of sitework.",
+            "name": "Four Story + Shell Space",
+            "description": "A four story, cubical building with two stories of shell space for future expansion.",
             "image": "https://placecats.com/g/400/320",
-            "projectAreaSF": 50000,
+            "projectAreaSF": 60000,
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 60000 },
+                { "name": "A Substructure", "square_footage": 15000 },
                 { "name": "B10 Superstructure", "square_footage": 60000 },
                 { "name": "B20 Enclosure", "square_footage": 50000 },
-                { "name": "B30 Roofing", "square_footage": 12500 },
-                { "name": "C Interiors", "square_footage": 20000 },
-                { "name": "D Services", "square_footage": 30000 },
+                { "name": "B30 Roofing", "square_footage": 15000 },
+                { "name": "C Interiors", "square_footage": 30000 },
+                { "name": "D Services", "square_footage": 60000 },
                 { "name": "E Equipment and Furnishings", "square_footage": 20000 },
-                { "name": "F Special Construction", "square_footage": 11000 },
+                { "name": "F Special Construction", "square_footage": 10000 },
                 { "name": "G Building Sitework", "square_footage": 40000 }
             ]
         },
         {
-            "name": "Smaller + Shell Space",
-            "description": "A smaller building with a shell space for future expansion. Larger amount of sitework.",
+            "name": "Three Story + Shell Space",
+            "description": "A three story, rectangular building with a single story of shell space for future expansion.",
             "image": "https://placecats.com/g/401/300",
             "projectAreaSF": 40000,
             "costOfWork": [
@@ -95,10 +95,10 @@ const sampleData = {
             "image": "https://placecats.com/g/400/301",
             "projectAreaSF": 45000,
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 45000 },
+                { "name": "A Substructure", "square_footage": 22500 },
                 { "name": "B10 Superstructure", "square_footage": 45000 },
                 { "name": "B20 Enclosure", "square_footage": 45000 },
-                { "name": "B30 Roofing", "square_footage": 10000 },
+                { "name": "B30 Roofing", "square_footage": 22500 },
                 { "name": "C Interiors", "square_footage": 45000 },
                 { "name": "D Services", "square_footage": 45000 },
                 { "name": "E Equipment and Furnishings", "square_footage": 45000 },

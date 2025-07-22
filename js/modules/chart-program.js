@@ -200,7 +200,7 @@ export function renderPhase2ProgramView() {
     // Create a horizontal grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-4 gap-4')
-        .style('height', '200px');
+        .style('height', '300px');
 
     // Get the list of available schemes from the current data
     const schemeData = state.currentData.schemes || [];
@@ -244,18 +244,44 @@ export function renderPhase2ProgramView() {
             render();
         });
 
-    // Add image to each card
+    // Add image to each card (taking up most of the height)
     schemeCards.append('img')
         .attr('src', d => d.image)
         .attr('alt', d => d.name)
-        .attr('class', 'w-full h-full object-cover');
+        .attr('class', 'w-full object-cover')
+        .style('height', '60%');
 
-    // Add title overlay
-    schemeCards.append('div')
-        .attr('class', 'absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-2 text-center')
-        .append('h4')
-        .attr('class', 'font-semibold text-sm')
+    // Add content container below the image
+    const contentContainer = schemeCards.append('div')
+        .attr('class', 'p-2 bg-white h-2/5 flex flex-col justify-between');
+
+    // Add scheme name
+    contentContainer.append('h4')
+        .attr('class', 'font-semibold text-sm text-gray-800 mb-1')
         .text(d => d.name);
+
+    // Add description
+    contentContainer.append('p')
+        .attr('class', 'text-xs text-gray-600 mb-2 leading-tight')
+        .text(d => d.description);
+
+    // Add stats container
+    const statsContainer = contentContainer.append('div')
+        .attr('class', 'text-xs text-gray-700');
+
+    // Add total SF
+    statsContainer.append('div')
+        .attr('class', 'mb-1')
+        .html(d => `<strong>Total SF:</strong> ${d.projectAreaSF.toLocaleString()}`);
+
+    // Add shelled space (Superstructure - Equipment and Furnishings)
+    statsContainer.append('div')
+        .html(d => {
+            const superstructure = d.costOfWork.find(c => c.name === 'B10 Superstructure');
+            const equipment = d.costOfWork.find(c => c.name === 'E Equipment and Furnishings');
+            const shelledSpace = (superstructure?.square_footage || 0) - (equipment?.square_footage || 0);
+            return `<strong>Shelled Space:</strong> ${shelledSpace.toLocaleString()} SF`;
+        });
 
     // --- PROGRAM TABLE (Full Width) ---
     const tableContainer = mainContainer.append('div')
