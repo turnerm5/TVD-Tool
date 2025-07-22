@@ -9,18 +9,18 @@ import * as ui from './ui.js';
  */
 export function renderSankeyChart(data) {
     const phase1Data = data.phases.phase1;
-    const { totalProjectBudget, categories } = phase1Data;
+    const { totalProjectBudget, costOfWork } = phase1Data;
 
     // Filter out items with a total of 0
-    const filteredCategories = categories.filter(c => c.Total > 0);
+    const filteredCostOfWork = costOfWork.filter(c => c.Total > 0);
 
     // --- 1. Create Nodes ---
     // Using a Set to ensure uniqueness for categories
-    const categoryNames = [...new Set(filteredCategories.map(c => c.Category))];
-    const subCategoryNames = filteredCategories.map(c => c.Subcategory);
+    const categoryNames = [...new Set(filteredCostOfWork.map(c => c.Category))];
+    const subCategoryNames = filteredCostOfWork.map(c => c.Subcategory);
 
     // Calculate category sum and check for a remainder to be used as "Available COW"
-    const categorySum = filteredCategories.reduce((sum, item) => sum + item.Total, 0);
+    const categorySum = filteredCostOfWork.reduce((sum, item) => sum + item.Total, 0);
     const difference = totalProjectBudget - categorySum;
 
     if (difference > 0) {
@@ -43,7 +43,7 @@ export function renderSankeyChart(data) {
 
     // Aggregate totals for each category
     const categoryTotals = new Map();
-    for (const item of filteredCategories) {
+    for (const item of filteredCostOfWork) {
         const currentTotal = categoryTotals.get(item.Category) || 0;
         categoryTotals.set(item.Category, currentTotal + item.Total);
     }
@@ -63,7 +63,7 @@ export function renderSankeyChart(data) {
     }
 
     // Links from each Category to its Subcategories
-    for (const item of filteredCategories) {
+    for (const item of filteredCostOfWork) {
         links.push({
             source: nodeMap.get(item.Category),
             target: nodeMap.get(item.Subcategory),

@@ -54,10 +54,10 @@ export function getFormattedTimestamp() {
 
 /**
  * Calculates the total cost for a given set of components.
- * @param {Array} components - An array of component objects.
+ * @param {Array} items - An array of component objects.
  * @param {string} key - The key to use for the cost calculation (e.g., 'target_value').
  * @returns {number} The total calculated cost.
  */
-export function calculateTotal(components, key) {
-    return components.reduce((acc, c) => acc + (c[key] * c.square_footage), 0);
+export function calculateTotal(items, key) {
+    return items.reduce((acc, c) => acc + (c[key] * c.square_footage), 0);
 } 

@@ -31,7 +31,7 @@ function processData(data) {
 
     const benchmarkCostsByName = {};
     data.benchmarks.forEach(proj => {
-        proj.components.forEach(comp => {
+        proj.costOfWork.forEach(comp => {
             if (!benchmarkCostsByName[comp.name]) {
                 benchmarkCostsByName[comp.name] = [];
             }
@@ -40,8 +40,8 @@ function processData(data) {
     });
 
     // Only process components for phase2
-    if (data.phases.phase2 && data.phases.phase2.components) {
-        data.phases.phase2.components.forEach(c => {
+    if (data.phases.phase2 && data.phases.phase2.costOfWork) {
+        data.phases.phase2.costOfWork.forEach(c => {
             const costs = benchmarkCostsByName[c.name] || [];
             c.benchmark_low = costs.length ? Math.min(...costs) : 0;
             c.benchmark_high = costs.length ? Math.max(...costs) : 0;
@@ -72,14 +72,14 @@ export function loadData(data, fileName = 'Sample Data') {
         });
     }
 
-    state.lockedComponents = new Set();
+    state.lockedCostOfWork = new Set();
 
     // Lock components only for phase2
-    if (processedData.phases.phase2 && processedData.phases.phase2.components) {
-        processedData.phases.phase2.components.forEach(component => {
+    if (processedData.phases.phase2 && processedData.phases.phase2.costOfWork) {
+        processedData.phases.phase2.costOfWork.forEach(component => {
             if (component.target_value === 0 || component.square_footage === 0) {
                 const lockKey = `phase2-${component.name}`;
-                state.lockedComponents.add(lockKey);
+                state.lockedCostOfWork.add(lockKey);
             }
         });
     }
@@ -92,8 +92,8 @@ export function loadData(data, fileName = 'Sample Data') {
     console.log('Data loaded. Original Gross SF:', state.originalData.projectAreaSF, 'Current Gross SF:', state.currentData.projectAreaSF);
 
     // Dynamically set the Y-axis domain based on phase 2 data only
-    const allComponents = processedData.phases.phase2.components;
-            const maxVal = d3.max(allComponents, d => Math.max(d.benchmark_high, d.target_value));
+    const allCostOfWork = processedData.phases.phase2.costOfWork;
+            const maxVal = d3.max(allCostOfWork, d => Math.max(d.benchmark_high, d.target_value));
     state.yDomainMax = Math.ceil(maxVal / 10) * 10 + 20;
     yScale.domain([0, state.yDomainMax]);
 
@@ -148,8 +148,8 @@ export function exportJSON() {
 
     // Clean up any transient properties.
     Object.values(dataToExport.phases).forEach(phase => {
-        if (phase.components) {
-            phase.components.forEach(c => delete c.locked);
+        if (phase.costOfWork) {
+            phase.costOfWork.forEach(c => delete c.locked);
         }
     });
 

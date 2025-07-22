@@ -163,8 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cancel"
         );
         if (snapshotName) {
-            const phase2Components = state.currentData.phases.phase2.components;
-            const snapshotComponents = phase2Components.map(c => ({
+            const phase2CostOfWork = state.currentData.phases.phase2.costOfWork;
+            const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                 name: c.name,
                 target_value: c.target_value,
                 square_footage: c.square_footage
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const snapshot = {
                 name: snapshotName,
                 projectAreaSF: state.currentData.projectAreaSF,
-                components: snapshotComponents
+                costOfWork: snapshotCostOfWork
             };
             state.addSnapshot(snapshot);
             console.log('All snapshots:', state.snapshots);

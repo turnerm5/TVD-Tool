@@ -48,27 +48,27 @@ export function renderSummaryCharts() {
     // --- 1. Data Preparation ---
     const originalData = {
         name: "Imported Data",
-        components: state.originalData.phases.phase2.components
+        costOfWork: state.originalData.phases.phase2.costOfWork
     };
     const allSeriesData = [originalData, ...state.snapshots];
     const seriesNames = allSeriesData.map(d => d.name);
-    const componentNames = state.originalData.phases.phase2.components.map(c => c.name);
+    const costOfWorkNames = state.originalData.phases.phase2.costOfWork.map(c => c.name);
     const gmpValue = state.originalData.phases.phase2.totalProjectBudget;
     
     // --- Render Left Chart ---
-    renderGroupedBarChart(allSeriesData, seriesNames, componentNames);
+    renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames);
 
     // --- Render Right Chart (will be implemented next) ---
-    renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpValue);
+    renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpValue);
 }
 
 /**
  * Renders the grouped bar chart (left side).
  * @param {Array} allSeriesData - The array of all data series (original + snapshots).
  * @param {Array} seriesNames - The names of the series.
- * @param {Array} componentNames - The names of the components.
+ * @param {Array} costOfWorkNames - The names of the components.
  */
-function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
+function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
     const container = d3.select("#summary-bar-chart-container");
     container.html("");
 
@@ -85,7 +85,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
 
     // --- D3 Scales ---
     const x0 = d3.scaleBand()
-        .domain(componentNames)
+        .domain(costOfWorkNames)
         .range([0, width])
         .padding(0.2);
 
@@ -95,7 +95,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
         .padding(0.05);
 
     const yMax = d3.max(allSeriesData, series => 
-                        d3.max(series.components, c => c.target_value * c.square_footage)
+                        d3.max(series.costOfWork, c => c.target_value * c.square_footage)
     );
     
     const y = d3.scaleLinear()
@@ -117,14 +117,14 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
 
     // --- D3 Bar Rendering ---
     const componentGroup = g.selectAll(".component-group")
-        .data(componentNames)
+        .data(costOfWorkNames)
         .enter().append("g")
         .attr("class", "component-group")
         .attr("transform", d => `translate(${x0(d)},0)`);
 
     const bars = componentGroup.selectAll("g.bar-group")
         .data(componentName => allSeriesData.map(series => {
-            const comp = series.components.find(c => c.name === componentName);
+            const comp = series.costOfWork.find(c => c.name === componentName);
             return {
                 seriesName: series.name,
                 value: comp ? comp.target_value * comp.square_footage : 0
@@ -203,10 +203,10 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
  * Renders the stacked bar chart (right side).
  * @param {Array} allSeriesData - The array of all data series (original + snapshots).
  * @param {Array} seriesNames - The names of the series.
- * @param {Array} componentNames - The names of the components.
+ * @param {Array} costOfWorkNames - The names of the components.
  * @param {number} gmpValue - The total project budget.
  */
-function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpValue) {
+function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpValue) {
     const container = d3.select("#summary-stacked-chart-container");
     container.html("");
 
@@ -224,14 +224,14 @@ function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpVa
     // --- Data Transformation for Stacking ---
     const stackedData = allSeriesData.map(series => {
         let cumulative = 0;
-        const components = componentNames.map(compName => {
-            const component = series.components.find(c => c.name === compName);
+        const costOfWork = costOfWorkNames.map(compName => {
+            const component = series.costOfWork.find(c => c.name === compName);
             const value = component ? component.target_value * component.square_footage : 0;
             const start = cumulative;
             cumulative += value;
             return { name: compName, value, start, end: cumulative };
         });
-        return { name: series.name, components, total: cumulative };
+        return { name: series.name, costOfWork, total: cumulative };
     });
 
     // --- D3 Scales ---
@@ -245,7 +245,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpVa
         .domain([0, yMax * 1.1]).nice()
         .range([height, 0]);
 
-    const componentColor = d3.scaleOrdinal(d3.schemeTableau10).domain(componentNames);
+    const componentColor = d3.scaleOrdinal(d3.schemeTableau10).domain(costOfWorkNames);
 
     // --- D3 Axes ---
     g.append("g")
@@ -265,7 +265,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpVa
         .attr("transform", d => `translate(${x(d.name)},0)`);
 
     seriesGroup.selectAll("rect")
-        .data(d => d.components)
+        .data(d => d.costOfWork)
         .enter().append("rect")
         .attr("y", d => y(d.end))
         .attr("height", d => y(d.start) - y(d.end))
@@ -307,7 +307,7 @@ export function updateSummary() {
     // --- Data Series Table ---
     const originalData = {
         name: 'Imported Data',
-        components: state.originalData.phases.phase2.components,
+        costOfWork: state.originalData.phases.phase2.costOfWork,
         projectAreaSF: state.originalData.projectAreaSF
     };
     const allSeries = [originalData, ...state.snapshots];
@@ -331,7 +331,7 @@ export function updateSummary() {
 
     const tbody = table.createTBody();
     allSeries.forEach(series => {
-        const totalRom = d3.sum(series.components, c => c.target_value * c.square_footage);
+        const totalRom = d3.sum(series.costOfWork, c => c.target_value * c.square_footage);
         const grossSF = series.projectAreaSF || 0; // Use the SF from the series data directly
         const usableSF = grossSF * 0.8;
         const costPerSF = grossSF > 0 ? totalRom / grossSF : 0;

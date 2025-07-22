@@ -35,13 +35,13 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     if (Math.abs(initialCostChange) < 0.01) return;
 
     // 2. Identify which components can absorb the change.
-    const unlockedComponents = phase.components.filter(c => {
+    const unlockedCostOfWork = phase.costOfWork.filter(c => {
         const key = `${phaseKey}-${c.name}`;
-        return c !== changedComponent && !state.lockedComponents.has(key) && c.square_footage > 0
+        return c !== changedComponent && !state.lockedCostOfWork.has(key) && c.square_footage > 0
     });
 
     // If no components can absorb the change, just apply it and let the total cost drift.
-    if (unlockedComponents.length === 0) {
+    if (unlockedCostOfWork.length === 0) {
         changedComponent.target_value = newRom;
         render();
         return;
@@ -57,7 +57,7 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // This loop ensures that if one component hits $0/SF, the remaining cost is
     // redistributed among the other available components.
     let remainingCostToAbsorb = costToAbsorb;
-    let componentsAvailableToAbsorb = [...unlockedComponents];
+    let componentsAvailableToAbsorb = [...unlockedCostOfWork];
     let iterations = 0; // Safety break to prevent infinite loops
 
     while (Math.abs(remainingCostToAbsorb) > 0.01 && componentsAvailableToAbsorb.length > 0 && iterations < 10) {
@@ -105,14 +105,14 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
  * This function uses the D3 enter/update/exit pattern to create and update the component columns.
  */
 export function renderChart() {
-    const phaseComponents = state.currentData.phases.phase2.components;
+    const phaseCostOfWork = state.currentData.phases.phase2.costOfWork;
     // Set the number of columns in the CSS grid layout.
-    dom.chartContainer.style("grid-template-columns", `repeat(${phaseComponents.length}, 1fr)`);
+    dom.chartContainer.style("grid-template-columns", `repeat(${phaseCostOfWork.length}, 1fr)`);
     // Set the output range for the y-scale based on the container's current height.
     yScale.range([dom.chartContainer.node().clientHeight - parseFloat(dom.chartContainer.style("padding-bottom")), 0]);
     
     // Bind data to the component columns. The key function (d.name) helps D3 track objects.
-    const components = dom.chartContainer.selectAll(".component-column").data(phaseComponents, d => d.name);
+    const components = dom.chartContainer.selectAll(".component-column").data(phaseCostOfWork, d => d.name);
     
     // Remove any columns that are no longer in the data.
     components.exit().remove();
@@ -167,7 +167,7 @@ export function renderChart() {
         });
     
     // Create a map of original component values for quick lookup.
-    const originalComponents = state.originalData.phases.phase2.components.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
+    const originalComponents = state.originalData.phases.phase2.costOfWork.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
     
     // Update labels and ghost bars for each component.
     updateGroup.each(function(d) {
@@ -203,19 +203,19 @@ export function renderChart() {
         .style('display', 'block')
         .style('opacity', d => {
             const key = `phase2-${d.name}`;
-            return state.lockedComponents.has(key) ? 1 : 0.5;
+            return state.lockedCostOfWork.has(key) ? 1 : 0.5;
         })
         .text(d => {
             const key = `phase2-${d.name}`;
-            return state.lockedComponents.has(key) ? '🔒' : '🔓';
+            return state.lockedCostOfWork.has(key) ? '🔒' : '🔓';
         })
         .on('click', (event, d) => {
             event.stopPropagation();
             const key = `phase2-${d.name}`;
-            if (state.lockedComponents.has(key)) {
-                state.lockedComponents.delete(key);
+            if (state.lockedCostOfWork.has(key)) {
+                state.lockedCostOfWork.delete(key);
             } else {
-                state.lockedComponents.add(key);
+                state.lockedCostOfWork.add(key);
             }
             render();
         });
@@ -229,7 +229,7 @@ export function renderChart() {
         .on('click', (event, d) => {
             event.stopPropagation();
             // Store the current interiors state when entering detail view
-            const interiorsData = state.currentData.phases.phase2.components.find(c => c.name === 'C Interiors');
+            const interiorsData = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
             if (interiorsData) {
                 state.interiorsEntryState = JSON.parse(JSON.stringify(interiorsData));
             }
@@ -244,7 +244,7 @@ export function renderChart() {
         const benchmarkProjects = state.currentData.benchmarks || [];
 
         const indicators = svg.selectAll('.benchmark-indicator-group')
-            .data(benchmarkProjects.filter(p => p.components.some(c => c.name === componentData.name)));
+            .data(benchmarkProjects.filter(p => p.costOfWork.some(c => c.name === componentData.name)));
 
         indicators.exit().remove();
 
@@ -258,7 +258,7 @@ export function renderChart() {
         const mergedIndicators = enterIndicators.merge(indicators);
 
         mergedIndicators.each(function(d) {
-            const benchmarkComp = d.components.find(c => c.name === componentData.name);
+            const benchmarkComp = d.costOfWork.find(c => c.name === componentData.name);
             if (!benchmarkComp) return;
 
             const yPos = yScale(benchmarkComp.cost);
@@ -362,13 +362,13 @@ export function handleSquareFootageCellChange(event) {
 
     if (isNaN(newSF) || newSF < 0) {
         // Find the original value to revert to if input is invalid
-        const originalComponent = state.originalData.phases[phaseKey].components.find(c => c.name === componentName);
+        const originalComponent = state.originalData.phases[phaseKey].costOfWork.find(c => c.name === componentName);
         input.value = originalComponent ? originalComponent.square_footage.toLocaleString('en-US') : '0';
         return;
     }
 
     const phase = state.currentData.phases[phaseKey];
-    const component = phase.components.find(c => c.name === componentName);
+    const component = phase.costOfWork.find(c => c.name === componentName);
 
     if (component) {
         component.square_footage = newSF;
@@ -424,8 +424,8 @@ function dragged(event, d) {
 function dragEnded(event, d) {
     d3.select(this).classed("active", false);
     const key = `phase2-${d.name}`;
-    if (!state.lockedComponents.has(key)) {
-        state.lockedComponents.add(key);
+    if (!state.lockedCostOfWork.has(key)) {
+        state.lockedCostOfWork.add(key);
         render(); // Rerender to update the lock icon
     }
 }
@@ -438,9 +438,9 @@ function dragEnded(event, d) {
 export function balanceToGmp() {
     const phaseKey = 'phase2';
     const phase = state.currentData.phases[phaseKey];
-    const unlockedComponents = phase.components.filter(c => {
+    const unlockedComponents = phase.costOfWork.filter(c => {
         const key = `${phaseKey}-${c.name}`;
-        return !state.lockedComponents.has(key) && c.square_footage > 0
+        return !state.lockedCostOfWork.has(key) && c.square_footage > 0
     });
 
     if (unlockedComponents.length === 0) {
@@ -448,7 +448,7 @@ export function balanceToGmp() {
         return;
     }
 
-            const currentRomTotal = utils.calculateTotal(phase.components, 'target_value');
+            const currentRomTotal = utils.calculateTotal(phase.costOfWork, 'target_value');
     const targetBudget = phase.totalProjectBudget;
     const difference = targetBudget - currentRomTotal;
 

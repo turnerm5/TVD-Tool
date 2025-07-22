@@ -45,8 +45,8 @@ function updatePhase2ProgramTable(container, initialRender = false) {
             
             if (snapshotName) {
                 // Gather the current phase 2 component data for the snapshot
-                const phase2Components = state.currentData.phases.phase2.components;
-                const snapshotComponents = phase2Components.map(c => ({
+                const phase2CostOfWork = state.currentData.phases.phase2.costOfWork;
+                const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                     name: c.name,
                     target_value: c.target_value,
                     square_footage: c.square_footage
@@ -55,7 +55,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
                 const snapshot = {
                     name: snapshotName,
                     projectAreaSF: state.currentData.projectAreaSF,
-                    components: snapshotComponents
+                    costOfWork: snapshotCostOfWork
                 };
                 // Add the snapshot to the state
                 state.addSnapshot(snapshot);
@@ -97,21 +97,21 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     let totalSquareFootage = 0;
     let totalTargetValue = 0;
 
-    const phaseComponents = state.currentData.phases.phase2.components;
-    const originalComponents = state.originalData.phases.phase2.components;
+    const phaseCostOfWork = state.currentData.phases.phase2.costOfWork;
+    const originalCostOfWork = state.originalData.phases.phase2.costOfWork;
 
     // Calculate totals first
-    phaseComponents.forEach(d => {
+    phaseCostOfWork.forEach(d => {
         totalSquareFootage += d.square_footage;
         
-        const originalComponent = originalComponents.find(c => c.name === d.name);
+        const originalComponent = originalCostOfWork.find(c => c.name === d.name);
         if (originalComponent) {
             totalTargetValue += (originalComponent.target_value * d.square_footage);
         }
     });
 
     const rows = tbody.selectAll('tr')
-        .data(phaseComponents)
+        .data(phaseCostOfWork)
         .enter()
         .append('tr')
         .attr('class', 'bg-white border-b hover:bg-gray-50');
@@ -139,7 +139,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     rows.append('td')
         .attr('class', 'px-6 py-4')
         .text(d => {
-            const originalComponent = originalComponents.find(c => c.name === d.name);
+            const originalComponent = originalCostOfWork.find(c => c.name === d.name);
             return originalComponent ? utils.formatCurrency(originalComponent.target_value) : '-';
         });
 
@@ -147,7 +147,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     rows.append('td')
         .attr('class', 'px-6 py-4')
         .text(d => {
-            const originalComponent = originalComponents.find(c => c.name === d.name);
+            const originalComponent = originalCostOfWork.find(c => c.name === d.name);
             if (originalComponent) {
                 const targetValue = originalComponent.target_value * d.square_footage;
                 return utils.formatCurrencyBig(targetValue);
@@ -226,8 +226,8 @@ export function renderPhase2ProgramView() {
             state.currentData.projectAreaSF = newGrossSf;
 
             // Animate each component's square footage change
-            d.components.forEach(schemeComponent => {
-                const currentComponent = state.currentData.phases.phase2.components.find(c => c.name === schemeComponent.name);
+            d.costOfWork.forEach(schemeComponent => {
+                const currentComponent = state.currentData.phases.phase2.costOfWork.find(c => c.name === schemeComponent.name);
                 if (currentComponent) {
                     const oldSf = currentComponent.square_footage;
                     const newSf = schemeComponent.square_footage;

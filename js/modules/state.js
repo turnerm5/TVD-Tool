@@ -11,7 +11,7 @@ let _yDomainMax = 100;
 let _currentPhase = 'phase1';
 let _currentView = 'benchmarks';
 let _selectedBenchmark = null;
-let _lockedComponents = new Set();
+let _lockedCostOfWork = new Set();
 let _snapshots = [];
 let _interiorsEntryState = null;
 
@@ -34,8 +34,8 @@ export const state = {
     get selectedBenchmark() { return _selectedBenchmark; },
     set selectedBenchmark(id) { _selectedBenchmark = id; },
 
-    get lockedComponents() { return _lockedComponents; },
-    set lockedComponents(components) { _lockedComponents = components; },
+    get lockedCostOfWork() { return _lockedCostOfWork; },
+    set lockedCostOfWork(costOfWork) { _lockedCostOfWork = costOfWork; },
 
     get interiorsEntryState() { return _interiorsEntryState; },
     set interiorsEntryState(state) { _interiorsEntryState = state; },

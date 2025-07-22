@@ -14,8 +14,8 @@ export function setDependencies(fns) {
 }
 
 export function renderInteriorsView() {
-    const interiorsData = state.currentData.phases.phase2.components.find(c => c.name === 'C Interiors');
-    const originalInteriorsData = state.originalData.phases.phase2.components.find(c => c.name === 'C Interiors');
+    const interiorsData = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
+    const originalInteriorsData = state.originalData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
 
     if (!interiorsData || !interiorsData.breakdown) {
         dom.interiorsView.innerHTML = `<div class="p-4"><p>No interiors data available.</p></div>`;
@@ -53,7 +53,7 @@ export function renderInteriorsView() {
             } else {
                 // Discard changes - restore the entry state
                 if (state.interiorsEntryState) {
-                    const interiorsData = state.currentData.phases.phase2.components.find(c => c.name === 'C Interiors');
+                    const interiorsData = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
                     if (interiorsData) {
                         Object.assign(interiorsData, JSON.parse(JSON.stringify(state.interiorsEntryState)));
                     }
@@ -205,7 +205,7 @@ export function renderInteriorsView() {
 }
 
 function recalculateAndUpdate() {
-    const interiorsData = state.currentData.phases.phase2.components.find(c => c.name === 'C Interiors');
+    const interiorsData = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
     
     // Calculate total space type SF
     const totalSpaceTypeSf = interiorsData.breakdown.reduce((acc, item) => acc + item.sf, 0);
