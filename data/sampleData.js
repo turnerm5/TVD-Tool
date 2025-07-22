@@ -31,64 +31,67 @@ const sampleData = {
                 { "Category": "Permits", "Subcategory": "Building Permit", "Total": 136000 }
             ],
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 49050, "target_value": 33.50 },
-                { "name": "B10 Superstructure", "square_footage": 49050, "target_value": 98 },
-                { "name": "B20 Enclosure", "square_footage": 49050, "target_value": 100 },
-                { "name": "B30 Roofing", "square_footage": 12263, "target_value": 15 },
+                { "name": "A Substructure", "square_footage": 40000, "target_value": 33.50 },
+                { "name": "B10 Superstructure", "square_footage": 40000, "target_value": 98 },
+                { "name": "B20 Enclosure", "square_footage": 30000, "target_value": 100 },
+                { "name": "B30 Roofing", "square_footage": 10000, "target_value": 15 },
                 { 
                     "name": "C Interiors", 
-                    "square_footage": 49050, 
+                    "square_footage": 40000, 
                     "target_value": 115,
-                    "building_efficiency": 0.60,
+                    "building_efficiency": 0.575,
                     "breakdown": [
-                        { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 12000 },
-                        { "name": "Research", "percentage": 0.35, "cost": 150, "sf": 8000 },
-                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 4000 },
-                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 5000 }
+                        { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 10000 },
+                        { "name": "Research", "percentage": 0.35, "cost": 150, "sf": 6000 },
+                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 3000 },
+                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 4000 }
                     ]
                 },
-                { "name": "D Services", "square_footage": 49050, "target_value": 265 },
-                { "name": "E Equipment and Furnishings", "square_footage": 49050, "target_value": 50.00 },
+                { "name": "D Services", "square_footage": 40000, "target_value": 265 },
+                { "name": "E Equipment and Furnishings", "square_footage": 40000, "target_value": 50.00 },
                 { "name": "F Special Construction", "square_footage": 10000, "target_value": 20 },
-                { "name": "G Building Sitework", "square_footage": 49050, "target_value": 42 }
+                { "name": "G Building Sitework", "square_footage": 20000, "target_value": 42 }
             ]
         }
     },
     "schemes": [
         {
-            "name": "The Monolith",
+            "name": "Larger + Shell Space",
+            "description": "A larger building with a shell space for future expansion. Smaller amount of sitework.",
             "image": "https://placecats.com/g/400/320",
             "projectAreaSF": 50000,
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 50000 },
-                { "name": "B10 Superstructure", "square_footage": 50000 },
+                { "name": "A Substructure", "square_footage": 60000 },
+                { "name": "B10 Superstructure", "square_footage": 60000 },
                 { "name": "B20 Enclosure", "square_footage": 50000 },
                 { "name": "B30 Roofing", "square_footage": 12500 },
-                { "name": "C Interiors", "square_footage": 50000 },
-                { "name": "D Services", "square_footage": 50000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
+                { "name": "C Interiors", "square_footage": 20000 },
+                { "name": "D Services", "square_footage": 30000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 20000 },
                 { "name": "F Special Construction", "square_footage": 11000 },
-                { "name": "G Building Sitework", "square_footage": 50000 }
+                { "name": "G Building Sitework", "square_footage": 40000 }
             ]
         },
         {
-            "name": "The Canopy",
+            "name": "Smaller + Shell Space",
+            "description": "A smaller building with a shell space for future expansion. Larger amount of sitework.",
             "image": "https://placecats.com/g/401/300",
-            "projectAreaSF": 60000,
+            "projectAreaSF": 40000,
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 60000 },
-                { "name": "B10 Superstructure", "square_footage": 60000 },
-                { "name": "B20 Enclosure", "square_footage": 60000 },
-                { "name": "B30 Roofing", "square_footage": 20000 },
-                { "name": "C Interiors", "square_footage": 60000 },
-                { "name": "D Services", "square_footage": 60000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 60000 },
+                { "name": "A Substructure", "square_footage": 40000 },
+                { "name": "B10 Superstructure", "square_footage": 40000 },
+                { "name": "B20 Enclosure", "square_footage": 40000 },
+                { "name": "B30 Roofing", "square_footage": 10000 },
+                { "name": "C Interiors", "square_footage": 20000 },
+                { "name": "D Services", "square_footage": 30000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 20000 },
                 { "name": "F Special Construction", "square_footage": 15000 },
                 { "name": "G Building Sitework", "square_footage": 60000 }
             ]
         },
         {
-            "name": "The Courtyard",
+            "name": "Medium Rectangular + No Shell Space",
+            "description": "A medium-sized building with no shell space. Medium amount of sitework.",
             "image": "https://placecats.com/g/400/301",
             "projectAreaSF": 45000,
             "costOfWork": [
@@ -104,17 +107,18 @@ const sampleData = {
             ]
         },
         {
-            "name": "The Terraces",
+            "name": "Medium Cubical + No Shell Space",
+            "description": "A medium-sized building with no shell space. Medium amount of sitework.",
             "image": "https://placecats.com/g/401/301",
             "projectAreaSF": 55000,
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 55000 },
-                { "name": "B10 Superstructure", "square_footage": 55000 },
-                { "name": "B20 Enclosure", "square_footage": 55000 },
-                { "name": "B30 Roofing", "square_footage": 15000 },
-                { "name": "C Interiors", "square_footage": 55000 },
-                { "name": "D Services", "square_footage": 55000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 55000 },
+                { "name": "A Substructure", "square_footage": 45000 },
+                { "name": "B10 Superstructure", "square_footage": 45000 },
+                { "name": "B20 Enclosure", "square_footage": 45000 },
+                { "name": "B30 Roofing", "square_footage": 10000 },
+                { "name": "C Interiors", "square_footage": 45000 },
+                { "name": "D Services", "square_footage": 45000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 45000 },
                 { "name": "F Special Construction", "square_footage": 12000 },
                 { "name": "G Building Sitework", "square_footage": 55000 }
             ]
