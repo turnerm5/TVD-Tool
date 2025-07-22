@@ -46,10 +46,8 @@ function wrap(text, width) {
  */
 export function renderSummaryCharts() {
     // --- 1. Data Preparation ---
-    const originalData = {
-        name: "Imported Data",
-        costOfWork: state.originalData.phases.phase2.costOfWork
-    };
+    // Create stable "Imported Data" series using pure original data (never changes)
+    const originalData = utils.createImportedDataSeries(state.originalData);
     const allSeriesData = [originalData, ...state.snapshots];
     const seriesNames = allSeriesData.map(d => d.name);
     const costOfWorkNames = state.originalData.phases.phase2.costOfWork.map(c => c.name);
@@ -95,7 +93,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .padding(0.05);
 
     const yMax = d3.max(allSeriesData, series => 
-                        d3.max(series.costOfWork, c => c.target_value * c.square_footage)
+                        d3.max(series.costOfWork, c => utils.calculateComponentValue(c))
     );
     
     const y = d3.scaleLinear()
@@ -127,7 +125,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
             const comp = series.costOfWork.find(c => c.name === componentName);
             return {
                 seriesName: series.name,
-                value: comp ? comp.target_value * comp.square_footage : 0
+                value: comp ? utils.calculateComponentValue(comp) : 0
             };
         }))
         .enter().append("g").attr("class", "bar-group");
@@ -228,9 +226,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
         let cumulative = 0;
         // 1. Direct Cost of Work Components
         const directCostItems = series.costOfWork.map(comp => {
-            const value = (comp.name === 'C Interiors' && comp.building_efficiency) 
-                ? (comp.square_footage / comp.building_efficiency) * comp.target_value
-                : comp.target_value * comp.square_footage;
+            const value = utils.calculateComponentValue(comp);
             const start = cumulative;
             cumulative += value;
             return { name: comp.name, value, start, end: cumulative, isIndirect: false };
@@ -326,11 +322,8 @@ export function updateSummary() {
     summaryPanel.appendChild(header);
 
     // --- Data Series Table ---
-    const originalData = {
-        name: 'Imported Data',
-        costOfWork: state.originalData.phases.phase2.costOfWork,
-        projectAreaSF: state.originalData.projectAreaSF
-    };
+    // Create stable "Imported Data" series using pure original data (never changes)
+    const originalData = utils.createImportedDataSeries(state.originalData);
     const allSeries = [originalData, ...state.snapshots];
 
     console.log('Rendering summary table. All series data:', allSeries);
@@ -344,7 +337,6 @@ export function updateSummary() {
             <th scope="col" class="px-6 py-3">Scenario</th>
             <th scope="col" class="px-6 py-3 text-right">Estimate</th>
             <th scope="col" class="px-6 py-3 text-right">Gross SF</th>
-            <th scope="col" class="px-6 py-3 text-right">Usable SF</th>
             <th scope="col" class="px-6 py-3 text-right">$/SF</th>
             <th scope="col" class="px-6 py-3 text-right">Variance</th>
         </tr>
@@ -352,12 +344,10 @@ export function updateSummary() {
 
     const tbody = table.createTBody();
     allSeries.forEach(series => {
-        const cowTotal = utils.calculateTotalCostOfWork(series.costOfWork);
-        const indirectTotal = d3.sum(state.indirectCostPercentages, p => p.percentage * cowTotal);
-        const totalProjectCost = cowTotal + indirectTotal;
+        const totals = utils.calculateSeriesTotal(series, state.indirectCostPercentages);
+        const { totalProjectCost } = totals;
 
         const grossSF = series.projectAreaSF || 0;
-        const usableSF = utils.calculateUsableSF(grossSF, series.costOfWork);
         const costPerSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
         const variance = totalProjectCost - gmp;
         
@@ -367,7 +357,6 @@ export function updateSummary() {
             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${series.name}</td>
             <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(totalProjectCost)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
-            <td class="px-6 py-4 text-right">${utils.formatNumber(usableSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerSF)}</td>
             <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
                 ${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}

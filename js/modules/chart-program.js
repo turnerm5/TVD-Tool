@@ -49,7 +49,8 @@ function updatePhase2ProgramTable(container, initialRender = false) {
                 const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                     name: c.name,
                     target_value: c.target_value,
-                    square_footage: c.square_footage
+                    square_footage: c.square_footage,
+                    building_efficiency: c.building_efficiency // Include building_efficiency for C Interiors
                 }));
                 // Create the snapshot object
                 const snapshot = {
@@ -79,7 +80,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         'Component',
         'Square Footage',
         'Target Value / SF',
-        'Target Value'
+        'Value'
     ];
 
     headerRow.selectAll('th')
@@ -93,36 +94,53 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     // Body
     const tbody = table.append('tbody');
 
-    // Calculate totals for the footer
-    let totalSquareFootage = 0;
-    let totalTargetValue = 0;
-
     const phaseCostOfWork = state.currentData.phases.phase2.costOfWork;
     const originalCostOfWork = state.originalData.phases.phase2.costOfWork;
 
-    // Calculate totals first
+    // Calculate Cost of Work totals
+    let cowTotalSquareFootage = 0;
+    let cowTotalTargetValue = 0;
+
     phaseCostOfWork.forEach(d => {
-        totalSquareFootage += d.square_footage;
+        cowTotalSquareFootage += d.square_footage;
         
         const originalComponent = originalCostOfWork.find(c => c.name === d.name);
         if (originalComponent) {
-            totalTargetValue += (originalComponent.target_value * d.square_footage);
+            // Create a hybrid component object for calculation
+            const hybridComponent = {
+                name: d.name,
+                target_value: originalComponent.target_value,
+                square_footage: d.square_footage,
+                building_efficiency: d.building_efficiency
+            };
+            cowTotalTargetValue += utils.calculateComponentValue(hybridComponent);
         }
     });
 
-    const rows = tbody.selectAll('tr')
+    // --- COST OF WORK SECTION ---
+    // Add Cost of Work subheading
+    const cowSubheadRow = tbody.append('tr')
+        .attr('class', 'bg-blue-50 border-b');
+
+    cowSubheadRow.append('td')
+        .attr('class', 'px-6 py-3 font-bold text-blue-900 uppercase text-sm')
+        .attr('colspan', 4)
+        .text('Cost of Work');
+
+    // Add Cost of Work rows
+    const cowRows = tbody.selectAll('tr.cow-row')
         .data(phaseCostOfWork)
         .enter()
         .append('tr')
-        .attr('class', 'bg-white border-b hover:bg-gray-50');
+        .attr('class', 'cow-row bg-white border-b hover:bg-gray-50');
 
     // Component Name
-    rows.append('td')
+    cowRows.append('td')
         .attr('class', 'px-6 py-4 font-medium text-gray-900 whitespace-nowrap')
         .text(d => d.name);
 
     // Square Footage (editable)
-    const sfCells = rows.append('td')
+    const sfCells = cowRows.append('td')
         .attr('class', 'px-6 py-4');
 
     sfCells.append('input')
@@ -136,7 +154,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         });
 
     // Target Value / SF (from original data)
-    rows.append('td')
+    cowRows.append('td')
         .attr('class', 'px-6 py-4')
         .text(d => {
             const originalComponent = originalCostOfWork.find(c => c.name === d.name);
@@ -144,40 +162,120 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         });
 
     // Target Value (Target Value/SF * Square Footage)
-    rows.append('td')
+    cowRows.append('td')
         .attr('class', 'px-6 py-4')
         .text(d => {
             const originalComponent = originalCostOfWork.find(c => c.name === d.name);
             if (originalComponent) {
-                const targetValue = originalComponent.target_value * d.square_footage;
+                // Create a hybrid component object for calculation
+                const hybridComponent = {
+                    name: d.name,
+                    target_value: originalComponent.target_value,
+                    square_footage: d.square_footage,
+                    building_efficiency: d.building_efficiency
+                };
+                const targetValue = utils.calculateComponentValue(hybridComponent);
                 return utils.formatCurrencyBig(targetValue);
             }
             return '-';
         });
 
-    // Add totals row
-    const totalsRow = tbody.append('tr')
-        .attr('class', 'bg-gray-100 border-t-2 border-gray-300 font-semibold');
+    // Add Cost of Work subtotal row
+    const cowSubtotalRow = tbody.append('tr')
+        .attr('class', 'bg-blue-100 border-t border-blue-300 font-semibold');
 
-    // Component Name (Total label)
-    totalsRow.append('td')
-        .attr('class', 'px-6 py-4 font-bold text-gray-900')
-        .text('TOTALS');
+    cowSubtotalRow.append('td')
+        .attr('class', 'px-6 py-3 font-bold text-blue-900')
+        .text('Cost of Work Subtotal');
 
-    // Total Square Footage
-    totalsRow.append('td')
-        .attr('class', 'px-6 py-4 font-bold')
-        .text(totalSquareFootage.toLocaleString('en-US'));
+    cowSubtotalRow.append('td')
+        .attr('class', 'px-6 py-3 font-bold text-blue-900')
+        .text('-');
 
-    // Target Value / SF (empty for totals)
-    totalsRow.append('td')
+    cowSubtotalRow.append('td')
+        .attr('class', 'px-6 py-3 font-bold text-blue-900')
+        .text('-');
+
+    cowSubtotalRow.append('td')
+        .attr('class', 'px-6 py-3 font-bold text-blue-900')
+        .text(utils.formatCurrencyBig(cowTotalTargetValue));
+
+    // --- INDIRECTS SECTION ---
+    // Calculate indirect costs - but we need to use the hybrid calculation
+    // Create hybrid cost of work for accurate calculation
+    const hybridCostOfWork = phaseCostOfWork.map(d => {
+        const originalComponent = originalCostOfWork.find(c => c.name === d.name);
+        return {
+            name: d.name,
+            target_value: originalComponent ? originalComponent.target_value : d.target_value,
+            square_footage: d.square_footage,
+            building_efficiency: d.building_efficiency
+        };
+    });
+    const totalCow = utils.calculateTotalCostOfWork(hybridCostOfWork);
+    let indirectsTotal = 0;
+
+    // Add Indirects subheading
+    const indirectsSubheadRow = tbody.append('tr')
+        .attr('class', 'bg-orange-50 border-b');
+
+    indirectsSubheadRow.append('td')
+        .attr('class', 'px-6 py-3 font-bold text-orange-900 uppercase text-sm')
+        .attr('colspan', 4)
+        .text('Indirects');
+
+    // Add Indirect rows
+    if (state.indirectCostPercentages && state.indirectCostPercentages.length > 0) {
+        const indirectRows = tbody.selectAll('tr.indirect-row')
+            .data(state.indirectCostPercentages)
+            .enter()
+            .append('tr')
+            .attr('class', 'indirect-row bg-white border-b hover:bg-gray-50');
+
+        // Component Name
+        indirectRows.append('td')
+            .attr('class', 'px-6 py-4 font-medium text-gray-900 whitespace-nowrap')
+            .text(d => d.name);
+
+        // Square Footage (empty for indirects)
+        indirectRows.append('td')
+            .attr('class', 'px-6 py-4 text-gray-400')
+            .text('-');
+
+        // Target Value / SF (empty for indirects)
+        indirectRows.append('td')
+            .attr('class', 'px-6 py-4 text-gray-400')
+            .text('-');
+
+        // Value (calculated from percentage)
+        indirectRows.append('td')
+            .attr('class', 'px-6 py-4')
+            .text(d => {
+                const value = d.percentage * totalCow;
+                indirectsTotal += value;
+                return utils.formatCurrencyBig(value);
+            });
+    }
+
+    // --- GRAND TOTAL ROW ---
+    const grandTotalRow = tbody.append('tr')
+        .attr('class', 'bg-gray-200 border-t-2 border-gray-400 font-bold');
+
+    grandTotalRow.append('td')
+        .attr('class', 'px-6 py-4 font-bold text-gray-900 uppercase')
+        .text('Grand Total');
+
+    grandTotalRow.append('td')
         .attr('class', 'px-6 py-4')
         .text('-');
 
-    // Total Target Value
-    totalsRow.append('td')
-        .attr('class', 'px-6 py-4 font-bold')
-        .text(utils.formatCurrencyBig(totalTargetValue));
+    grandTotalRow.append('td')
+        .attr('class', 'px-6 py-4')
+        .text('-');
+
+    grandTotalRow.append('td')
+        .attr('class', 'px-6 py-4 font-bold text-gray-900')
+        .text(utils.formatCurrencyBig(totalCow + indirectsTotal));
 }
 
 export function renderPhase2ProgramView() {
