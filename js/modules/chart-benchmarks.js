@@ -108,7 +108,7 @@ export function render(render) {
 
         const tbody = table.append('tbody');
         const rows = tbody.selectAll('tr')
-            .data(projectData.components)
+            .data(projectData.costOfWork)
             .enter()
             .append('tr');
 

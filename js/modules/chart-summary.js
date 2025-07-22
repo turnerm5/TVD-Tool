@@ -46,29 +46,27 @@ function wrap(text, width) {
  */
 export function renderSummaryCharts() {
     // --- 1. Data Preparation ---
-    const originalData = {
-        name: "Imported Data",
-        components: state.originalData.phases.phase2.components
-    };
+    // Create stable "Imported Data" series using pure original data (never changes)
+    const originalData = utils.createImportedDataSeries(state.originalData);
     const allSeriesData = [originalData, ...state.snapshots];
     const seriesNames = allSeriesData.map(d => d.name);
-    const componentNames = state.originalData.phases.phase2.components.map(c => c.name);
+    const costOfWorkNames = state.originalData.phases.phase2.costOfWork.map(c => c.name);
     const gmpValue = state.originalData.phases.phase2.totalProjectBudget;
     
     // --- Render Left Chart ---
-    renderGroupedBarChart(allSeriesData, seriesNames, componentNames);
+    renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames);
 
     // --- Render Right Chart (will be implemented next) ---
-    renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpValue);
+    renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpValue);
 }
 
 /**
  * Renders the grouped bar chart (left side).
  * @param {Array} allSeriesData - The array of all data series (original + snapshots).
  * @param {Array} seriesNames - The names of the series.
- * @param {Array} componentNames - The names of the components.
+ * @param {Array} costOfWorkNames - The names of the components.
  */
-function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
+function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
     const container = d3.select("#summary-bar-chart-container");
     container.html("");
 
@@ -85,7 +83,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
 
     // --- D3 Scales ---
     const x0 = d3.scaleBand()
-        .domain(componentNames)
+        .domain(costOfWorkNames)
         .range([0, width])
         .padding(0.2);
 
@@ -95,7 +93,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
         .padding(0.05);
 
     const yMax = d3.max(allSeriesData, series => 
-        d3.max(series.components, c => c.current_rom * c.square_footage)
+                        d3.max(series.costOfWork, c => utils.calculateComponentValue(c))
     );
     
     const y = d3.scaleLinear()
@@ -117,17 +115,17 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
 
     // --- D3 Bar Rendering ---
     const componentGroup = g.selectAll(".component-group")
-        .data(componentNames)
+        .data(costOfWorkNames)
         .enter().append("g")
         .attr("class", "component-group")
         .attr("transform", d => `translate(${x0(d)},0)`);
 
     const bars = componentGroup.selectAll("g.bar-group")
         .data(componentName => allSeriesData.map(series => {
-            const comp = series.components.find(c => c.name === componentName);
+            const comp = series.costOfWork.find(c => c.name === componentName);
             return {
                 seriesName: series.name,
-                value: comp ? comp.current_rom * comp.square_footage : 0
+                value: comp ? utils.calculateComponentValue(comp) : 0
             };
         }))
         .enter().append("g").attr("class", "bar-group");
@@ -203,10 +201,10 @@ function renderGroupedBarChart(allSeriesData, seriesNames, componentNames) {
  * Renders the stacked bar chart (right side).
  * @param {Array} allSeriesData - The array of all data series (original + snapshots).
  * @param {Array} seriesNames - The names of the series.
- * @param {Array} componentNames - The names of the components.
+ * @param {Array} costOfWorkNames - The names of the components.
  * @param {number} gmpValue - The total project budget.
  */
-function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpValue) {
+function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpValue) {
     const container = d3.select("#summary-stacked-chart-container");
     container.html("");
 
@@ -223,15 +221,30 @@ function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpVa
 
     // --- Data Transformation for Stacking ---
     const stackedData = allSeriesData.map(series => {
+        const cowTotal = utils.calculateTotalCostOfWork(series.costOfWork);
+        
         let cumulative = 0;
-        const components = componentNames.map(compName => {
-            const component = series.components.find(c => c.name === compName);
-            const value = component ? component.current_rom * component.square_footage : 0;
+        // 1. Direct Cost of Work Components
+        const directCostItems = series.costOfWork.map(comp => {
+            const value = utils.calculateComponentValue(comp);
             const start = cumulative;
             cumulative += value;
-            return { name: compName, value, start, end: cumulative };
+            return { name: comp.name, value, start, end: cumulative, isIndirect: false };
         });
-        return { name: series.name, components, total: cumulative };
+
+        // 2. Indirect Cost Components - use original percentages applied to this series' COW
+        const indirectCostItems = state.indirectCostPercentages.map(indirect => {
+            const value = indirect.percentage * cowTotal;
+            const start = cumulative;
+            cumulative += value;
+            return { name: indirect.name, value, start, end: cumulative, isIndirect: true };
+        });
+
+        return { 
+            name: series.name, 
+            components: [...directCostItems, ...indirectCostItems],
+            total: cumulative 
+        };
     });
 
     // --- D3 Scales ---
@@ -245,7 +258,8 @@ function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpVa
         .domain([0, yMax * 1.1]).nice()
         .range([height, 0]);
 
-    const componentColor = d3.scaleOrdinal(d3.schemeTableau10).domain(componentNames);
+    const directColor = d3.scaleOrdinal(d3.schemeTableau10).domain(costOfWorkNames);
+    const indirectColor = d3.scaleOrdinal(d3.schemeSet3).domain(state.indirectCostPercentages.map(d => d.name));
 
     // --- D3 Axes ---
     g.append("g")
@@ -268,9 +282,12 @@ function renderStackedBarChart(allSeriesData, seriesNames, componentNames, gmpVa
         .data(d => d.components)
         .enter().append("rect")
         .attr("y", d => y(d.end))
-        .attr("height", d => y(d.start) - y(d.end))
+        .attr("height", d => Math.max(0, y(d.start) - y(d.end)))
         .attr("width", x.bandwidth())
-        .attr("fill", d => componentColor(d.name))
+        .attr("fill", d => d.isIndirect ? indirectColor(d.name) : directColor(d.name))
+        .attr("stroke", d => d.isIndirect ? "#a3a3a3" : "none")
+        .attr("stroke-dasharray", d => d.isIndirect ? "3, 3" : "none")
+        .attr("fill-opacity", d => d.isIndirect ? 0.7 : 1.0)
         .append("title")
         .text(d => `${d.name}: ${utils.formatCurrency(d.value)}`);
 
@@ -305,11 +322,8 @@ export function updateSummary() {
     summaryPanel.appendChild(header);
 
     // --- Data Series Table ---
-    const originalData = {
-        name: 'Imported Data',
-        components: state.originalData.phases.phase2.components,
-        projectAreaSF: state.originalData.projectAreaSF
-    };
+    // Create stable "Imported Data" series using pure original data (never changes)
+    const originalData = utils.createImportedDataSeries(state.originalData);
     const allSeries = [originalData, ...state.snapshots];
 
     console.log('Rendering summary table. All series data:', allSeries);
@@ -321,9 +335,10 @@ export function updateSummary() {
     thead.innerHTML = `
         <tr class="text-xs text-gray-700 uppercase bg-gray-50">
             <th scope="col" class="px-6 py-3">Scenario</th>
-            <th scope="col" class="px-6 py-3 text-right">Estimate</th>
+            <th scope="col" class="px-6 py-3 text-right">COW</th>
+            <th scope="col" class="px-6 py-3 text-right">Indirects</th>
+            <th scope="col" class="px-6 py-3 text-right">Total</th>
             <th scope="col" class="px-6 py-3 text-right">Gross SF</th>
-            <th scope="col" class="px-6 py-3 text-right">Usable SF</th>
             <th scope="col" class="px-6 py-3 text-right">$/SF</th>
             <th scope="col" class="px-6 py-3 text-right">Variance</th>
         </tr>
@@ -331,19 +346,21 @@ export function updateSummary() {
 
     const tbody = table.createTBody();
     allSeries.forEach(series => {
-        const totalRom = d3.sum(series.components, c => c.current_rom * c.square_footage);
-        const grossSF = series.projectAreaSF || 0; // Use the SF from the series data directly
-        const usableSF = grossSF * 0.8;
-        const costPerSF = grossSF > 0 ? totalRom / grossSF : 0;
-        const variance = totalRom - gmp;
+        const totals = utils.calculateSeriesTotal(series, state.indirectCostPercentages);
+        const { cowTotal, indirectTotal, totalProjectCost } = totals;
+
+        const grossSF = series.projectAreaSF || 0;
+        const costPerSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
+        const variance = totalProjectCost - gmp;
         
         const row = tbody.insertRow();
         row.className = 'bg-white border-b';
         row.innerHTML = `
             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${series.name}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(totalRom)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(cowTotal)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(indirectTotal)}</td>
+            <td class="px-6 py-4 text-right font-semibold">${utils.formatCurrencyBig(totalProjectCost)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
-            <td class="px-6 py-4 text-right">${utils.formatNumber(usableSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerSF)}</td>
             <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
                 ${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}

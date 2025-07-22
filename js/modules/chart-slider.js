@@ -21,34 +21,34 @@ export function setDependencies(fns) {
  * When a component's value is changed, this function calculates the delta
  * and distributes the inverse of that delta proportionally across all other unlocked components.
  * @param {object} changedComponent - The component object that was directly modified.
- * @param {number} newValue - The new `current_rom` value for the changed component.
+ * @param {number} newValue - The new `target_value` value for the changed component.
  * @param {string} phaseKey - The key for the current phase ('phase1' or 'phase2').
  */
 function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     const phase = state.currentData.phases[phaseKey];
 
     // 1. Calculate the initial change in absolute cost from the user's action.
-    const originalRom = changedComponent.current_rom;
+    const originalRom = changedComponent.target_value;
     const newRom = Math.max(0, newValue); // Ensure new value isn't negative
     const initialCostChange = (newRom - originalRom) * changedComponent.square_footage;
 
     if (Math.abs(initialCostChange) < 0.01) return;
 
     // 2. Identify which components can absorb the change.
-    const unlockedComponents = phase.components.filter(c => {
+    const unlockedCostOfWork = phase.costOfWork.filter(c => {
         const key = `${phaseKey}-${c.name}`;
-        return c !== changedComponent && !state.lockedComponents.has(key) && c.square_footage > 0
+        return c !== changedComponent && !state.lockedCostOfWork.has(key) && c.square_footage > 0
     });
 
     // If no components can absorb the change, just apply it and let the total cost drift.
-    if (unlockedComponents.length === 0) {
-        changedComponent.current_rom = newRom;
+    if (unlockedCostOfWork.length === 0) {
+        changedComponent.target_value = newRom;
         render();
         return;
     }
 
     // 3. Set the target component to its new value.
-    changedComponent.current_rom = newRom;
+            changedComponent.target_value = newRom;
 
     // 4. Calculate the total cost that needs to be absorbed by the other components.
     const costToAbsorb = -initialCostChange;
@@ -57,7 +57,7 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // This loop ensures that if one component hits $0/SF, the remaining cost is
     // redistributed among the other available components.
     let remainingCostToAbsorb = costToAbsorb;
-    let componentsAvailableToAbsorb = [...unlockedComponents];
+    let componentsAvailableToAbsorb = [...unlockedCostOfWork];
     let iterations = 0; // Safety break to prevent infinite loops
 
     while (Math.abs(remainingCostToAbsorb) > 0.01 && componentsAvailableToAbsorb.length > 0 && iterations < 10) {
@@ -67,7 +67,7 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
         const nextComponentsAvailable = [];
 
         componentsAvailableToAbsorb.forEach(comp => {
-            const currentCompRom = comp.current_rom;
+            const currentCompRom = comp.target_value;
             const sf = comp.square_footage;
             const romChangeForComp = costShare / sf;
             const newCompRom = currentCompRom + romChangeForComp;
@@ -76,10 +76,10 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
                 // This component can't absorb its full share. Absorb what it can down to 0.
                 const absorbedCost = -currentCompRom * sf;
                 remainingCostToAbsorb += (costShare - absorbedCost); // Add the un-absorbed amount to the remainder.
-                comp.current_rom = 0;
+                comp.target_value = 0;
             } else {
                 // This component can absorb its full share for this iteration.
-                comp.current_rom = newCompRom;
+                comp.target_value = newCompRom;
                 nextComponentsAvailable.push(comp); // This component is still available for future adjustments.
             }
         });
@@ -92,8 +92,8 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // apply it back to the originally changed component to maintain the total budget.
     if (Math.abs(remainingCostToAbsorb) > 0.01 && changedComponent.square_footage > 0) {
         const leftoverRomChange = remainingCostToAbsorb / changedComponent.square_footage;
-        changedComponent.current_rom += leftoverRomChange;
-        changedComponent.current_rom = Math.max(0, changedComponent.current_rom);
+        changedComponent.target_value += leftoverRomChange;
+        changedComponent.target_value = Math.max(0, changedComponent.target_value);
     }
 
     render();
@@ -105,14 +105,14 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
  * This function uses the D3 enter/update/exit pattern to create and update the component columns.
  */
 export function renderChart() {
-    const phaseComponents = state.currentData.phases.phase2.components;
+    const phaseCostOfWork = state.currentData.phases.phase2.costOfWork;
     // Set the number of columns in the CSS grid layout.
-    dom.chartContainer.style("grid-template-columns", `repeat(${phaseComponents.length}, 1fr)`);
+    dom.chartContainer.style("grid-template-columns", `repeat(${phaseCostOfWork.length}, 1fr)`);
     // Set the output range for the y-scale based on the container's current height.
     yScale.range([dom.chartContainer.node().clientHeight - parseFloat(dom.chartContainer.style("padding-bottom")), 0]);
     
     // Bind data to the component columns. The key function (d.name) helps D3 track objects.
-    const components = dom.chartContainer.selectAll(".component-column").data(phaseComponents, d => d.name);
+    const components = dom.chartContainer.selectAll(".component-column").data(phaseCostOfWork, d => d.name);
     
     // Remove any columns that are no longer in the data.
     components.exit().remove();
@@ -149,25 +149,26 @@ export function renderChart() {
     // updateGroup.select(".target-value").style("top", d => yScale(d.target_value) + "px").style("bottom", null); // REMOVED
     
     updateGroup.select(".current-rom")
-        .style("top", d => yScale(d.current_rom) - 3 + "px")
+        .style("top", d => yScale(d.target_value) - 3 + "px")
         .style("bottom", null)
         .each(function(d) {
             const bar = d3.select(this);
-            const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
+            const isOutsideBenchmark = d.target_value < d.benchmark_low || d.target_value > d.benchmark_high;
 
-            if (d.current_rom === 0) {
-                bar.style("background", "none")
-                   .style("border", "2px dashed #9ca3af") // gray-400
-                   .classed('zero-rom-bar', true);
+            bar.classed('zero-rom-bar', d.target_value === 0);
+            bar.classed('outside-benchmark', isOutsideBenchmark && d.target_value !== 0);
+            
+            if (d.target_value !== 0) {
+                bar.style("background", isOutsideBenchmark ? null : '#1f2937');
+                bar.style("border", null);
             } else {
-                bar.style("background", isOutsideBenchmark ? '#dc2626' : '#1f2937') // Red if outside, dark grey if inside
-                   .style("border", "none")
-                   .classed('zero-rom-bar', false);
+                bar.style("background", null);
+                bar.style("border", null);
             }
         });
     
     // Create a map of original component values for quick lookup.
-    const originalComponents = state.originalData.phases.phase2.components.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
+    const originalComponents = state.originalData.phases.phase2.costOfWork.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
     
     // Update labels and ghost bars for each component.
     updateGroup.each(function(d) {
@@ -176,22 +177,23 @@ export function renderChart() {
         
         // Update the value labels
         const valueGroup = d3.select(this).select(".value-label-group");
-        valueGroup.select(".current-value-label").text(utils.formatCurrency(d.current_rom));
-        valueGroup.style("top", yScale(d.current_rom) - 10 + "px").style("bottom", null);
+        valueGroup.select(".current-value-label").text(utils.formatCurrency(d.target_value));
+        valueGroup.style("top", yScale(d.target_value) - 10 + "px").style("bottom", null);
 
         // Position the ghost bar
         const ghostBar = d3.select(this).select(".ghost-rom");
-        ghostBar.style("top", yScale(original.current_rom) - 3 + "px").style("bottom", null);
+        ghostBar.style("top", yScale(original.target_value) - 3 + "px").style("bottom", null);
 
         // Show/hide and update the delta label
         const deltaLabel = valueGroup.select(".delta-label");
-        if (d.current_rom !== original.current_rom) {
+        if (d.target_value !== original.target_value) {
             ghostBar.style("display", "block");
-            const delta = d.current_rom - original.current_rom;
-            const isOutsideBenchmark = d.current_rom < d.benchmark_low || d.current_rom > d.benchmark_high;
+            const delta = d.target_value - original.target_value;
+            const isOutsideBenchmark = d.target_value < d.benchmark_low || d.target_value > d.benchmark_high;
             deltaLabel.style("display", "block")
                 .text(`${delta > 0 ? '+' : ''}${utils.formatCurrency(delta)}`)
-                .style("color", isOutsideBenchmark ? '#dc2626' : '#16a34a'); // Red if outside, green if inside
+                .classed('outside-benchmark', isOutsideBenchmark)
+                .classed('inside-benchmark', !isOutsideBenchmark);
         } else {
             ghostBar.style("display", "none");
             deltaLabel.style("display", "none");
@@ -203,20 +205,37 @@ export function renderChart() {
         .style('display', 'block')
         .style('opacity', d => {
             const key = `phase2-${d.name}`;
-            return state.lockedComponents.has(key) ? 1 : 0.5;
+            return state.lockedCostOfWork.has(key) ? 1 : 0.5;
         })
         .text(d => {
             const key = `phase2-${d.name}`;
-            return state.lockedComponents.has(key) ? '🔒' : '🔓';
+            return state.lockedCostOfWork.has(key) ? '🔒' : '🔓';
         })
         .on('click', (event, d) => {
             event.stopPropagation();
             const key = `phase2-${d.name}`;
-            if (state.lockedComponents.has(key)) {
-                state.lockedComponents.delete(key);
+            if (state.lockedCostOfWork.has(key)) {
+                state.lockedCostOfWork.delete(key);
             } else {
-                state.lockedComponents.add(key);
+                state.lockedCostOfWork.add(key);
             }
+            render();
+        });
+
+    // Add Detail button for C Interiors component
+    updateGroup.select(".detail-btn").remove(); // Remove any existing detail buttons
+    updateGroup.filter(d => d.name === 'C Interiors')
+        .append("div")
+        .attr("class", "detail-btn")
+        .text('Detail')
+        .on('click', (event, d) => {
+            event.stopPropagation();
+            // Store the current interiors state when entering detail view
+            const interiorsData = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
+            if (interiorsData) {
+                state.interiorsEntryState = JSON.parse(JSON.stringify(interiorsData));
+            }
+            state.currentView = 'interiors';
             render();
         });
 
@@ -227,7 +246,7 @@ export function renderChart() {
         const benchmarkProjects = state.currentData.benchmarks || [];
 
         const indicators = svg.selectAll('.benchmark-indicator-group')
-            .data(benchmarkProjects.filter(p => p.components.some(c => c.name === componentData.name)));
+            .data(benchmarkProjects.filter(p => p.costOfWork.some(c => c.name === componentData.name)));
 
         indicators.exit().remove();
 
@@ -241,7 +260,7 @@ export function renderChart() {
         const mergedIndicators = enterIndicators.merge(indicators);
 
         mergedIndicators.each(function(d) {
-            const benchmarkComp = d.components.find(c => c.name === componentData.name);
+            const benchmarkComp = d.costOfWork.find(c => c.name === componentData.name);
             if (!benchmarkComp) return;
 
             const yPos = yScale(benchmarkComp.cost);
@@ -279,9 +298,7 @@ function showBenchmarkTooltip(event, benchmarkData) {
         .attr('class', 'benchmark-tooltip');
 
     tooltip.append('img')
-        .attr('src', benchmarkData.image)
-        .style('width', '240px')
-        .style('height', '180px');
+        .attr('src', benchmarkData.image);
 
     tooltip.append('div')
         .attr('class', 'benchmark-tooltip-name')
@@ -326,31 +343,14 @@ export function renderYAxisLabels() {
     dom.yAxisLabelsContainer.html('');
     const ticks = yScale.ticks(10);
     ticks.forEach(tick => {
-        dom.yAxisLabelsContainer.append('div')
-            .style('position', 'absolute')
-            .style('top', `${yScale(tick)}px`)
-            .style('transform', 'translateY(-50%)')
+        const label = dom.yAxisLabelsContainer.append('div')
             .text(`$${tick}`);
+        
+        // Use CSS for styling, but position requires JS
+        label.style('position', 'absolute')
+             .style('top', `${yScale(tick)}px`)
+             .style('transform', 'translateY(-50%)');
     });
-}
-
-/**
- * Handles changes to the "Current ROM" input cells in the Program View table.
- */
-export function handleCurrentRomCellChange(event) {
-    const input = event.target;
-    const newValue = parseFloat(input.value);
-    const componentName = input.dataset.name;
-    const phaseKey = 'phase2';
-
-    if (isNaN(newValue)) return;
-
-    const phase = state.currentData.phases[phaseKey];
-    const component = phase.components.find(c => c.name === componentName);
-
-    if (component) {
-        applyChangeAndBalance(component, newValue, phaseKey);
-    }
 }
 
 /**
@@ -364,13 +364,13 @@ export function handleSquareFootageCellChange(event) {
 
     if (isNaN(newSF) || newSF < 0) {
         // Find the original value to revert to if input is invalid
-        const originalComponent = state.originalData.phases[phaseKey].components.find(c => c.name === componentName);
+        const originalComponent = state.originalData.phases[phaseKey].costOfWork.find(c => c.name === componentName);
         input.value = originalComponent ? originalComponent.square_footage.toLocaleString('en-US') : '0';
         return;
     }
 
     const phase = state.currentData.phases[phaseKey];
-    const component = phase.components.find(c => c.name === componentName);
+    const component = phase.costOfWork.find(c => c.name === componentName);
 
     if (component) {
         component.square_footage = newSF;
@@ -426,8 +426,8 @@ function dragged(event, d) {
 function dragEnded(event, d) {
     d3.select(this).classed("active", false);
     const key = `phase2-${d.name}`;
-    if (!state.lockedComponents.has(key)) {
-        state.lockedComponents.add(key);
+    if (!state.lockedCostOfWork.has(key)) {
+        state.lockedCostOfWork.add(key);
         render(); // Rerender to update the lock icon
     }
 }
@@ -440,9 +440,9 @@ function dragEnded(event, d) {
 export function balanceToGmp() {
     const phaseKey = 'phase2';
     const phase = state.currentData.phases[phaseKey];
-    const unlockedComponents = phase.components.filter(c => {
+    const unlockedComponents = phase.costOfWork.filter(c => {
         const key = `${phaseKey}-${c.name}`;
-        return !state.lockedComponents.has(key) && c.square_footage > 0
+        return !state.lockedCostOfWork.has(key) && c.square_footage > 0
     });
 
     if (unlockedComponents.length === 0) {
@@ -450,38 +450,77 @@ export function balanceToGmp() {
         return;
     }
 
-    const currentRomTotal = utils.calculateTotal(phase.components, 'current_rom');
+    const totalIndirectPercentage = d3.sum(state.indirectCostPercentages, p => p.percentage);
+    const totalCow = utils.calculateTotalCostOfWork(phase.costOfWork);
+    const currentIndirectCosts = totalCow * totalIndirectPercentage;
+    const currentTotalCost = totalCow + currentIndirectCosts;
     const targetBudget = phase.totalProjectBudget;
-    const difference = targetBudget - currentRomTotal;
+    const difference = targetBudget - currentTotalCost;
 
     if (Math.abs(difference) < 1) {
         alert("Already balanced to GMP.");
         return;
     }
 
-    const totalUnlockedSf = unlockedComponents.reduce((acc, c) => acc + c.square_footage, 0);
-    const costChangePerSf = difference / totalUnlockedSf;
+    // We need to find the change in COW that will result in the desired total cost change.
+    // Let deltaCOW be the change needed in the total Cost of Work.
+    // newTotalCost = (totalCow + deltaCOW) + (totalCow + deltaCOW) * totalIndirectPercentage
+    // newTotalCost = (totalCow + deltaCOW) * (1 + totalIndirectPercentage)
+    // We want newTotalCost to be targetBudget.
+    // targetBudget = (totalCow + deltaCOW) * (1 + totalIndirectPercentage)
+    // targetBudget / (1 + totalIndirectPercentage) = totalCow + deltaCOW
+    // deltaCOW = (targetBudget / (1 + totalIndirectPercentage)) - totalCow
+    const requiredCowTotal = targetBudget / (1 + totalIndirectPercentage);
+    const cowDifference = requiredCowTotal - totalCow;
 
-    let costRemainingToDistribute = difference;
+
+    // Now distribute cowDifference across unlocked components
+    const totalUnlockedSf = unlockedComponents.reduce((acc, c) => {
+        if (c.name === 'C Interiors' && c.building_efficiency) {
+            return acc + (c.square_footage / c.building_efficiency);
+        }
+        return acc + c.square_footage;
+    }, 0);
+
+    if (totalUnlockedSf === 0) {
+        alert("Cannot balance: total square footage of unlocked components is zero.");
+        return;
+    }
+
+    const costChangePerEffectiveSf = cowDifference / totalUnlockedSf;
+
+    let costRemainingToDistribute = cowDifference;
 
     const componentsAvailable = [...unlockedComponents];
     let iterations = 0;
     while(Math.abs(costRemainingToDistribute) > 1 && iterations < 5) {
-        const sfAvailable = componentsAvailable.reduce((acc, c) => acc + c.square_footage, 0);
+        const sfAvailable = componentsAvailable.reduce((acc, c) => {
+             if (c.name === 'C Interiors' && c.building_efficiency) {
+                return acc + (c.square_footage / c.building_efficiency);
+            }
+            return acc + c.square_footage;
+        }, 0);
         if (sfAvailable === 0) break;
+        
         const costPerSf = costRemainingToDistribute / sfAvailable;
 
         costRemainingToDistribute = 0;
         const componentsForNextRound = [];
 
         componentsAvailable.forEach(c => {
-            const newRom = c.current_rom + costPerSf;
+            const effectiveSf = (c.name === 'C Interiors' && c.building_efficiency) 
+                ? c.square_footage / c.building_efficiency
+                : c.square_footage;
+            
+            const romChange = costPerSf; // change in $/SF
+            const newRom = c.target_value + romChange;
+            
             if (newRom < 0) {
-                const absorbedCost = -c.current_rom * c.square_footage;
-                costRemainingToDistribute += (costPerSf * c.square_footage - absorbedCost);
-                c.current_rom = 0;
+                const costToMakeZero = -c.target_value * effectiveSf;
+                costRemainingToDistribute += (costPerSf * effectiveSf - costToMakeZero);
+                c.target_value = 0;
             } else {
-                c.current_rom = newRom;
+                c.target_value = newRom;
                 componentsForNextRound.push(c);
             }
         });

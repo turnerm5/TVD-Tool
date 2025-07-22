@@ -15,6 +15,7 @@ import * as summary from './modules/chart-summary.js';
 import * as sankey from './modules/chart-sankey.js';
 import * as program from './modules/chart-program.js';
 import * as benchmarks from './modules/chart-benchmarks.js';
+import * as interiors from './modules/chart-interiors.js';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
@@ -35,6 +36,7 @@ function render() {
     dom.phase1View.classList.add('hidden');
     dom.benchmarksView.classList.add('hidden');
     dom.summaryView.classList.add('hidden');
+    dom.interiorsView.classList.add('hidden');
     dom.legend.classList.add('hidden');
     dom.summaryLegend.classList.add('hidden');
     dom.maximizeBtn.classList.add('hidden');
@@ -80,6 +82,12 @@ function render() {
             summary.renderSummaryCharts();
             summary.updateSummary();
         });
+    } else if (state.currentView === 'interiors') {
+        dom.interiorsView.classList.remove('hidden');
+        // No specific button gets active class since this is accessed via Detail button
+        requestAnimationFrame(() => {
+            interiors.renderInteriorsView();
+        });
     }
 
     // --- 3. Update reset button state ---
@@ -98,10 +106,12 @@ slider.setDependencies({
 program.setDependencies({
     render: render,
     handleSquareFootageCellChange: slider.handleSquareFootageCellChange,
-    handleCurrentRomCellChange: slider.handleCurrentRomCellChange,
     handleGrossSfCellChange: slider.handleGrossSfCellChange
 });
 summary.setRender(render);
+interiors.setDependencies({
+    render: render
+});
 
 
 // --- GLOBAL EVENT LISTENERS ---
@@ -153,16 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cancel"
         );
         if (snapshotName) {
-            const phase2Components = state.currentData.phases.phase2.components;
-            const snapshotComponents = phase2Components.map(c => ({
+            const phase2CostOfWork = state.currentData.phases.phase2.costOfWork;
+            const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                 name: c.name,
-                current_rom: c.current_rom,
-                square_footage: c.square_footage
+                target_value: c.target_value,
+                square_footage: c.square_footage,
+                building_efficiency: c.building_efficiency // Include building_efficiency for C Interiors
             }));
             const snapshot = {
                 name: snapshotName,
                 projectAreaSF: state.currentData.projectAreaSF,
-                components: snapshotComponents
+                costOfWork: snapshotCostOfWork
             };
             state.addSnapshot(snapshot);
             console.log('All snapshots:', state.snapshots);

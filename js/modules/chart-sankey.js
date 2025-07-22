@@ -9,24 +9,24 @@ import * as ui from './ui.js';
  */
 export function renderSankeyChart(data) {
     const phase1Data = data.phases.phase1;
-    const { totalProjectBudget, categories } = phase1Data;
+    const { totalProjectBudget, costOfWork } = phase1Data;
 
     // Filter out items with a total of 0
-    const filteredCategories = categories.filter(c => c.Total > 0);
+    const filteredCostOfWork = costOfWork.filter(c => c.Total > 0);
 
     // --- 1. Create Nodes ---
     // Using a Set to ensure uniqueness for categories
-    const categoryNames = [...new Set(filteredCategories.map(c => c.Category))];
-    const subCategoryNames = filteredCategories.map(c => c.Subcategory);
+    const categoryNames = [...new Set(filteredCostOfWork.map(c => c.Category))];
+    const subCategoryNames = filteredCostOfWork.map(c => c.Subcategory);
 
     // Calculate category sum and check for a remainder to be used as "Available COW"
-    const categorySum = filteredCategories.reduce((sum, item) => sum + item.Total, 0);
+    const categorySum = filteredCostOfWork.reduce((sum, item) => sum + item.Total, 0);
     const difference = totalProjectBudget - categorySum;
 
     if (difference > 0) {
         categoryNames.push("Available COW");
         // Add a corresponding sub-category node to make it stop in the middle
-        subCategoryNames.push("Unallocated");
+        subCategoryNames.push("Site Utilities");
     }
 
     const nodes = [
@@ -43,7 +43,7 @@ export function renderSankeyChart(data) {
 
     // Aggregate totals for each category
     const categoryTotals = new Map();
-    for (const item of filteredCategories) {
+    for (const item of filteredCostOfWork) {
         const currentTotal = categoryTotals.get(item.Category) || 0;
         categoryTotals.set(item.Category, currentTotal + item.Total);
     }
@@ -63,7 +63,7 @@ export function renderSankeyChart(data) {
     }
 
     // Links from each Category to its Subcategories
-    for (const item of filteredCategories) {
+    for (const item of filteredCostOfWork) {
         links.push({
             source: nodeMap.get(item.Category),
             target: nodeMap.get(item.Subcategory),
@@ -75,7 +75,7 @@ export function renderSankeyChart(data) {
     if (difference > 0) {
         links.push({
             source: nodeMap.get("Available COW"),
-            target: nodeMap.get("Unallocated"),
+            target: nodeMap.get("Site Utilities"),
             value: difference
         });
     }
@@ -113,7 +113,7 @@ export function renderSankeyChart(data) {
     // Helper to get node color
     function getNodeColor(node) {
         if (node.name === 'Total Project Budget') return "#FBBF24"; // Amber-400
-        if (node.name === 'Unallocated') return "#981e32"; // WSU Crimson
+        if (node.name === 'Site Utilities') return "#981e32"; // WSU Crimson
         if (node.depth === 1) return color(node.name);
         // For subcategories, inherit from parent if possible
         if (node.depth === 2 && node.targetLinks && node.targetLinks.length > 0) {
