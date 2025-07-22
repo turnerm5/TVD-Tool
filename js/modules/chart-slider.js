@@ -220,6 +220,18 @@ export function renderChart() {
             render();
         });
 
+    // Add Detail button for C Interiors component
+    updateGroup.select(".detail-btn").remove(); // Remove any existing detail buttons
+    updateGroup.filter(d => d.name === 'C Interiors')
+        .append("div")
+        .attr("class", "detail-btn")
+        .text('Detail')
+        .on('click', (event, d) => {
+            event.stopPropagation();
+            state.currentView = 'interiors';
+            render();
+        });
+
     // --- Render the benchmark indicators (A, B, C, D) within each column's SVG ---
     updateGroup.each(function(componentData) {
         const group = d3.select(this);

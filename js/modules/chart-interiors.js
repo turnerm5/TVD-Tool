@@ -14,8 +14,8 @@ export function setDependencies(fns) {
 }
 
 export function renderInteriorsView() {
-    const interiorsData = state.currentData.phases.phase2.components.find(c => c.name === 'C - Interiors');
-    const originalInteriorsData = state.originalData.phases.phase2.components.find(c => c.name === 'C - Interiors');
+    const interiorsData = state.currentData.phases.phase2.components.find(c => c.name === 'C Interiors');
+    const originalInteriorsData = state.originalData.phases.phase2.components.find(c => c.name === 'C Interiors');
 
     if (!interiorsData || !interiorsData.breakdown) {
         dom.interiorsView.innerHTML = `<div class="p-4"><p>No interiors data available.</p></div>`;
@@ -32,6 +32,20 @@ export function renderInteriorsView() {
 
     const container = d3.select(dom.interiorsView);
     container.html(''); 
+
+    // Add back button
+    const headerContainer = container.append('div').attr('class', 'flex items-center justify-between p-4 bg-gray-50 border-b');
+    headerContainer.append('button')
+        .attr('class', 'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition')
+        .html('← Back to Chart')
+        .on('click', () => {
+            state.currentView = 'chart';
+            render();
+        });
+    
+    headerContainer.append('h2')
+        .attr('class', 'text-xl font-bold text-gray-800')
+        .text('Detailed Interiors Analysis');
 
     const grid = container.append('div').attr('class', 'grid grid-cols-12 gap-8 p-4');
 
@@ -53,25 +67,19 @@ export function renderInteriorsView() {
         });
 
     leftPanel.append('label').attr('class', 'block text-sm font-medium text-gray-700 mt-4').text('Building Efficiency');
+    
+    // Auto-calculate efficiency: (all square footage - Mechanical and Support + Circulation) / all square footage
+    const mechanicalAndSupportSf = interiorsData.breakdown.find(item => item.name === 'Mechanical and Support')?.sf || 0;
+    const circulationSf = interiorsData.breakdown.find(item => item.name === 'Circulation')?.sf || 0;
+    const totalInteriorsSf = interiorsData.breakdown.reduce((acc, item) => acc + item.sf, 0);
+    const calculatedEfficiency = totalInteriorsSf > 0 ? (totalInteriorsSf - mechanicalAndSupportSf + circulationSf) / totalInteriorsSf : 0;
+    
+    // Update the efficiency in the data
+    interiorsData.building_efficiency = calculatedEfficiency;
+    
     leftPanel.append('div')
-        .attr('class', 'flex items-center mt-1')
-        .append('input')
-            .attr('type', 'number')
-            .attr('id', 'building-efficiency-input')
-            .attr('class', 'p-2 w-full bg-white rounded-md border')
-            .attr('value', (interiorsData.building_efficiency * 100).toFixed(2))
-            .attr('min', 0)
-            .attr('max', 100)
-            .attr('step', 1)
-            .on('change', function() {
-                const newEfficiency = +this.value / 100;
-                interiorsData.building_efficiency = newEfficiency;
-                recalculateAndUpdate();
-            })
-        .select(function() { return this.parentNode; }) // get the parent flex container
-        .append('span')
-            .attr('class', 'ml-2 text-gray-500')
-            .text('%');
+        .attr('class', 'mt-1 p-2 bg-gray-100 rounded-md border')
+        .html(`<span class="font-medium">${(calculatedEfficiency * 100).toFixed(2)}%</span> <span class="text-sm text-gray-500">(Auto-calculated)</span>`);
 
     const targetBudget = originalInteriorsData.current_rom * totalSf;
     leftPanel.append('label').attr('class', 'block text-sm font-medium text-gray-700 mt-4').text('Initial Target Budget');
@@ -229,7 +237,7 @@ function renderTreemapChart(interiorsData, container) {
     d3.select(container).select('svg').remove();
 
     const data = {
-        name: 'C - Interiors',
+        name: 'C Interiors',
         children: interiorsData.breakdown.filter(d => d.sf > 0)
     };
 

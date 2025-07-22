@@ -12,6 +12,7 @@ let _currentPhase = 'phase1';
 let _currentView = 'benchmarks';
 let _selectedBenchmark = null;
 let _lockedComponents = new Set();
+let _lockedInteriorsBreakdown = new Set();
 let _snapshots = [];
 
 export const state = {
@@ -35,6 +36,9 @@ export const state = {
 
     get lockedComponents() { return _lockedComponents; },
     set lockedComponents(components) { _lockedComponents = components; },
+
+    get lockedInteriorsBreakdown() { return _lockedInteriorsBreakdown; },
+    set lockedInteriorsBreakdown(components) { _lockedInteriorsBreakdown = components; },
 
     get snapshots() { return _snapshots; },
     addSnapshot(snapshot) {

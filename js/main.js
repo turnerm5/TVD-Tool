@@ -15,6 +15,7 @@ import * as summary from './modules/chart-summary.js';
 import * as sankey from './modules/chart-sankey.js';
 import * as program from './modules/chart-program.js';
 import * as benchmarks from './modules/chart-benchmarks.js';
+import * as interiors from './modules/chart-interiors.js';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
@@ -35,6 +36,7 @@ function render() {
     dom.phase1View.classList.add('hidden');
     dom.benchmarksView.classList.add('hidden');
     dom.summaryView.classList.add('hidden');
+    dom.interiorsView.classList.add('hidden');
     dom.legend.classList.add('hidden');
     dom.summaryLegend.classList.add('hidden');
     dom.maximizeBtn.classList.add('hidden');
@@ -80,6 +82,12 @@ function render() {
             summary.renderSummaryCharts();
             summary.updateSummary();
         });
+    } else if (state.currentView === 'interiors') {
+        dom.interiorsView.classList.remove('hidden');
+        // No specific button gets active class since this is accessed via Detail button
+        requestAnimationFrame(() => {
+            interiors.renderInteriorsView();
+        });
     }
 
     // --- 3. Update reset button state ---
@@ -102,6 +110,21 @@ program.setDependencies({
     handleGrossSfCellChange: slider.handleGrossSfCellChange
 });
 summary.setRender(render);
+interiors.setDependencies({
+    render: render,
+    handleInteriorsSfChange: function(itemName, newSf) {
+        // Handle square footage changes in interiors breakdown
+        const interiorsData = state.currentData.phases.phase2.components.find(c => c.name === 'C Interiors');
+        if (interiorsData && interiorsData.breakdown) {
+            const item = interiorsData.breakdown.find(d => d.name === itemName);
+            if (item && interiorsData.square_footage > 0) {
+                item.percentage = newSf / interiorsData.square_footage;
+                // Recalculate and re-render
+                render();
+            }
+        }
+    }
+});
 
 
 // --- GLOBAL EVENT LISTENERS ---

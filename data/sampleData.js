@@ -29,7 +29,20 @@ const sampleData = {
                 { "name": "B10 Superstructure", "square_footage": 49050, "current_rom": 78.00 },
                 { "name": "B20 Enclosure", "square_footage": 49050, "current_rom": 78.00 },
                 { "name": "B30 Roofing", "square_footage": 12263, "current_rom": 39.00 },
-                { "name": "C Interiors", "square_footage": 49050, "current_rom": 95.00 },
+                { 
+                    "name": "C Interiors", 
+                    "square_footage": 49050, 
+                    "current_rom": 95.00,
+                    "building_efficiency": 0.85,
+                    "breakdown": [
+                        { "name": "Classroom", "percentage": 0.30, "cost": 125, "sf": 12498 },
+                        { "name": "Research", "percentage": 0.25, "cost": 150, "sf": 10414 },
+                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 6248 },
+                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 4166 },
+                        { "name": "Circulation", "percentage": 0.15, "cost": 80, "sf": 6248 },
+                        { "name": "Mechanical and Support", "percentage": 0.05, "cost": 60, "sf": 2083 }
+                    ]
+                },
                 { "name": "D Services", "square_footage": 49050, "current_rom": 220.00 },
                 { "name": "E Equipment and Furnishings", "square_footage": 49050, "current_rom": 50.00 },
                 { "name": "F Special Construction", "square_footage": 10000, "current_rom": 84 },
