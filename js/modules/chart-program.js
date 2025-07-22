@@ -200,7 +200,7 @@ export function renderPhase2ProgramView() {
     // Create a horizontal grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-4 gap-4')
-        .style('height', '100px');
+        .style('height', '200px');
 
     // Get the list of available schemes from the current data
     const schemeData = state.currentData.schemes || [];

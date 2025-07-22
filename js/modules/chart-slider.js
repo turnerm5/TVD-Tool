@@ -155,14 +155,15 @@ export function renderChart() {
             const bar = d3.select(this);
             const isOutsideBenchmark = d.target_value < d.benchmark_low || d.target_value > d.benchmark_high;
 
-            if (d.target_value === 0) {
-                bar.style("background", "none")
-                   .style("border", "2px dashed #9ca3af") // gray-400
-                   .classed('zero-rom-bar', true);
+            bar.classed('zero-rom-bar', d.target_value === 0);
+            bar.classed('outside-benchmark', isOutsideBenchmark && d.target_value !== 0);
+            
+            if (d.target_value !== 0) {
+                bar.style("background", isOutsideBenchmark ? null : '#1f2937');
+                bar.style("border", null);
             } else {
-                bar.style("background", isOutsideBenchmark ? '#dc2626' : '#1f2937') // Red if outside, dark grey if inside
-                   .style("border", "none")
-                   .classed('zero-rom-bar', false);
+                bar.style("background", null);
+                bar.style("border", null);
             }
         });
     
@@ -191,7 +192,8 @@ export function renderChart() {
             const isOutsideBenchmark = d.target_value < d.benchmark_low || d.target_value > d.benchmark_high;
             deltaLabel.style("display", "block")
                 .text(`${delta > 0 ? '+' : ''}${utils.formatCurrency(delta)}`)
-                .style("color", isOutsideBenchmark ? '#dc2626' : '#16a34a'); // Red if outside, green if inside
+                .classed('outside-benchmark', isOutsideBenchmark)
+                .classed('inside-benchmark', !isOutsideBenchmark);
         } else {
             ghostBar.style("display", "none");
             deltaLabel.style("display", "none");
@@ -296,9 +298,7 @@ function showBenchmarkTooltip(event, benchmarkData) {
         .attr('class', 'benchmark-tooltip');
 
     tooltip.append('img')
-        .attr('src', benchmarkData.image)
-        .style('width', '240px')
-        .style('height', '180px');
+        .attr('src', benchmarkData.image);
 
     tooltip.append('div')
         .attr('class', 'benchmark-tooltip-name')
@@ -343,11 +343,13 @@ export function renderYAxisLabels() {
     dom.yAxisLabelsContainer.html('');
     const ticks = yScale.ticks(10);
     ticks.forEach(tick => {
-        dom.yAxisLabelsContainer.append('div')
-            .style('position', 'absolute')
-            .style('top', `${yScale(tick)}px`)
-            .style('transform', 'translateY(-50%)')
+        const label = dom.yAxisLabelsContainer.append('div')
             .text(`$${tick}`);
+        
+        // Use CSS for styling, but position requires JS
+        label.style('position', 'absolute')
+             .style('top', `${yScale(tick)}px`)
+             .style('transform', 'translateY(-50%)');
     });
 }
 

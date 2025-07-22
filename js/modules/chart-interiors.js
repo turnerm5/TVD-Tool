@@ -277,13 +277,12 @@ function renderTreemapChart(interiorsData, container) {
         .attr("width", d => d.x1 - d.x0 - 10)
         .attr("height", d => d.y1 - d.y0 - 10)
         .style("overflow", "hidden")
+        .classed("interiors-treemap-leaf", true)
         .style("display", d => (d.x1 - d.x0 < 60 || d.y1 - d.y0 < 40) ? "none" : "block");
 
     fo.append("xhtml:div")
-        .style("color", "white")
-        .style("text-shadow", "1px 1px 2px black")
         .html(d => `
-            <div style="font-weight: bold; margin-bottom: 4px;">${d.data.name}</div>
+            <div class="name">${d.data.name}</div>
             <div>${d.data.sf.toLocaleString('en-US', { maximumFractionDigits: 0 })} SF</div>
             <div>${utils.formatCurrencyBig(d.data.sf * d.data.cost)}</div>
         `);
@@ -331,19 +330,16 @@ function renderStackedBar(data, container, targetBudget) {
 
     // Target line
     svg.append('line')
+        .attr('class', 'interiors-stacked-bar-target-line')
        .attr('x1', 0)
        .attr('x2', width)
        .attr('y1', y(targetBudget))
-       .attr('y2', y(targetBudget))
-       .attr('stroke', 'red')
-       .attr('stroke-dasharray', '4');
+       .attr('y2', y(targetBudget));
        
     svg.append('text')
+        .attr('class', 'interiors-stacked-bar-target-label')
         .attr('x', width)
         .attr('y', y(targetBudget))
         .attr('dy', -4)
-        .attr('text-anchor', 'end')
-        .attr('fill', 'red')
-        .attr('font-size', '12px')
         .text(`Target: ${utils.formatCurrencyBig(targetBudget)}`);
 }

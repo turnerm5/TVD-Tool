@@ -123,6 +123,24 @@ body {
 .component-column .detail-btn:hover {
     background-color: #2563eb; /* blue-600 */
 }
+
+.current-rom.zero-rom-bar {
+    background: none;
+    border: 2px dashed #9ca3af;
+}
+
+.current-rom.outside-benchmark {
+    background: #dc2626;
+}
+
+.delta-label.outside-benchmark {
+    color: #dc2626;
+}
+
+.delta-label.inside-benchmark {
+    color: #16a34a;
+}
+
 .value-label-group {
     position: absolute;
     width: max-content;
@@ -355,11 +373,15 @@ body {
     transition: opacity 0.2s;
     font-size: 0.875rem;
 }
+
 .benchmark-tooltip img {
+    width: 240px;
+    height: 180px;
     display: block;
     margin-bottom: 0.75rem;
     border-radius: 0.25rem;
 }
+
 .benchmark-tooltip-name {
     font-weight: 600;
     color: #1f2937;
@@ -405,4 +427,25 @@ body {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+}
+
+.interiors-treemap-leaf text {
+    fill: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.interiors-treemap-leaf .name {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.interiors-stacked-bar-target-line {
+    stroke: red;
+    stroke-dasharray: 4;
+}
+
+.interiors-stacked-bar-target-label {
+    fill: red;
+    font-size: 12px;
+    text-anchor: end;
 }
