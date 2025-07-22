@@ -12,8 +12,8 @@ let _currentPhase = 'phase1';
 let _currentView = 'benchmarks';
 let _selectedBenchmark = null;
 let _lockedComponents = new Set();
-let _lockedInteriorsBreakdown = new Set();
 let _snapshots = [];
+let _interiorsEntryState = null;
 
 export const state = {
     get originalData() { return _originalData; },
@@ -37,8 +37,8 @@ export const state = {
     get lockedComponents() { return _lockedComponents; },
     set lockedComponents(components) { _lockedComponents = components; },
 
-    get lockedInteriorsBreakdown() { return _lockedInteriorsBreakdown; },
-    set lockedInteriorsBreakdown(components) { _lockedInteriorsBreakdown = components; },
+    get interiorsEntryState() { return _interiorsEntryState; },
+    set interiorsEntryState(state) { _interiorsEntryState = state; },
 
     get snapshots() { return _snapshots; },
     addSnapshot(snapshot) {

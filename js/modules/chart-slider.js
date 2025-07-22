@@ -228,6 +228,11 @@ export function renderChart() {
         .text('Detail')
         .on('click', (event, d) => {
             event.stopPropagation();
+            // Store the current interiors state when entering detail view
+            const interiorsData = state.currentData.phases.phase2.components.find(c => c.name === 'C Interiors');
+            if (interiorsData) {
+                state.interiorsEntryState = JSON.parse(JSON.stringify(interiorsData));
+            }
             state.currentView = 'interiors';
             render();
         });

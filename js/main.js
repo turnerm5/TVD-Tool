@@ -111,19 +111,7 @@ program.setDependencies({
 });
 summary.setRender(render);
 interiors.setDependencies({
-    render: render,
-    handleInteriorsSfChange: function(itemName, newSf) {
-        // Handle square footage changes in interiors breakdown
-        const interiorsData = state.currentData.phases.phase2.components.find(c => c.name === 'C Interiors');
-        if (interiorsData && interiorsData.breakdown) {
-            const item = interiorsData.breakdown.find(d => d.name === itemName);
-            if (item && interiorsData.square_footage > 0) {
-                item.percentage = newSf / interiorsData.square_footage;
-                // Recalculate and re-render
-                render();
-            }
-        }
-    }
+    render: render
 });
 
 

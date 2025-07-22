@@ -25,25 +25,23 @@ const sampleData = {
             "totalProjectBudget": 40000000,
             "projectAreaSF": 49050,
             "components": [
-                { "name": "A Substructure", "square_footage": 49050, "current_rom": 130.00 },
-                { "name": "B10 Superstructure", "square_footage": 49050, "current_rom": 78.00 },
-                { "name": "B20 Enclosure", "square_footage": 49050, "current_rom": 78.00 },
-                { "name": "B30 Roofing", "square_footage": 12263, "current_rom": 39.00 },
+                { "name": "A Substructure", "square_footage": 49050, "current_rom": 134.85 },
+                { "name": "B10 Superstructure", "square_footage": 49050, "current_rom": 82.85 },
+                { "name": "B20 Enclosure", "square_footage": 49050, "current_rom": 82.85 },
+                { "name": "B30 Roofing", "square_footage": 12263, "current_rom": 43.00 },
                 { 
                     "name": "C Interiors", 
                     "square_footage": 49050, 
-                    "current_rom": 95.00,
-                    "building_efficiency": 0.85,
+                    "current_rom": 132.44,
+                    "building_efficiency": 0.60,
                     "breakdown": [
-                        { "name": "Classroom", "percentage": 0.30, "cost": 125, "sf": 12498 },
-                        { "name": "Research", "percentage": 0.25, "cost": 150, "sf": 10414 },
-                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 6248 },
-                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 4166 },
-                        { "name": "Circulation", "percentage": 0.15, "cost": 80, "sf": 6248 },
-                        { "name": "Mechanical and Support", "percentage": 0.05, "cost": 60, "sf": 2083 }
+                        { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 12000 },
+                        { "name": "Research", "percentage": 0.35, "cost": 150, "sf": 8000 },
+                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 4000 },
+                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 5000 }
                     ]
                 },
-                { "name": "D Services", "square_footage": 49050, "current_rom": 220.00 },
+                { "name": "D Services", "square_footage": 49050, "current_rom": 224.85 },
                 { "name": "E Equipment and Furnishings", "square_footage": 49050, "current_rom": 50.00 },
                 { "name": "F Special Construction", "square_footage": 10000, "current_rom": 84 },
                 { "name": "G Building Sitework", "square_footage": 49050, "current_rom": 41 }
