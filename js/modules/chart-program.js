@@ -95,7 +95,6 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     const tbody = table.append('tbody');
 
     const phaseCostOfWork = state.currentData.phases.phase2.costOfWork;
-    const originalCostOfWork = state.originalData.phases.phase2.costOfWork;
 
     // Calculate Cost of Work totals
     let cowTotalSquareFootage = 0;
@@ -104,17 +103,8 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     phaseCostOfWork.forEach(d => {
         cowTotalSquareFootage += d.square_footage;
         
-        const originalComponent = originalCostOfWork.find(c => c.name === d.name);
-        if (originalComponent) {
-            // Create a hybrid component object for calculation
-            const hybridComponent = {
-                name: d.name,
-                target_value: originalComponent.target_value,
-                square_footage: d.square_footage,
-                building_efficiency: d.building_efficiency
-            };
-            cowTotalTargetValue += utils.calculateComponentValue(hybridComponent);
-        }
+        // Use current component data for calculation instead of hybrid
+        cowTotalTargetValue += utils.calculateComponentValue(d);
     });
 
     // --- COST OF WORK SECTION ---
@@ -153,31 +143,17 @@ function updatePhase2ProgramTable(container, initialRender = false) {
             handleSquareFootageCellChange(event);
         });
 
-    // Target Value / SF (from original data)
+    // Target Value / SF (use current data instead of original)
     cowRows.append('td')
         .attr('class', 'px-6 py-4')
-        .text(d => {
-            const originalComponent = originalCostOfWork.find(c => c.name === d.name);
-            return originalComponent ? utils.formatCurrency(originalComponent.target_value) : '-';
-        });
+        .text(d => utils.formatCurrency(d.target_value));
 
-    // Target Value (Target Value/SF * Square Footage)
+    // Target Value (use current component data for calculation)
     cowRows.append('td')
         .attr('class', 'px-6 py-4')
         .text(d => {
-            const originalComponent = originalCostOfWork.find(c => c.name === d.name);
-            if (originalComponent) {
-                // Create a hybrid component object for calculation
-                const hybridComponent = {
-                    name: d.name,
-                    target_value: originalComponent.target_value,
-                    square_footage: d.square_footage,
-                    building_efficiency: d.building_efficiency
-                };
-                const targetValue = utils.calculateComponentValue(hybridComponent);
-                return utils.formatCurrencyBig(targetValue);
-            }
-            return '-';
+            const targetValue = utils.calculateComponentValue(d);
+            return utils.formatCurrencyBig(targetValue);
         });
 
     // Add Cost of Work subtotal row
@@ -201,18 +177,8 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         .text(utils.formatCurrencyBig(cowTotalTargetValue));
 
     // --- INDIRECTS SECTION ---
-    // Calculate indirect costs - but we need to use the hybrid calculation
-    // Create hybrid cost of work for accurate calculation
-    const hybridCostOfWork = phaseCostOfWork.map(d => {
-        const originalComponent = originalCostOfWork.find(c => c.name === d.name);
-        return {
-            name: d.name,
-            target_value: originalComponent ? originalComponent.target_value : d.target_value,
-            square_footage: d.square_footage,
-            building_efficiency: d.building_efficiency
-        };
-    });
-    const totalCow = utils.calculateTotalCostOfWork(hybridCostOfWork);
+    // Calculate indirect costs using current component data
+    const totalCow = utils.calculateTotalCostOfWork(phaseCostOfWork);
     let indirectsTotal = 0;
 
     // Add Indirects subheading

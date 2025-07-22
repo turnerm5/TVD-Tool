@@ -110,7 +110,7 @@ const sampleData = {
             "name": "Medium Cubical + No Shell Space",
             "description": "A medium-sized building with no shell space. Medium amount of sitework.",
             "image": "https://placecats.com/g/401/301",
-            "projectAreaSF": 55000,
+            "projectAreaSF": 45000,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 45000 },
                 { "name": "B10 Superstructure", "square_footage": 45000 },

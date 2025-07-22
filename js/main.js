@@ -167,7 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                 name: c.name,
                 target_value: c.target_value,
-                square_footage: c.square_footage
+                square_footage: c.square_footage,
+                building_efficiency: c.building_efficiency // Include building_efficiency for C Interiors
             }));
             const snapshot = {
                 name: snapshotName,

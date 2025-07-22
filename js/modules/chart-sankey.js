@@ -26,7 +26,7 @@ export function renderSankeyChart(data) {
     if (difference > 0) {
         categoryNames.push("Available COW");
         // Add a corresponding sub-category node to make it stop in the middle
-        subCategoryNames.push("Unallocated");
+        subCategoryNames.push("Site Utilities");
     }
 
     const nodes = [
@@ -75,7 +75,7 @@ export function renderSankeyChart(data) {
     if (difference > 0) {
         links.push({
             source: nodeMap.get("Available COW"),
-            target: nodeMap.get("Unallocated"),
+            target: nodeMap.get("Site Utilities"),
             value: difference
         });
     }
@@ -113,7 +113,7 @@ export function renderSankeyChart(data) {
     // Helper to get node color
     function getNodeColor(node) {
         if (node.name === 'Total Project Budget') return "#FBBF24"; // Amber-400
-        if (node.name === 'Unallocated') return "#981e32"; // WSU Crimson
+        if (node.name === 'Site Utilities') return "#981e32"; // WSU Crimson
         if (node.depth === 1) return color(node.name);
         // For subcategories, inherit from parent if possible
         if (node.depth === 2 && node.targetLinks && node.targetLinks.length > 0) {
