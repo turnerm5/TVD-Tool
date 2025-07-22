@@ -56,19 +56,28 @@ export const state = {
 
     /**
      * Adds a new snapshot of the current data state.
-     * @param {string} name - The name for the new snapshot.
+     * Accepts either a name string or a full snapshot object.
+     * @param {string|object} snapshotOrName - The name for the new snapshot, or a snapshot object.
      */
-    addSnapshot(name) {
+    addSnapshot(snapshotOrName) {
         if (this.snapshots.length >= 3) {
             // Maybe show a user notification here in a real app
             console.warn("Maximum number of snapshots (3) reached.");
             return;
         }
-        const snapshot = {
-            name: name,
-            costOfWork: JSON.parse(JSON.stringify(this.currentData.phases.phase2.costOfWork)),
-            projectAreaSF: this.currentData.projectAreaSF
-        };
+        let snapshot;
+        if (typeof snapshotOrName === 'string') {
+            snapshot = {
+                name: snapshotOrName,
+                costOfWork: JSON.parse(JSON.stringify(this.currentData.phases.phase2.costOfWork)),
+                projectAreaSF: this.currentData.projectAreaSF
+            };
+        } else if (typeof snapshotOrName === 'object' && snapshotOrName !== null) {
+            snapshot = snapshotOrName;
+        } else {
+            console.warn('Invalid argument to addSnapshot:', snapshotOrName);
+            return;
+        }
         this.snapshots.push(snapshot);
     },
 
