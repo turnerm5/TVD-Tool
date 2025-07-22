@@ -335,7 +335,9 @@ export function updateSummary() {
     thead.innerHTML = `
         <tr class="text-xs text-gray-700 uppercase bg-gray-50">
             <th scope="col" class="px-6 py-3">Scenario</th>
-            <th scope="col" class="px-6 py-3 text-right">Estimate</th>
+            <th scope="col" class="px-6 py-3 text-right">COW</th>
+            <th scope="col" class="px-6 py-3 text-right">Indirects</th>
+            <th scope="col" class="px-6 py-3 text-right">Total</th>
             <th scope="col" class="px-6 py-3 text-right">Gross SF</th>
             <th scope="col" class="px-6 py-3 text-right">$/SF</th>
             <th scope="col" class="px-6 py-3 text-right">Variance</th>
@@ -345,7 +347,7 @@ export function updateSummary() {
     const tbody = table.createTBody();
     allSeries.forEach(series => {
         const totals = utils.calculateSeriesTotal(series, state.indirectCostPercentages);
-        const { totalProjectCost } = totals;
+        const { cowTotal, indirectTotal, totalProjectCost } = totals;
 
         const grossSF = series.projectAreaSF || 0;
         const costPerSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
@@ -355,7 +357,9 @@ export function updateSummary() {
         row.className = 'bg-white border-b';
         row.innerHTML = `
             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${series.name}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(totalProjectCost)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(cowTotal)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(indirectTotal)}</td>
+            <td class="px-6 py-4 text-right font-semibold">${utils.formatCurrencyBig(totalProjectCost)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerSF)}</td>
             <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
