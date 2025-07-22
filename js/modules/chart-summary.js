@@ -236,7 +236,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
             return { name: comp.name, value, start, end: cumulative, isIndirect: false };
         });
 
-        // 2. Indirect Cost Components
+        // 2. Indirect Cost Components - use original percentages applied to this series' COW
         const indirectCostItems = state.indirectCostPercentages.map(indirect => {
             const value = indirect.percentage * cowTotal;
             const start = cumulative;
