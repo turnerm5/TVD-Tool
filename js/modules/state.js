@@ -18,12 +18,11 @@ export const state = {
      * This establishes a baseline for how indirect costs relate to COW.
      */
     calculateIndirectCostPercentages() {
-        const phase2 = this.originalData.phase2;
-        if (!phase2.indirectCosts) {
+        if (!this.originalData.indirectCosts) {
             this.indirectCostPercentages = [];
             return;
         }
-        this.indirectCostPercentages = phase2.indirectCosts.map(item => ({
+        this.indirectCostPercentages = this.originalData.indirectCosts.map(item => ({
             name: item.Subcategory,
             percentage: item.Percentage || 0
         }));

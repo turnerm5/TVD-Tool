@@ -58,7 +58,7 @@ function processData(data) {
  */
 export function loadData(data, fileName = 'Sample Data') {
     if (!data.phase1 || !data.phase2) {
-        alert("Invalid JSON format. Must contain 'phases' object with 'phase1' and 'phase2' keys.");
+        alert("Invalid JSON format. Must contain 'phase1' and 'phase2' objects at the top level.");
         return;
     }
 
