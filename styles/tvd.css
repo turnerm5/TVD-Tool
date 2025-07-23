@@ -38,9 +38,9 @@ body {
 /* New Benchmark Range Styling */
 .benchmark-range {
     position: absolute;
-    left: calc(50% - 0.5px);
-    width: 1px;
-    background-color: #38bdf8; /* a pleasant blue */
+    left: 25%;
+    width: 50%;
+    background-color: #dbeafe; /* light blue */
     z-index: 1;
 }
 .benchmark-cap {
