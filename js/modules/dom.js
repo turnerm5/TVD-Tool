@@ -29,7 +29,6 @@ export const programView = document.getElementById('program-view');
 export const benchmarksView = document.getElementById('benchmarks-view');
 export const summaryView = document.getElementById('summary-view');
 export const phase1View = document.getElementById('phase1-view');
-export const interiorsView = document.getElementById('interiors-view');
 export const sliderView = d3.select('#slider-view');
 
 export const summaryPanel = document.getElementById('summary-panel');

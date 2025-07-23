@@ -22,9 +22,6 @@ export function setDependencies(fns) {
  * @returns {number} The effective square footage.
  */
 function getEffectiveSf(component) {
-    if (component.name === 'C Interiors' && component.building_efficiency) {
-        return component.square_footage / component.building_efficiency;
-    }
     return component.square_footage;
 }
 
@@ -240,23 +237,6 @@ export function renderChart() {
     updateGroup.select(".component-label").text(d => d.name);
 
     renderLockControls();
-
-    // Add Detail button for C Interiors component
-    updateGroup.select(".detail-btn").remove(); // Remove any existing detail buttons
-    updateGroup.filter(d => d.name === 'C Interiors')
-        .append("div")
-        .attr("class", "detail-btn")
-        .text('Detail')
-        .on('click', (event, d) => {
-            event.stopPropagation();
-            // Store the current interiors state when entering detail view
-            const interiorsData = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
-            if (interiorsData) {
-                state.interiorsEntryState = JSON.parse(JSON.stringify(interiorsData));
-            }
-            state.currentView = 'interiors';
-            render();
-        });
 
     // --- Render the benchmark indicators (A, B, C, D) within each column's SVG ---
     updateGroup.each(function(componentData) {

@@ -82,8 +82,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
                 const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                     name: c.name,
                     target_value: c.target_value,
-                    square_footage: c.square_footage,
-                    building_efficiency: c.building_efficiency // Include building_efficiency for C Interiors
+                    square_footage: c.square_footage
                 }));
                 // Create the snapshot object
                 const snapshot = {
@@ -197,9 +196,9 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     // Target Value (use current component data for calculation)
     cowRows.append('td')
         .attr('class', 'px-6 py-4')
-        .text(d => {
-            const targetValue = utils.calculateComponentValue(d);
-            return utils.formatCurrencyBig(targetValue);
+        .html(d => {
+            let valueText = utils.formatCurrencyBig(utils.calculateComponentValue(d));
+            return valueText;
         });
 
     // Add Cost of Work subtotal row
@@ -262,10 +261,9 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         // Value (calculated from percentage)
         indirectRows.append('td')
             .attr('class', 'px-6 py-4')
-            .text(d => {
-                const value = d.percentage * totalCow;
-                indirectsTotal += value;
-                return utils.formatCurrencyBig(value);
+            .html(d => {
+                let valueText = utils.formatCurrencyBig(utils.calculateComponentValue(d));
+                return valueText;
             });
     }
 

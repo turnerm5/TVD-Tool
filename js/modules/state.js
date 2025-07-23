@@ -8,8 +8,7 @@ export const state = {
     currentData: null,
     originalData: null,
     lockedCostOfWork: new Set(),
-    currentView: 'summary', // 'summary', 'slider', 'interiors', 'program'
-    interiorsEntryState: null,
+    currentView: 'summary', // 'summary', 'slider', 'program'
     snapshots: [],
     indirectCostPercentages: [],
     shelledFloors: [],

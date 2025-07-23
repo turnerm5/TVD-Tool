@@ -40,14 +40,7 @@ const sampleData = {
                 { 
                     "name": "C Interiors", 
                     "square_footage": 45000, 
-                    "target_value": 115,
-                    "building_efficiency": 0.575,
-                    "breakdown": [
-                        { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 10000},
-                        { "name": "Research", "percentage": 0.35, "cost": 150, "sf": 9000 },
-                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 4000 },
-                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 2500 }
-                    ]
+                    "target_value": 115
                 },
                 { "name": "D Services", "square_footage": 45000, "target_value": 265 },
                 { "name": "E Equipment and Furnishings", "square_footage": 45000, "target_value": 50.00 },

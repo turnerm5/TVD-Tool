@@ -61,10 +61,6 @@ export function getFormattedTimestamp() {
  * @returns {number} The calculated usable square footage.
  */
 export function calculateUsableSF(grossSF, costOfWorkItems) {
-    const costOfWork = costOfWorkItems.find(d => d.name === 'C Interiors');
-    if (costOfWork && costOfWork.building_efficiency) {
-        return grossSF / costOfWork.building_efficiency;
-    }
     return grossSF * 0.8; // Default if not found or no efficiency specified
 }
 
@@ -76,9 +72,6 @@ export function calculateUsableSF(grossSF, costOfWorkItems) {
  */
 export function calculateTotalCostOfWork(costOfWorkItems) {
     return d3.sum(costOfWorkItems, c => {
-        if (c.name === 'C Interiors' && c.building_efficiency) {
-            return (c.square_footage / c.building_efficiency) * c.target_value;
-        }
         return c.target_value * c.square_footage;
     });
 }
@@ -89,9 +82,6 @@ export function calculateTotalCostOfWork(costOfWorkItems) {
  * @returns {number} The calculated value for this component.
  */
 export function calculateComponentValue(component) {
-    if (component.name === 'C Interiors' && component.building_efficiency) {
-        return (component.square_footage / component.building_efficiency) * component.target_value;
-    }
     return component.target_value * component.square_footage;
 }
 
