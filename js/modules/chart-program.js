@@ -4,11 +4,11 @@ import * as utils from './utils.js';
 import * as ui from './ui.js';
 
 function updateCInteriorsSF() {
-    const cInteriors = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
-    const originalCInteriors = state.originalData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
+    const cInteriors = state.currentData.phase2.costOfWork.find(c => c.name === 'C Interiors');
+    const originalCInteriors = state.originalData.phase2.costOfWork.find(c => c.name === 'C Interiors');
 
     if (cInteriors && originalCInteriors) {
-        const totalFloors = state.currentData.phases.phase2.floors || 0;
+        const totalFloors = state.currentData.phase2.floors || 0;
         const shelledFloorsCount = state.shelledFloors.filter(Boolean).length;
         const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
         
@@ -33,7 +33,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('class', 'font-semibold text-gray-700')
         .text('Shell Floors:');
 
-    const floors = state.currentData.phases.phase2.floors || 0;
+            const floors = state.currentData.phase2.floors || 0;
     for (let i = 0; i < floors; i++) {
         const checkboxWrapper = checkboxContainer.append('div')
             .attr('class', 'flex items-center');
@@ -81,7 +81,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
             
             if (snapshotName) {
                 // Gather the current phase 2 component data for the snapshot
-                const phase2CostOfWork = state.currentData.phases.phase2.costOfWork;
+                const phase2CostOfWork = state.currentData.phase2.costOfWork;
                 const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                     name: c.name,
                     target_value: c.target_value,
@@ -130,7 +130,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
     // Body
     const tbody = table.append('tbody');
 
-    const phaseCostOfWork = state.currentData.phases.phase2.costOfWork;
+            const phaseCostOfWork = state.currentData.phase2.costOfWork;
 
     // Calculate Cost of Work totals
     let cowTotalSquareFootage = 0;
@@ -331,7 +331,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
 
             // Animate each component's square footage change
             d.costOfWork.forEach(schemeComponent => {
-                const currentComponent = state.currentData.phases.phase2.costOfWork.find(c => c.name === schemeComponent.name);
+                const currentComponent = state.currentData.phase2.costOfWork.find(c => c.name === schemeComponent.name);
                 if (currentComponent) {
                     const oldSf = currentComponent.square_footage;
                     const newSf = schemeComponent.square_footage;

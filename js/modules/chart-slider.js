@@ -33,7 +33,7 @@ function getEffectiveSf(component) {
  * @param {string} phaseKey - The key for the current phase ('phase1' or 'phase2').
  */
 function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
-    const phase = state.currentData.phases[phaseKey];
+    const phase = state.currentData[phaseKey];
 
     // 1. Calculate the initial change in absolute cost from the user's action.
     const originalRom = changedComponent.target_value;
@@ -129,7 +129,7 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
  * This function uses the D3 enter/update/exit pattern to create and update the component columns.
  */
 export function renderChart() {
-    const phaseCostOfWork = state.currentData.phases.phase2.costOfWork;
+            const phaseCostOfWork = state.currentData.phase2.costOfWork;
     // Set the number of columns in the CSS grid layout.
     dom.chartContainer.style("grid-template-columns", `repeat(${phaseCostOfWork.length}, 1fr)`);
     // Set the output range for the y-scale based on the container's current height.
@@ -200,7 +200,7 @@ export function renderChart() {
         });
     
     // Create a map of original component values for quick lookup.
-    const originalComponents = state.originalData.phases.phase2.costOfWork.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
+            const originalComponents = state.originalData.phase2.costOfWork.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
     
     // Update labels and ghost bars for each component.
     updateGroup.each(function(d) {
@@ -386,12 +386,12 @@ export function handleSquareFootageCellChange(event) {
 
     if (isNaN(newSF) || newSF < 0) {
         // Find the original value to revert to if input is invalid
-        const originalComponent = state.originalData.phases[phaseKey].costOfWork.find(c => c.name === componentName);
+        const originalComponent = state.originalData[phaseKey].costOfWork.find(c => c.name === componentName);
         input.value = originalComponent ? originalComponent.square_footage.toLocaleString('en-US') : '0';
         return;
     }
 
-    const phase = state.currentData.phases[phaseKey];
+    const phase = state.currentData[phaseKey];
     const component = phase.costOfWork.find(c => c.name === componentName);
 
     if (component) {
@@ -453,7 +453,7 @@ function dragEnded(event, d) {
  */
 function renderLockControls() {
     const phaseKey = 'phase2';
-    const costOfWork = state.currentData.phases[phaseKey].costOfWork;
+    const costOfWork = state.currentData[phaseKey].costOfWork;
     const lockSets = state.currentData.lockSets || [];
 
     // Clear existing controls
@@ -562,7 +562,7 @@ function renderLockControls() {
  */
 export function balanceToGmp() {
     const phaseKey = 'phase2';
-    const phase = state.currentData.phases[phaseKey];
+    const phase = state.currentData[phaseKey];
     const unlockedComponents = phase.costOfWork.filter(c => {
         const key = `${phaseKey}-${c.name}`;
         return !state.lockedCostOfWork.has(key) && c.square_footage > 0

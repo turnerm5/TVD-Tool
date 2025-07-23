@@ -89,7 +89,7 @@ export function calculateTotalCostOfWork(costOfWorkItems) {
 export function calculateComponentValue(component) {
     // Check if the component is an indirect cost by looking for a 'percentage' property
     if (component.hasOwnProperty('percentage')) {
-        const totalCow = calculateTotalCostOfWork(state.currentData.phases.phase2.costOfWork);
+        const totalCow = calculateTotalCostOfWork(state.currentData.phase2.costOfWork);
         return totalCow * (component.percentage || 0);
     }
     // Default calculation for regular "Cost of Work" items
@@ -105,8 +105,8 @@ export function createImportedDataSeries() {
     return {
         name: "Baseline",
         color: "#9ca3af", // gray-400
-        costOfWork: state.originalData.phases.phase2.costOfWork,
-        grossSF: state.originalData.phases.phase2.grossSF
+        costOfWork: state.originalData.phase2.costOfWork,
+        grossSF: state.originalData.phase2.grossSF
     };
 }
 

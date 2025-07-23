@@ -18,7 +18,7 @@ export const state = {
      * This establishes a baseline for how indirect costs relate to COW.
      */
     calculateIndirectCostPercentages() {
-        const phase2 = this.originalData.phases.phase2;
+        const phase2 = this.originalData.phase2;
         if (!phase2.indirectCosts) {
             this.indirectCostPercentages = [];
             return;
@@ -37,7 +37,7 @@ export const state = {
         this.snapshots = [];
         this.lockedCostOfWork.clear();
         this.calculateIndirectCostPercentages();
-        this.shelledFloors = new Array(this.originalData.phases.phase2.floors).fill(false);
+        this.shelledFloors = new Array(this.originalData.phase2.floors).fill(false);
     },
 
     /**
@@ -55,7 +55,7 @@ export const state = {
         if (typeof snapshotOrName === 'string') {
             snapshot = {
                 name: snapshotOrName,
-                costOfWork: JSON.parse(JSON.stringify(this.currentData.phases.phase2.costOfWork)),
+                costOfWork: JSON.parse(JSON.stringify(this.currentData.phase2.costOfWork)),
                 grossSF: this.currentData.grossSF
             };
         } else if (typeof snapshotOrName === 'object' && snapshotOrName !== null) {
@@ -93,8 +93,8 @@ export const state = {
         if (this.currentData.grossSF !== this.originalData.grossSF) return true;
 
         // Check if any component target_value or square_footage has changed
-        const currentCostOfWork = this.currentData.phases.phase2.costOfWork;
-        const originalCostOfWork = this.originalData.phases.phase2.costOfWork;
+        const currentCostOfWork = this.currentData.phase2.costOfWork;
+        const originalCostOfWork = this.originalData.phase2.costOfWork;
 
         for (let i = 0; i < currentCostOfWork.length; i++) {
             const current = currentCostOfWork[i];
@@ -107,7 +107,7 @@ export const state = {
         }
 
         // Check if shelled floors have changed
-        const originalShelledFloors = new Array(this.originalData.phases.phase2.floors || 0).fill(false);
+        const originalShelledFloors = new Array(this.originalData.phase2.floors || 0).fill(false);
         if (this.shelledFloors.length !== originalShelledFloors.length) return true;
         for (let i = 0; i < this.shelledFloors.length; i++) {
             if (this.shelledFloors[i] !== originalShelledFloors[i]) return true;

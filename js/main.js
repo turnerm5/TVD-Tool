@@ -29,6 +29,11 @@ const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
 function render() {
     if (!state.currentData) return;
 
+    // Update yScale domain based on current data
+    if (state.yDomainMax) {
+        yScale.domain([0, state.yDomainMax]);
+    }
+
     // Update Reset button state based on whether data has changed
     state.updateResetButtonState();
 
@@ -148,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cancel"
         );
         if (snapshotName) {
-            const phase2CostOfWork = state.currentData.phases.phase2.costOfWork;
+            const phase2CostOfWork = state.currentData.phase2.costOfWork;
             const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                 name: c.name,
                 target_value: c.target_value,

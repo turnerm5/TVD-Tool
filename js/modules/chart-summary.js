@@ -50,8 +50,8 @@ export function renderSummaryCharts() {
     const importedSeries = utils.createImportedDataSeries();
     const allSeriesData = [importedSeries, ...state.snapshots];
     const seriesNames = allSeriesData.map(d => d.name);
-    const costOfWorkNames = state.originalData.phases.phase2.costOfWork.map(c => c.name);
-    const gmpValue = state.originalData.phases.phase2.totalProjectBudget;
+            const costOfWorkNames = state.originalData.phase2.costOfWork.map(c => c.name);
+        const gmpValue = state.originalData.phase2.totalProjectBudget;
     
     // --- Render Left Chart ---
     renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames);
@@ -310,7 +310,7 @@ export function updateSummary() {
     const summaryPanel = dom.summaryPanel;
     summaryPanel.innerHTML = ''; // Clear previous content
 
-    const gmp = state.originalData.phases.phase2.totalProjectBudget;
+            const gmp = state.originalData.phase2.totalProjectBudget;
 
     // --- Header ---
     const header = document.createElement('div');
