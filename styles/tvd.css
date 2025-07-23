@@ -239,38 +239,30 @@ body {
 } 
 
 /* --- Benchmark View Specific --- */
-#benchmarks-view.detail-active .benchmark-grid {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
+/* Keep the same 4-column grid always - no layout changes */
 
 #benchmarks-view.detail-active .benchmark-card {
     display: none; /* Hide non-selected cards */
 }
 
 #benchmarks-view.detail-active .benchmark-card.selected {
-    display: block; /* Show the selected card */
-    width: 50%; 
-    pointer-events: auto;
-}
-#benchmarks-view.detail-active .benchmark-card.selected img {
-    height: 400px;
+    display: block; /* Show the selected card in its original position */
+    /* No size or position changes - stays exactly the same */
 }
 
 #benchmark-detail-container {
     position: relative; /* Anchor for the close button */
-    width: 50%;
-    margin-left: 2%;
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
 
 #benchmarks-view.detail-active #benchmark-detail-container {
-    margin-left: 0; /* Remove margin when it's a flex item */
     opacity: 1;
     transform: translateY(0);
+    /* Position detail container to span remaining grid columns */
+    grid-column: 2 / -1; /* Start from column 2, span to the end */
+    grid-row: 1; /* Same row as the cards */
 }
 
 .benchmark-detail-table {

@@ -101,7 +101,7 @@ export function render(render) {
 
         const thead = table.append('thead');
         thead.append('tr').selectAll('th')
-            .data(['Component', 'Cost ($/SF)'])
+            .data(['Component', 'Cost ($/SF)', 'System Details'])
             .enter()
             .append('th')
             .text(d => d);
@@ -114,6 +114,7 @@ export function render(render) {
 
         rows.append('td').text(d => d.name);
         rows.append('td').text(d => utils.formatCurrency(d.cost));
+        rows.append('td').text(d => d.systemDetail || '-');
 
     } else {
         // --- Show Grid View ---
