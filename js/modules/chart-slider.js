@@ -109,7 +109,10 @@ export function renderChart() {
     // Set the number of columns in the CSS grid layout.
     dom.chartContainer.style("grid-template-columns", `repeat(${phaseCostOfWork.length}, 1fr)`);
     // Set the output range for the y-scale based on the container's current height.
-    yScale.range([dom.chartContainer.node().clientHeight - parseFloat(dom.chartContainer.style("padding-bottom")), 0]);
+    const paddingBottom = parseFloat(dom.chartContainer.style("padding-bottom"));
+    const paddingTop = parseFloat(dom.chartContainer.style("padding-top"));
+    const chartHeight = dom.chartContainer.node().clientHeight;
+    yScale.range([chartHeight - paddingBottom, paddingTop]);
     
     // Bind data to the component columns. The key function (d.name) helps D3 track objects.
     const components = dom.chartContainer.selectAll(".component-column").data(phaseCostOfWork, d => d.name);
@@ -250,7 +253,8 @@ export function renderChart() {
             const benchmarkComp = d.costOfWork.find(c => c.name === componentData.name);
             if (!benchmarkComp) return;
 
-            const yPos = yScale(benchmarkComp.cost);
+            const paddingTop = parseFloat(dom.chartContainer.style("padding-top"));
+            const yPos = yScale(benchmarkComp.cost) + paddingTop;
             
             d3.select(this).select('.benchmark-indicator-line').attr('x1', '20%').attr('x2', '10%').attr('y1', yPos).attr('y2', yPos);
             d3.select(this).select('.benchmark-indicator-circle').attr('cx', '10%').attr('cy', yPos).attr('r', 6);
@@ -496,6 +500,27 @@ function renderLockControls() {
                 state.lockedCostOfWork.delete(key);
             }
             render();
+        });
+
+    // --- Toggle Lock/Unlock All Button ---
+    const anyLocked = costOfWork.some(c => state.lockedCostOfWork.has(`${phaseKey}-${c.name}`));
+
+    dom.lockControls.append('div')
+        .attr('class', 'mt-4') // Add some space above the button
+        .append('button')
+        .attr('class', 'w-full text-sm p-1.5 rounded bg-gray-200 hover:bg-gray-300 transition')
+        .text(anyLocked ? 'Unlock All' : 'Lock All')
+        .on('click', () => {
+            const currentlyAnyLocked = costOfWork.some(c => state.lockedCostOfWork.has(`${phaseKey}-${c.name}`));
+
+            if (currentlyAnyLocked) {
+                // Unlock all components
+                costOfWork.forEach(c => state.lockedCostOfWork.delete(`${phaseKey}-${c.name}`));
+            } else {
+                // Lock all components
+                costOfWork.forEach(c => state.lockedCostOfWork.add(`${phaseKey}-${c.name}`));
+            }
+            render(); // Re-render the chart and controls
         });
 }
 

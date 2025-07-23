@@ -9,7 +9,7 @@ body {
     display: grid;
     gap: 0.5rem;
     padding-top: 1rem;
-    padding-bottom: 4rem; /* Reduced padding as labels are no longer rotated */
+    padding-bottom: 6rem; /* Increased padding */
     width: 100%;
     height: 600px;
     background-color: #f8fafc;
@@ -85,7 +85,7 @@ body {
 }
 .component-label {
     position: absolute;
-    bottom: -2.5rem; /* Position it below the component column */
+    bottom: -3.5rem; /* Position it below the component column */
     left: 50%;
     transform: translateX(-50%); /* Center the label horizontally */
     width: 100%;
@@ -99,7 +99,7 @@ body {
 }
 .component-column .lock-icon {
     position: absolute;
-    bottom: -65px; /* moved down 20px from -15px */
+    bottom: -97px;
     left: 50%;
     transform: translateX(-50%);
     cursor: pointer;
@@ -112,7 +112,7 @@ body {
 
 .component-column .detail-btn {
     position: absolute;
-    bottom: -95px; /* Position below the lock icon */
+    bottom: -127px; /* Position below the lock icon */
     left: 50%;
     transform: translateX(-50%);
     cursor: pointer;
@@ -175,10 +175,10 @@ body {
 
 .benchmark-indicator-svg {
     position: absolute;
-    top: 0;
+    top: -1rem; /* Match chart-container padding-top */
     left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% + 7rem); /* Match chart-container padding (1rem top + 6rem bottom) */
     z-index: 2; /* Position it below the drag handle but above the range lines */
     pointer-events: none; /* Let clicks pass through the SVG container */
 }
