@@ -138,7 +138,13 @@ const sampleData = {
                 { "name": "B20 Enclosure", "cost": 99.10 },
                 { "name": "B30 Roofing", "cost": 11.39 },
                 { "name": "C Interiors", "cost": 78.63 },
-                { "name": "D Services", "cost": 281.02 },
+                { 
+                    "name": "D Services", 
+                    "cost": 281.02,
+                    "systemDetail": "High-precision Variable Air Volume (VAV) system with HEPA filtration and low-velocity laminar airflow for vibration and particulate control.",
+                    "pros": "Provides exceptional environmental stability (temperature, vibration, particulates) for sensitive research; highly responsive.",
+                    "cons": "High energy consumption due to tight controls and filtration; complex to design, install, and commission."
+                },
                 { "name": "E Equipment and Furnishings", "cost": 54.78 },
                 { "name": "F Special Construction", "cost": 4.14 },
                 { "name": "G Building Sitework", "cost": 34.09 }
@@ -156,7 +162,13 @@ const sampleData = {
                 { "name": "B20 Enclosure", "cost": 121.22 },
                 { "name": "B30 Roofing", "cost": 16.35 },
                 { "name": "C Interiors", "cost": 97.79 },
-                { "name": "D Services", "cost": 355.77 },
+                { 
+                    "name": "D Services", 
+                    "cost": 355.77,
+                    "systemDetail": "Hybrid system using radiant floors/ceilings and chilled beams, with a dedicated VAV exhaust system (Phoenix) and heat recovery for lab safety.",
+                    "pros": "Extremely energy-efficient due to radiant systems and heat recovery; provides superior, quiet occupant comfort.",
+                    "cons": "Complex control integration between systems; radiant systems have slow thermal response times; potential condensation risk."
+                },
                 { "name": "E Equipment and Furnishings", "cost": 54.23 },
                 { "name": "F Special Construction", "cost": 2.11 },
                 { "name": "G Building Sitework", "cost": 46.20 }
@@ -174,7 +186,13 @@ const sampleData = {
                 { "name": "B20 Enclosure", "cost": 118.38 },
                 { "name": "B30 Roofing", "cost": 21.72 },
                 { "name": "C Interiors", "cost": 118.56 },
-                { "name": "D Services", "cost": 349.49 },
+                { 
+                    "name": "D Services", 
+                    "cost": 349.49,
+                    "systemDetail": "Mixed system with Variable Air Volume (VAV) controllers for labs, fan coil units for general spaces, and chilled beams for supplemental cooling.",
+                    "pros": "Flexible design accommodates different research needs; uses proven VAV technology for lab safety; biomass boiler provides sustainable energy.",
+                    "cons": "VAV portion has high energy use and potential for noise; multiple system types increase maintenance complexity."
+                },
                 { "name": "E Equipment and Furnishings", "cost": 49.78 },
                 { "name": "F Special Construction", "cost": 0.35 },
                 { "name": "G Building Sitework", "cost": 49.72 }
@@ -192,7 +210,13 @@ const sampleData = {
                 { "name": "B20 Enclosure", "cost": 140.63 },
                 { "name": "B30 Roofing", "cost": 13.32 },
                 { "name": "C Interiors", "cost": 137.02 },
-                { "name": "D Services", "cost": 391.72 },
+                { 
+                    "name": "D Services", 
+                    "cost": 391.72,
+                    "systemDetail": "Chilled beam system for cooling combined with a heat recovery chiller that repurposes waste heat for building heating and hot water.",
+                    "pros": "Very energy efficient due to chilled beams and extensive heat recovery; quiet, draft-free cooling enhances occupant comfort.",
+                    "cons": "Requires careful humidity control to prevent condensation; a separate air system is still needed for fume hood ventilation."
+                },
                 { "name": "E Equipment and Furnishings", "cost": 44.18 },
                 { "name": "F Special Construction", "cost": 0.00 },
                 { "name": "G Building Sitework", "cost": 35.79 }
@@ -210,7 +234,13 @@ const sampleData = {
                 { "name": "B20 Enclosure", "cost": 121.03 },
                 { "name": "B30 Roofing", "cost": 14.37 },
                 { "name": "C Interiors", "cost": 64.70 },
-                { "name": "D Services", "cost": 265.79 },
+                { 
+                    "name": "D Services", 
+                    "cost": 265.79,
+                    "systemDetail": "Hybrid system featuring naturally ventilated offices and an optimized lab ventilation system using energy-efficient chilled beams.",
+                    "pros": "Extremely energy efficient by using natural ventilation for offices; chilled beams provide quiet, comfortable lab cooling.",
+                    "cons": "Natural ventilation is climate-dependent; lab system requires separate air handling for fume hoods and humidity control."
+                },
                 { "name": "E Equipment and Furnishings", "cost": 33.60 },
                 { "name": "F Special Construction", "cost": 34.30 },
                 { "name": "G Building Sitework", "cost": 73.65 }
@@ -228,7 +258,13 @@ const sampleData = {
                 { "name": "B20 Enclosure", "cost": 71.53 },
                 { "name": "B30 Roofing", "cost": 14.36 },
                 { "name": "C Interiors", "cost": 63.08 },
-                { "name": "D Services", "cost": 237.97 },
+                { 
+                    "name": "D Services", 
+                    "cost": 237.97,
+                    "systemDetail": "Conventional Variable Air Volume (VAV) system with full hydronics (boilers and chiller) and heat recovery.",
+                    "pros": "Robust and reliable system using proven VAV technology for lab safety; heat recovery improves efficiency.",
+                    "cons": "Higher energy consumption compared to radiant or chilled beam systems; requires significant space for ductwork."
+                },
                 { "name": "E Equipment and Furnishings", "cost": 26.29 },
                 { "name": "F Special Construction", "cost": 0.06 },
                 { "name": "G Building Sitework", "cost": 19.52 }
