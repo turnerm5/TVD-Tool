@@ -132,8 +132,7 @@ export function renderChart() {
     const valueLabelGroup = enterGroup.append("div").attr("class", "value-label-group");
     valueLabelGroup.append("div").attr("class", "current-value-label");
     valueLabelGroup.append("div").attr("class", "delta-label");
-    enterGroup.append("div").attr("class", "lock-icon");
-
+    
     // Merge the enter selection with the update selection.
     // All subsequent operations apply to both new and existing elements.
     const updateGroup = enterGroup.merge(components);
@@ -201,26 +200,8 @@ export function renderChart() {
     });
 
     updateGroup.select(".component-label").text(d => d.name);
-    updateGroup.select(".lock-icon")
-        .style('display', 'block')
-        .style('opacity', d => {
-            const key = `phase2-${d.name}`;
-            return state.lockedCostOfWork.has(key) ? 1 : 0.5;
-        })
-        .text(d => {
-            const key = `phase2-${d.name}`;
-            return state.lockedCostOfWork.has(key) ? '🔒' : '🔓';
-        })
-        .on('click', (event, d) => {
-            event.stopPropagation();
-            const key = `phase2-${d.name}`;
-            if (state.lockedCostOfWork.has(key)) {
-                state.lockedCostOfWork.delete(key);
-            } else {
-                state.lockedCostOfWork.add(key);
-            }
-            render();
-        });
+
+    renderLockControls();
 
     // Add Detail button for C Interiors component
     updateGroup.select(".detail-btn").remove(); // Remove any existing detail buttons
@@ -425,12 +406,60 @@ function dragged(event, d) {
  */
 function dragEnded(event, d) {
     d3.select(this).classed("active", false);
-    const key = `phase2-${d.name}`;
-    if (!state.lockedCostOfWork.has(key)) {
-        state.lockedCostOfWork.add(key);
-        render(); // Rerender to update the lock icon
-    }
 }
+
+/**
+ * Renders the lock controls table in the sidebar.
+ */
+function renderLockControls() {
+    const phaseKey = 'phase2';
+    const costOfWork = state.currentData.phases[phaseKey].costOfWork;
+
+    // Clear existing controls
+    dom.lockControls.html('');
+
+    // Create a table
+    const table = dom.lockControls.append('table').attr('class', 'w-full text-sm');
+    const thead = table.append('thead');
+    const tbody = table.append('tbody');
+
+    thead.append('tr')
+        .selectAll('th')
+        .data(['Component', 'Locked'])
+        .enter()
+        .append('th')
+        .attr('class', 'text-left font-semibold p-2')
+        .text(d => d);
+
+    const rows = tbody.selectAll('tr')
+        .data(costOfWork, d => d.name)
+        .enter()
+        .append('tr');
+
+    rows.append('td')
+        .attr('class', 'p-2')
+        .text(d => d.name);
+
+    const lockCell = rows.append('td')
+        .attr('class', 'p-2 text-center');
+
+    lockCell.append('input')
+        .attr('type', 'checkbox')
+        .property('checked', d => {
+            const key = `${phaseKey}-${d.name}`;
+            return state.lockedCostOfWork.has(key);
+        })
+        .on('change', (event, d) => {
+            const key = `${phaseKey}-${d.name}`;
+            if (event.target.checked) {
+                state.lockedCostOfWork.add(key);
+            } else {
+                state.lockedCostOfWork.delete(key);
+            }
+            render();
+        });
+}
+
 
 /**
  * Automatically adjusts all unlocked components to meet the total project budget.
