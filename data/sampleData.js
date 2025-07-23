@@ -3,7 +3,7 @@ const sampleData = {
         "phase1": {
             "totalProjectBudget": 20000000,
             "costOfWork": [
-                { "Category": "Special Construction & Demo", "Subcategory": "Demolition", "Total": 5000000 },
+                { "Category": "Special Construction & Demo", "Subcategory": "Demolition", "Total": 5338387 },
                 { "Category": "Sitework", "Subcategory": "Site Preparation", "Total": 0 },
                 { "Category": "Sitework", "Subcategory": "Site Improvements", "Total": 0 },
                 { "Category": "Sitework", "Subcategory": "Civil & Mechanical Utilities", "Total": 0 },
