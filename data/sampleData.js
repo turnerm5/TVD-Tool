@@ -23,35 +23,35 @@ const sampleData = {
         },
         "phase2": {
             "totalProjectBudget": 40000000,
-            "grossSF": 56000,
+            "grossSF": 45000,
             "indirectCosts": [
-                { "Category": "GCs and Insurance", "Subcategory": "Precon and Fee", "Total": 2744000 },
-                { "Category": "Escalation & Contingency", "Subcategory": "Design Contingency", "Total": 2152000 },
-                { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Total": 2152000 },
-                { "Category": "GCs and Insurance", "Subcategory": "Bonds and Insurance", "Total": 1748000 },
-                { "Category": "Permits", "Subcategory": "Building Permit", "Total": 136000 }
+                { "Category": "GCs and Insurance", "Subcategory": "Precon and Fee", "Percentage": 0.0686 },
+                { "Category": "Escalation & Contingency", "Subcategory": "Design Contingency", "Percentage": 0.0538 },
+                { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Percentage": 0.0538 },
+                { "Category": "GCs and Insurance", "Subcategory": "Bonds and Insurance", "Percentage": 0.0437 },
+                { "Category": "Permits", "Subcategory": "Building Permit", "Percentage": 0.0034 }
             ],
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 16000, "target_value": 33.50 },
-                { "name": "B10 Superstructure", "square_footage": 56000, "target_value": 98 },
-                { "name": "B20 Enclosure", "square_footage": 35000, "target_value": 100 },
-                { "name": "B30 Roofing", "square_footage": 16000, "target_value": 15 },
+                { "name": "A Substructure", "square_footage": 12500, "target_value": 33.50 },
+                { "name": "B10 Superstructure", "square_footage": 45000, "target_value": 98 },
+                { "name": "B20 Enclosure", "square_footage": 30000, "target_value": 100 },
+                { "name": "B30 Roofing", "square_footage": 12500, "target_value": 15 },
                 { 
                     "name": "C Interiors", 
-                    "square_footage": 48000, 
+                    "square_footage": 45000, 
                     "target_value": 115,
                     "building_efficiency": 0.575,
                     "breakdown": [
-                        { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 19200 },
-                        { "name": "Research", "percentage": 0.35, "cost": 150, "sf": 16800 },
-                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 7200 },
-                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 4800 }
+                        { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 10000},
+                        { "name": "Research", "percentage": 0.35, "cost": 150, "sf": 9000 },
+                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 4000 },
+                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 2500 }
                     ]
                 },
-                { "name": "D Services", "square_footage": 48000, "target_value": 265 },
-                { "name": "E Equipment and Furnishings", "square_footage": 48000, "target_value": 50.00 },
+                { "name": "D Services", "square_footage": 45000, "target_value": 265 },
+                { "name": "E Equipment and Furnishings", "square_footage": 45000, "target_value": 50.00 },
                 { "name": "F Special Construction", "square_footage": 10000, "target_value": 20 },
-                { "name": "G Building Sitework", "square_footage": 64000, "target_value": 42 }
+                { "name": "G Building Sitework", "square_footage": 25000, "target_value": 42 }
             ]
         }
     },

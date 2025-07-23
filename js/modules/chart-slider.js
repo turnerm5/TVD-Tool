@@ -17,6 +17,19 @@ export function setDependencies(fns) {
 }
 
 /**
+ * Calculates the effective square footage for a component, accounting for building efficiency.
+ * @param {object} component - The component data.
+ * @returns {number} The effective square footage.
+ */
+function getEffectiveSf(component) {
+    if (component.name === 'C Interiors' && component.building_efficiency) {
+        return component.square_footage / component.building_efficiency;
+    }
+    return component.square_footage;
+}
+
+
+/**
  * Distributes cost changes across unlocked components.
  * When a component's value is changed, this function calculates the delta
  * and distributes the inverse of that delta proportionally across all other unlocked components.
@@ -30,7 +43,8 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // 1. Calculate the initial change in absolute cost from the user's action.
     const originalRom = changedComponent.target_value;
     const newRom = Math.max(0, newValue); // Ensure new value isn't negative
-    const initialCostChange = (newRom - originalRom) * changedComponent.square_footage;
+    const changedComponentEffectiveSf = getEffectiveSf(changedComponent);
+    const initialCostChange = (newRom - originalRom) * changedComponentEffectiveSf;
 
     if (Math.abs(initialCostChange) < 0.01) return;
 
@@ -53,34 +67,49 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // 4. Calculate the total cost that needs to be absorbed by the other components.
     const costToAbsorb = -initialCostChange;
 
-    // 5. Distribute this cost change, handling cases where components bottom out at 0.
-    // This loop ensures that if one component hits $0/SF, the remaining cost is
-    // redistributed among the other available components.
+    // 5. Distribute this cost change proportionally, handling cases where components bottom out at 0.
     let remainingCostToAbsorb = costToAbsorb;
     let componentsAvailableToAbsorb = [...unlockedCostOfWork];
     let iterations = 0; // Safety break to prevent infinite loops
 
     while (Math.abs(remainingCostToAbsorb) > 0.01 && componentsAvailableToAbsorb.length > 0 && iterations < 10) {
-        const costShare = remainingCostToAbsorb / componentsAvailableToAbsorb.length;
-        remainingCostToAbsorb = 0; // Reset for this iteration
+        
+        // Calculate the total cost of all components available to absorb the change.
+        const totalCostOfAvailableComponents = componentsAvailableToAbsorb.reduce((sum, comp) => {
+            return sum + (comp.target_value * getEffectiveSf(comp));
+        }, 0);
 
+        if (totalCostOfAvailableComponents < 0.01) {
+            // No cost left in components to absorb the change. Stop here.
+            break;
+        }
+
+        const costToDistributeThisIteration = remainingCostToAbsorb;
+        remainingCostToAbsorb = 0;
         const nextComponentsAvailable = [];
 
         componentsAvailableToAbsorb.forEach(comp => {
-            const currentCompRom = comp.target_value;
-            const sf = comp.square_footage;
-            const romChangeForComp = costShare / sf;
-            const newCompRom = currentCompRom + romChangeForComp;
+            const effectiveSf = getEffectiveSf(comp);
+            if (effectiveSf === 0) return; 
 
-            if (newCompRom < 0) {
+            const currentCompCost = comp.target_value * effectiveSf;
+
+            // Calculate this component's proportional share of the cost to absorb.
+            const proportion = totalCostOfAvailableComponents > 0 ? currentCompCost / totalCostOfAvailableComponents : (1 / componentsAvailableToAbsorb.length);
+            const costChangeForComp = costToDistributeThisIteration * proportion;
+            
+            const newCompCost = currentCompCost + costChangeForComp;
+
+            if (newCompCost < 0) {
                 // This component can't absorb its full share. Absorb what it can down to 0.
-                const absorbedCost = -currentCompRom * sf;
-                remainingCostToAbsorb += (costShare - absorbedCost); // Add the un-absorbed amount to the remainder.
+                const absorbedCost = -currentCompCost; // The amount of cost it can actually absorb.
+                remainingCostToAbsorb += (costChangeForComp - absorbedCost); // Add un-absorbed amount to remainder.
                 comp.target_value = 0;
             } else {
-                // This component can absorb its full share for this iteration.
-                comp.target_value = newCompRom;
-                nextComponentsAvailable.push(comp); // This component is still available for future adjustments.
+                // This component can absorb its share.
+                const newRom = newCompCost / effectiveSf;
+                comp.target_value = newRom;
+                nextComponentsAvailable.push(comp);
             }
         });
         
@@ -90,8 +119,8 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
 
     // 6. If any cost remains un-absorbed (because all other components hit 0),
     // apply it back to the originally changed component to maintain the total budget.
-    if (Math.abs(remainingCostToAbsorb) > 0.01 && changedComponent.square_footage > 0) {
-        const leftoverRomChange = remainingCostToAbsorb / changedComponent.square_footage;
+    if (Math.abs(remainingCostToAbsorb) > 0.01 && changedComponentEffectiveSf > 0) {
+        const leftoverRomChange = remainingCostToAbsorb / changedComponentEffectiveSf;
         changedComponent.target_value += leftoverRomChange;
         changedComponent.target_value = Math.max(0, changedComponent.target_value);
     }
@@ -568,12 +597,7 @@ export function balanceToGmp() {
 
 
     // Now distribute cowDifference across unlocked components
-    const totalUnlockedSf = unlockedComponents.reduce((acc, c) => {
-        if (c.name === 'C Interiors' && c.building_efficiency) {
-            return acc + (c.square_footage / c.building_efficiency);
-        }
-        return acc + c.square_footage;
-    }, 0);
+    const totalUnlockedSf = unlockedComponents.reduce((acc, c) => acc + getEffectiveSf(c), 0);
 
     if (totalUnlockedSf === 0) {
         alert("Cannot balance: total square footage of unlocked components is zero.");
@@ -587,12 +611,7 @@ export function balanceToGmp() {
     const componentsAvailable = [...unlockedComponents];
     let iterations = 0;
     while(Math.abs(costRemainingToDistribute) > 1 && iterations < 5) {
-        const sfAvailable = componentsAvailable.reduce((acc, c) => {
-             if (c.name === 'C Interiors' && c.building_efficiency) {
-                return acc + (c.square_footage / c.building_efficiency);
-            }
-            return acc + c.square_footage;
-        }, 0);
+        const sfAvailable = componentsAvailable.reduce((acc, c) => acc + getEffectiveSf(c), 0);
         if (sfAvailable === 0) break;
         
         const costPerSf = costRemainingToDistribute / sfAvailable;
@@ -601,9 +620,7 @@ export function balanceToGmp() {
         const componentsForNextRound = [];
 
         componentsAvailable.forEach(c => {
-            const effectiveSf = (c.name === 'C Interiors' && c.building_efficiency) 
-                ? c.square_footage / c.building_efficiency
-                : c.square_footage;
+            const effectiveSf = getEffectiveSf(c);
             
             const romChange = costPerSf; // change in $/SF
             const newRom = c.target_value + romChange;
