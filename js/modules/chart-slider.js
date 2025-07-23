@@ -7,12 +7,10 @@ import { state } from './state.js';
 import * as dom from './dom.js';
 import * as utils from './utils.js';
 
-// Forward-declare dependencies
-let render, renderProgramView, updateSummary, yScale;
+let render, yScale;
+
 export function setDependencies(fns) {
     render = fns.render;
-    renderProgramView = fns.renderProgramView;
-    updateSummary = fns.updateSummary;
     yScale = fns.yScale;
 }
 
@@ -402,7 +400,6 @@ export function handleSquareFootageCellChange(event) {
         input.value = newSF.toLocaleString('en-US');
         // A change in square footage affects the total budget, so re-render everything.
         render();
-        updateSummary();
     }
 }
 
@@ -643,7 +640,4 @@ export function balanceToGmp() {
     }
 
     render();
-    if (document.getElementById('program-view').style.display !== 'none') {
-        renderProgramView();
-    }
 } 

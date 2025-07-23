@@ -29,6 +29,9 @@ const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
 function render() {
     if (!state.currentData) return;
 
+    // Update Reset button state based on whether data has changed
+    state.updateResetButtonState();
+
     // --- 1. Hide all views and deactivate all buttons ---
     dom.mainChart.classList.add('hidden');
     dom.programView.classList.add('hidden');
@@ -59,7 +62,7 @@ function render() {
     } else if (state.currentView === 'program') {
         dom.programView.classList.remove('hidden');
         dom.programViewBtn.classList.add('active');
-        program.renderPhase2ProgramView();
+        program.renderPhase2ProgramView(render, slider.handleSquareFootageCellChange);
     } else if (state.currentView === 'phase1') {
         dom.phase1View.classList.remove('hidden');
         dom.phase1ViewBtn.classList.add('active');
@@ -91,11 +94,6 @@ fileHandlers.setYScale(yScale);
 slider.setDependencies({
     render: render,
     yScale: yScale
-});
-program.setDependencies({
-    render: render,
-    handleSquareFootageCellChange: slider.handleSquareFootageCellChange,
-    handleGrossSfCellChange: slider.handleGrossSfCellChange
 });
 summary.setRender(render);
 
@@ -131,6 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         if (confirmed) {
             fileHandlers.loadData(state.originalData);
+            // Reset button state will be updated by the loadData function's call to updateResetButtonState
         }
     });
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);

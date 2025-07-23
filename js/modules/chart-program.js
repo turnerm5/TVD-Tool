@@ -3,16 +3,20 @@ import * as dom from './dom.js';
 import * as utils from './utils.js';
 import * as ui from './ui.js';
 
-// Forward-declare dependencies
-let handleSquareFootageCellChange, render, handleGrossSfCellChange;
-export function setDependencies(fns) {
-    handleSquareFootageCellChange = fns.handleSquareFootageCellChange;
-    render = fns.render;
-    handleGrossSfCellChange = fns.handleGrossSfCellChange;
+function updateCInteriorsSF() {
+    const cInteriors = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
+    const originalCInteriors = state.originalData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
+
+    if (cInteriors && originalCInteriors) {
+        const totalFloors = state.currentData.phases.phase2.floors || 0;
+        const shelledFloorsCount = state.shelledFloors.filter(Boolean).length;
+        const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
+        
+        cInteriors.square_footage = originalCInteriors.square_footage * (1 - shelledPercentage);
+    }
 }
 
-
-function updatePhase2ProgramTable(container, initialRender = false) {
+function updatePhase2ProgramTable(container, render, handleSquareFootageCellChange) {
     container.html('');
 
     // --- SNAPSHOT BUTTON UI ---
@@ -93,21 +97,9 @@ function updatePhase2ProgramTable(container, initialRender = false) {
                 state.addSnapshot(snapshot);
                 // Log all snapshots for debugging
                 console.log('All snapshots:', state.snapshots);
+                render();
             }
         });
-
-    function updateCInteriorsSF() {
-        const cInteriors = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
-        const originalCInteriors = state.originalData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
-
-        if (cInteriors && originalCInteriors) {
-            const totalFloors = state.currentData.phases.phase2.floors || 0;
-            const shelledFloorsCount = state.shelledFloors.filter(Boolean).length;
-            const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
-            
-            cInteriors.square_footage = originalCInteriors.square_footage * (1 - shelledPercentage);
-        }
-    }
 
     // --- PROGRAM TABLE ---
 
@@ -289,7 +281,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         .text(utils.formatCurrencyBig(totalCow + indirectsTotal));
 }
 
-export function renderPhase2ProgramView() {
+export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     // Clear the program view before rendering new content
     d3.select(dom.programView).html('');
 
@@ -395,5 +387,5 @@ export function renderPhase2ProgramView() {
     const tableContainer = mainContainer.append('div')
         .attr('class', 'program-table-container');
 
-    updatePhase2ProgramTable(tableContainer, true);
+    updatePhase2ProgramTable(tableContainer, render, handleSquareFootageCellChange);
 } 

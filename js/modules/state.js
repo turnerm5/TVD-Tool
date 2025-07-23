@@ -14,19 +14,6 @@ export const state = {
     shelledFloors: [],
 
     /**
-     * Initializes the application state.
-     * @param {object} data - The initial data loaded from sampleData.js.
-     */
-    init(data) {
-        this.originalData = data;
-        this.currentData = JSON.parse(JSON.stringify(data)); // Deep copy
-        this.snapshots = [];
-        this.lockedCostOfWork.clear();
-        this.calculateIndirectCostPercentages();
-        this.shelledFloors = new Array(data.phases.phase2.floors).fill(false);
-    },
-
-    /**
      * Calculates the indirect cost percentages based on the original data.
      * This establishes a baseline for how indirect costs relate to COW.
      */
@@ -93,5 +80,49 @@ export const state = {
      */
     clearSnapshots() {
         this.snapshots = [];
+    },
+
+    /**
+     * Checks if the current data has changed from the original data.
+     * @returns {boolean} - True if data has changed, false otherwise.
+     */
+    hasDataChanged() {
+        if (!this.currentData || !this.originalData) return false;
+
+        // Check if gross SF has changed
+        if (this.currentData.grossSF !== this.originalData.grossSF) return true;
+
+        // Check if any component target_value or square_footage has changed
+        const currentCostOfWork = this.currentData.phases.phase2.costOfWork;
+        const originalCostOfWork = this.originalData.phases.phase2.costOfWork;
+
+        for (let i = 0; i < currentCostOfWork.length; i++) {
+            const current = currentCostOfWork[i];
+            const original = originalCostOfWork[i];
+            
+            if (current.target_value !== original.target_value || 
+                current.square_footage !== original.square_footage) {
+                return true;
+            }
+        }
+
+        // Check if shelled floors have changed
+        const originalShelledFloors = new Array(this.originalData.phases.phase2.floors || 0).fill(false);
+        if (this.shelledFloors.length !== originalShelledFloors.length) return true;
+        for (let i = 0; i < this.shelledFloors.length; i++) {
+            if (this.shelledFloors[i] !== originalShelledFloors[i]) return true;
+        }
+
+        return false;
+    },
+
+    /**
+     * Updates the Reset button's disabled state based on whether data has changed.
+     */
+    updateResetButtonState() {
+        const resetButton = document.getElementById('reset-button');
+        if (resetButton) {
+            resetButton.disabled = !this.hasDataChanged();
+        }
     }
 }; 

@@ -92,18 +92,24 @@ export function loadData(data, fileName = 'Sample Data') {
     // Calculate indirect cost percentages now that originalData is set
     state.calculateIndirectCostPercentages();
     
+    // Reset shelled floors state
+    state.shelledFloors = new Array(data.phases.phase2.floors || 0).fill(false);
+    
             console.log('Data loaded. Original Gross SF:', state.originalData.grossSF, 'Current Gross SF:', state.currentData.grossSF);
 
     // Dynamically set the Y-axis domain based on phase 2 data only
     const allCostOfWork = processedData.phases.phase2.costOfWork;
-            const maxVal = d3.max(allCostOfWork, d => Math.max(d.benchmark_high, d.target_value));
-    state.yDomainMax = Math.ceil(maxVal / 10) * 10 + 20;
-    yScale.domain([0, state.yDomainMax]);
+    const maxTargetValue = d3.max(allCostOfWork, d => d.target_value);
+    state.yDomainMax = Math.ceil(maxTargetValue / 10) * 10;
 
-    document.getElementById('file-name').textContent = `Using: ${fileName}`;
-    state.currentPhase = 'phase1';
-
+    // Update UI
+    document.getElementById('file-name').textContent = fileName;
     ui.showMainContent();
+    
+    // Update Reset button state since we just loaded fresh data
+    state.updateResetButtonState();
+    
+    render();
 }
 
 /**
