@@ -70,7 +70,7 @@ export const state = {
             snapshot = {
                 name: snapshotOrName,
                 costOfWork: JSON.parse(JSON.stringify(this.currentData.phases.phase2.costOfWork)),
-                projectAreaSF: this.currentData.projectAreaSF
+                grossSF: this.currentData.grossSF
             };
         } else if (typeof snapshotOrName === 'object' && snapshotOrName !== null) {
             snapshot = snapshotOrName;

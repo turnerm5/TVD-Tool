@@ -23,7 +23,7 @@ const sampleData = {
         },
         "phase2": {
             "totalProjectBudget": 40000000,
-            "projectAreaSF": 56000,
+            "grossSF": 56000,
             "indirectCosts": [
                 { "Category": "GCs and Insurance", "Subcategory": "Precon and Fee", "Total": 2744000 },
                 { "Category": "Escalation & Contingency", "Subcategory": "Design Contingency", "Total": 2152000 },
@@ -60,7 +60,7 @@ const sampleData = {
             "name": "Hub",
             "description": "An L-shaped massing composed of interlocking volumes.",
             "image": "img/schemes/hub.jpg",
-            "projectAreaSF": 62600,
+            "grossSF": 62600,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 17200 },
                 { "name": "B10 Superstructure", "square_footage": 62600 },
@@ -77,7 +77,7 @@ const sampleData = {
             "name": "Pavilion",
             "description": "Simple rectangular block with three identical 16,000 SF floor plates.",
             "image": "img/schemes/pavilion.jpg",
-            "projectAreaSF": 56000,
+            "grossSF": 56000,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 16000 },
                 { "name": "B10 Superstructure", "square_footage": 56000 },
@@ -94,7 +94,7 @@ const sampleData = {
             "name": "Axial",
             "description": "A more compact, vertically-oriented massing organized along a central axis.",
             "image": "img/schemes/axial.jpg",
-            "projectAreaSF": 54200,
+            "grossSF": 54200,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 14800 },
                 { "name": "B10 Superstructure", "square_footage": 54200 },
@@ -111,7 +111,7 @@ const sampleData = {
             "name": "Max Floor",
             "description": "A two-story scheme with a large, rectangular footprint designed to maximize the buildable floor area.",
             "image": "img/schemes/max-floor.jpg",
-            "projectAreaSF": 60000,
+            "grossSF": 60000,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 25000 },
                 { "name": "B10 Superstructure", "square_footage": 60000 },
@@ -131,7 +131,7 @@ const sampleData = {
             "name": "BSU Materials Science",
             "image": "img/benchmarks/bsu-mat.jpg",
             "overall_sf_cost": 643.43,
-            "projectAreaSF": 89800,
+            "grossSF": 89800,
             "costOfWork": [
                 { "name": "A Substructure", "cost": 11.60 },
                 { "name": "B10 Superstructure", "cost": 68.68 },
@@ -149,7 +149,7 @@ const sampleData = {
             "name": "OSU Johnson Hall",
             "image": "img/benchmarks/osu-johnson-hall.jpg",
             "overall_sf_cost": 778.76,
-            "projectAreaSF": 61886,
+            "grossSF": 61886,
             "costOfWork": [
                 { "name": "A Substructure", "cost": 19.42 },
                 { "name": "B10 Superstructure", "cost": 65.66 },
@@ -167,7 +167,7 @@ const sampleData = {
             "name": "UI Integrated Research Building",
             "image": "img/benchmarks/ui-iric.jpg",
             "overall_sf_cost": 817.28,
-            "projectAreaSF": 78267,
+            "grossSF": 78267,
             "costOfWork": [
                 { "name": "A Substructure", "cost": 28.57 },
                 { "name": "B10 Superstructure", "cost": 80.71 },
@@ -185,7 +185,7 @@ const sampleData = {
             "name": "UO Knight Campus Phase 2",
             "image": "img/benchmarks/uo-knight-2.jpg",
             "overall_sf_cost": 922.89,
-            "projectAreaSF": 186729,
+            "grossSF": 186729,
             "costOfWork": [
                 { "name": "A Substructure", "cost": 24.14 },
                 { "name": "B10 Superstructure", "cost": 136.08 },
@@ -203,7 +203,7 @@ const sampleData = {
             "name": "UW Molecular Engineering",
             "image": "img/benchmarks/uw-mole.jpg",
             "overall_sf_cost": 742.65,
-            "projectAreaSF": 90374,
+            "grossSF": 90374,
             "costOfWork": [
                 { "name": "A Substructure", "cost": 106.72 },
                 { "name": "B10 Superstructure", "cost": 28.49 },
@@ -221,7 +221,7 @@ const sampleData = {
             "name": "WSU Tri-Cities",
             "image": "img/benchmarks/wsu-tricities.jpg",
             "overall_sf_cost": 544.25,
-            "projectAreaSF": 38391,
+            "grossSF": 38391,
             "costOfWork": [
                 { "name": "A Substructure", "cost": 4.87 },
                 { "name": "B10 Superstructure", "cost": 106.57 },

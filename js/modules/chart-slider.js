@@ -389,7 +389,7 @@ export function handleSquareFootageCellChange(event) {
 export function handleGrossSfCellChange(event) {
     const newValue = parseFloat(event.target.value.replace(/,/g, ''));
     if (!isNaN(newValue)) {
-        state.currentData.projectAreaSF = newValue;
+        state.currentData.grossSF = newValue;
         render();
     }
 }

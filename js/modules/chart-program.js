@@ -55,7 +55,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
                 // Create the snapshot object
                 const snapshot = {
                     name: snapshotName,
-                    projectAreaSF: state.currentData.projectAreaSF,
+                    grossSF: state.currentData.grossSF,
                     costOfWork: snapshotCostOfWork
                 };
                 // Add the snapshot to the state
@@ -279,15 +279,15 @@ export function renderPhase2ProgramView() {
             const updates = [];
 
             // Animate Gross SF change
-            const oldGrossSf = state.currentData.projectAreaSF;
-            const newGrossSf = d.projectAreaSF;
+                    const oldGrossSf = state.currentData.grossSF;
+        const newGrossSf = d.grossSF;
             let grossSf_change = 'none';
             if (newGrossSf > oldGrossSf) grossSf_change = 'increase';
             else if (newGrossSf < oldGrossSf) grossSf_change = 'decrease';
             if (grossSf_change !== 'none') {
                 updates.push({ name: 'Gross SF', sf_change: grossSf_change });
             }
-            state.currentData.projectAreaSF = newGrossSf;
+            state.currentData.grossSF = newGrossSf;
 
             // Animate each component's square footage change
             d.costOfWork.forEach(schemeComponent => {
@@ -336,7 +336,7 @@ export function renderPhase2ProgramView() {
     // Add total SF
     statsContainer.append('div')
         .attr('class', 'mb-1')
-        .html(d => `<strong>Total SF:</strong> ${d.projectAreaSF.toLocaleString()}`);
+                    .html(d => `<strong>Total SF:</strong> ${d.grossSF.toLocaleString()}`);
 
     
 

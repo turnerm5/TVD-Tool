@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
             const snapshot = {
                 name: snapshotName,
-                projectAreaSF: state.currentData.projectAreaSF,
+                grossSF: state.currentData.grossSF,
                 costOfWork: snapshotCostOfWork
             };
             state.addSnapshot(snapshot);

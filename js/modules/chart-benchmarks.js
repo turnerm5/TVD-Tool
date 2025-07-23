@@ -37,7 +37,7 @@ export function render(render) {
                 const caption = card.append('div').attr('class', 'benchmark-caption');
                 caption.append('h4').attr('class', 'font-semibold').text(d => d.name);
                 caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatCurrency(d.overall_sf_cost)} /SF`);
-                caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatNumber(d.projectAreaSF)} SF`);
+                caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatNumber(d.grossSF)} SF`);
                 
                 return card;
             },
@@ -48,7 +48,7 @@ export function render(render) {
                 update.selectAll('p').remove(); // Clear and re-append to be simple
                 const caption = update.select('.benchmark-caption');
                 caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatCurrency(d.overall_sf_cost)} /SF`);
-                caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatNumber(d.projectAreaSF)} SF`);
+                caption.append('p').attr('class', 'text-gray-600 text-sm').text(d => `${utils.formatNumber(d.grossSF)} SF`);
                 return update;
             }
         );
