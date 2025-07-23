@@ -89,11 +89,13 @@ export function calculateTotalCostOfWork(costOfWorkItems) {
 export function calculateComponentValue(component) {
     // Check if the component is an indirect cost by looking for a 'percentage' property
     if (component.hasOwnProperty('percentage')) {
-        const totalCow = calculateTotalCostOfWork(state.currentData.phase2.costOfWork);
-        return totalCow * (component.percentage || 0);
+        const totalCow = calculateTotalCostOfWork(state.currentScheme.costOfWork);
+        return totalCow * (Number(component.percentage) || 0);
     }
     // Default calculation for regular "Cost of Work" items
-    return (component.target_value || 0) * (component.square_footage || 0);
+    const targetValue = Number(component.target_value) || 0;
+    const squareFootage = Number(component.square_footage) || 0;
+    return targetValue * squareFootage;
 }
 
 /**
@@ -102,11 +104,29 @@ export function calculateComponentValue(component) {
  * @returns {object} The baseline data series object
  */
 export function createImportedDataSeries() {
+    const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+    const initialTargetValues = state.originalData.initialTargetValues || [];
+    
+    let costOfWork = [];
+    if (originalPredesignScheme) {
+        // Merge square_footage from Predesign scheme with target_value from initialTargetValues
+        costOfWork = originalPredesignScheme.costOfWork.map(component => {
+            const targetValueData = initialTargetValues.find(tv => tv.name === component.name);
+            return {
+                name: component.name,
+                square_footage: Number(component.square_footage) || 0,
+                target_value: targetValueData ? Number(targetValueData.target_value) || 0 : 0,
+                benchmark_low: targetValueData ? Number(targetValueData.benchmark_low) || 0 : 0,
+                benchmark_high: targetValueData ? Number(targetValueData.benchmark_high) || 0 : 0
+            };
+        });
+    }
+    
     return {
         name: "Baseline",
         color: "#9ca3af", // gray-400
-        costOfWork: state.originalData.phase2.costOfWork,
-        grossSF: state.originalData.phase2.grossSF
+        costOfWork: costOfWork,
+        grossSF: state.originalData.grossSF
     };
 }
 

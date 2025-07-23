@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cancel"
         );
         if (snapshotName) {
-            const phase2CostOfWork = state.currentData.phase2.costOfWork;
+            const phase2CostOfWork = state.currentScheme.costOfWork;
             const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                 name: c.name,
                 target_value: c.target_value,

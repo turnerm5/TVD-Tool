@@ -50,7 +50,8 @@ export function renderSummaryCharts() {
     const importedSeries = utils.createImportedDataSeries();
     const allSeriesData = [importedSeries, ...state.snapshots];
     const seriesNames = allSeriesData.map(d => d.name);
-            const costOfWorkNames = state.originalData.phase2.costOfWork.map(c => c.name);
+            const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+            const costOfWorkNames = originalPredesignScheme ? originalPredesignScheme.costOfWork.map(c => c.name) : [];
         const gmpValue = state.originalData.phase2.totalProjectBudget;
     
     // --- Render Left Chart ---

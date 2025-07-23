@@ -39,9 +39,9 @@ function processData(data) {
         });
     });
 
-    // Only process components for phase2
-    if (data.phase2 && data.phase2.costOfWork) {
-        data.phase2.costOfWork.forEach(c => {
+    // Process components using initialTargetValues for benchmark calculations
+    if (data.initialTargetValues && Array.isArray(data.initialTargetValues)) {
+        data.initialTargetValues.forEach(c => {
             const costs = benchmarkCostsByName[c.name] || [];
             c.benchmark_low = costs.length ? Math.min(...costs) : 0;
             c.benchmark_high = costs.length ? Math.max(...costs) : 0;
@@ -61,6 +61,19 @@ export function loadData(data, fileName = 'Sample Data') {
         alert("Invalid JSON format. Must contain 'phase1' and 'phase2' objects at the top level.");
         return;
     }
+    
+    // Find the Predesign scheme which contains the initial cost of work data
+    const predesignScheme = data.schemes && data.schemes.find(s => s.name === 'Predesign');
+    if (!predesignScheme || !predesignScheme.costOfWork) {
+        alert("Invalid JSON format. Must contain a 'Predesign' scheme with costOfWork data.");
+        return;
+    }
+    
+    // Validate that initialTargetValues exists
+    if (!data.initialTargetValues || !Array.isArray(data.initialTargetValues)) {
+        alert("Invalid JSON format. Must contain 'initialTargetValues' array.");
+        return;
+    }
 
     const processedData = processData(JSON.parse(JSON.stringify(data)));
 
@@ -74,9 +87,10 @@ export function loadData(data, fileName = 'Sample Data') {
 
     state.lockedCostOfWork = new Set();
 
-    // Lock components only for phase2
-    if (processedData.phase2 && processedData.phase2.costOfWork) {
-        processedData.phase2.costOfWork.forEach(component => {
+    // Lock components based on Predesign scheme data
+    const processedPredesignScheme = processedData.schemes && processedData.schemes.find(s => s.name === 'Predesign');
+    if (processedPredesignScheme && processedPredesignScheme.costOfWork) {
+        processedPredesignScheme.costOfWork.forEach(component => {
             if (component.target_value === 0 || component.square_footage === 0) {
                 const lockKey = `phase2-${component.name}`;
                 state.lockedCostOfWork.add(lockKey);
@@ -85,27 +99,43 @@ export function loadData(data, fileName = 'Sample Data') {
     }
 
     state.originalData = JSON.parse(JSON.stringify(processedData));
-    state.originalData.grossSF = data.phase2.grossSF || 0;
+    state.originalData.grossSF = predesignScheme.grossSF || 0;
     state.currentData = processedData;
-    state.currentData.grossSF = data.phase2.grossSF || 0;
+    state.currentData.grossSF = predesignScheme.grossSF || 0;
+    
+    // Initialize the current scheme with the Predesign scheme + target values
+    state.currentScheme = JSON.parse(JSON.stringify(predesignScheme));
+    
+    // Merge initialTargetValues into the current scheme
+    state.currentScheme.costOfWork.forEach(component => {
+        const targetValueData = processedData.initialTargetValues.find(tv => tv.name === component.name);
+        if (targetValueData) {
+            component.target_value = Number(targetValueData.target_value) || 0;
+            component.benchmark_low = Number(targetValueData.benchmark_low) || 0;
+            component.benchmark_high = Number(targetValueData.benchmark_high) || 0;
+        } else {
+            component.target_value = 0;
+            component.benchmark_low = 0;
+            component.benchmark_high = 0;
+        }
+    });
     
     // Calculate indirect cost percentages now that originalData is set
     state.calculateIndirectCostPercentages();
     
     // Reset shelled floors state
-    state.shelledFloors = new Array(data.phase2.floors || 0).fill(false);
+    state.shelledFloors = new Array(predesignScheme.floors || 0).fill(false);
     
             console.log('Data loaded. Original Gross SF:', state.originalData.grossSF, 'Current Gross SF:', state.currentData.grossSF);
 
-    // Dynamically set the Y-axis domain based on phase 2 data AND benchmark data
-    const allCostOfWork = processedData.phase2.costOfWork;
-    const maxTargetValue = d3.max(allCostOfWork, d => d.target_value);
+    // Dynamically set the Y-axis domain based on initialTargetValues AND benchmark data
+    const maxTargetValue = d3.max(processedData.initialTargetValues, d => d.target_value);
     
     // Also consider benchmark values to ensure they fit in the chart
     const allBenchmarkValues = [];
     
-    // Add benchmark_high and benchmark_low values from components
-    allCostOfWork.forEach(c => {
+    // Add benchmark_high and benchmark_low values from initialTargetValues
+    processedData.initialTargetValues.forEach(c => {
         if (c.benchmark_high) allBenchmarkValues.push(c.benchmark_high);
         if (c.benchmark_low) allBenchmarkValues.push(c.benchmark_low);
     });

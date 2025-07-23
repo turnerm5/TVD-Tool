@@ -4,11 +4,12 @@ import * as utils from './utils.js';
 import * as ui from './ui.js';
 
 function updateCInteriorsSF() {
-    const cInteriors = state.currentData.phase2.costOfWork.find(c => c.name === 'C Interiors');
-    const originalCInteriors = state.originalData.phase2.costOfWork.find(c => c.name === 'C Interiors');
+    const cInteriors = state.currentScheme.costOfWork.find(c => c.name === 'C Interiors');
+    const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+    const originalCInteriors = originalPredesignScheme ? originalPredesignScheme.costOfWork.find(c => c.name === 'C Interiors') : null;
 
     if (cInteriors && originalCInteriors) {
-        const totalFloors = state.currentData.phase2.floors || 0;
+        const totalFloors = state.currentScheme.floors || 0;
         const shelledFloorsCount = state.shelledFloors.filter(Boolean).length;
         const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
         
@@ -33,7 +34,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('class', 'font-semibold text-gray-700')
         .text('Shell Floors:');
 
-            const floors = state.currentData.phase2.floors || 0;
+            const floors = state.currentScheme.floors || 0;
     for (let i = 0; i < floors; i++) {
         const checkboxWrapper = checkboxContainer.append('div')
             .attr('class', 'flex items-center');
@@ -81,7 +82,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
             
             if (snapshotName) {
                 // Gather the current phase 2 component data for the snapshot
-                const phase2CostOfWork = state.currentData.phase2.costOfWork;
+                const phase2CostOfWork = state.currentScheme.costOfWork;
                 const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                     name: c.name,
                     target_value: c.target_value,
@@ -130,7 +131,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
     // Body
     const tbody = table.append('tbody');
 
-            const phaseCostOfWork = state.currentData.phase2.costOfWork;
+            const phaseCostOfWork = state.currentScheme.costOfWork;
 
     // Calculate Cost of Work totals
     let cowTotalSquareFootage = 0;
@@ -300,7 +301,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
 
     // Create a horizontal grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
-        .attr('class', 'grid grid-cols-4 gap-4')
+        .attr('class', 'grid grid-cols-5 gap-4')
         .style('height', '300px');
 
     // Get the list of available schemes from the current data
@@ -329,19 +330,52 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             }
             state.currentData.grossSF = newGrossSf;
 
-            // Animate each component's square footage change
-            d.costOfWork.forEach(schemeComponent => {
-                const currentComponent = state.currentData.phase2.costOfWork.find(c => c.name === schemeComponent.name);
-                if (currentComponent) {
-                    const oldSf = currentComponent.square_footage;
-                    const newSf = schemeComponent.square_footage;
-                    let sf_change = 'none';
-                    if (newSf > oldSf) sf_change = 'increase';
-                    else if (newSf < oldSf) sf_change = 'decrease';
-                    if (sf_change !== 'none') {
-                        updates.push({ name: currentComponent.name, sf_change });
-                    }
-                    currentComponent.square_footage = newSf;
+            // Preserve current target values and square footages before switching
+            const currentTargetValues = state.currentScheme.costOfWork.reduce((acc, c) => {
+                acc[c.name] = {
+                    target_value: c.target_value,
+                    square_footage: c.square_footage
+                };
+                return acc;
+            }, {});
+            
+            // Copy the new scheme
+            state.currentScheme = JSON.parse(JSON.stringify(d));
+            
+            // Merge target values (preserve current values or use initial values)
+            state.currentScheme.costOfWork.forEach(component => {
+                const currentData = currentTargetValues[component.name];
+                let targetValue = 0;
+                
+                if (currentData && currentData.target_value !== undefined) {
+                    // Use current target value (may have been modified by user)
+                    targetValue = Number(currentData.target_value) || 0;
+                } else {
+                    // Fall back to initialTargetValues
+                    const targetValueData = state.originalData.initialTargetValues.find(tv => tv.name === component.name);
+                    targetValue = targetValueData ? Number(targetValueData.target_value) || 0 : 0;
+                }
+                
+                component.target_value = targetValue;
+                
+                // Also merge benchmark values
+                const targetValueData = state.originalData.initialTargetValues.find(tv => tv.name === component.name);
+                if (targetValueData) {
+                    component.benchmark_low = Number(targetValueData.benchmark_low) || 0;
+                    component.benchmark_high = Number(targetValueData.benchmark_high) || 0;
+                } else {
+                    component.benchmark_low = 0;
+                    component.benchmark_high = 0;
+                }
+                
+                // Track square footage changes for animation
+                const oldSf = currentData ? currentData.square_footage : 0;
+                const newSf = component.square_footage;
+                let sf_change = 'none';
+                if (newSf > oldSf) sf_change = 'increase';
+                else if (newSf < oldSf) sf_change = 'decrease';
+                if (sf_change !== 'none') {
+                    updates.push({ name: component.name, sf_change });
                 }
             });
 

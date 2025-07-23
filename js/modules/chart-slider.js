@@ -33,7 +33,8 @@ function getEffectiveSf(component) {
  * @param {string} phaseKey - The key for the current phase ('phase1' or 'phase2').
  */
 function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
-    const phase = state.currentData[phaseKey];
+    // For phase2, use the current scheme data
+    const phase = { costOfWork: state.currentScheme.costOfWork };
 
     // 1. Calculate the initial change in absolute cost from the user's action.
     const originalRom = changedComponent.target_value;
@@ -129,7 +130,7 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
  * This function uses the D3 enter/update/exit pattern to create and update the component columns.
  */
 export function renderChart() {
-            const phaseCostOfWork = state.currentData.phase2.costOfWork;
+            const phaseCostOfWork = state.currentScheme.costOfWork;
     // Set the number of columns in the CSS grid layout.
     dom.chartContainer.style("grid-template-columns", `repeat(${phaseCostOfWork.length}, 1fr)`);
     // Set the output range for the y-scale based on the container's current height.
@@ -200,7 +201,23 @@ export function renderChart() {
         });
     
     // Create a map of original component values for quick lookup.
-            const originalComponents = state.originalData.phase2.costOfWork.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
+            const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+            const originalTargetValues = state.originalData.initialTargetValues || [];
+            
+            // Merge original square footage with original target values
+            const originalComponents = {};
+            if (originalPredesignScheme) {
+                originalPredesignScheme.costOfWork.forEach(component => {
+                    const targetValueData = originalTargetValues.find(tv => tv.name === component.name);
+                                         originalComponents[component.name] = {
+                        name: component.name,
+                        square_footage: Number(component.square_footage) || 0,
+                        target_value: targetValueData ? Number(targetValueData.target_value) || 0 : 0,
+                        benchmark_low: targetValueData ? Number(targetValueData.benchmark_low) || 0 : 0,
+                        benchmark_high: targetValueData ? Number(targetValueData.benchmark_high) || 0 : 0
+                    };
+                });
+            }
     
     // Update labels and ghost bars for each component.
     updateGroup.each(function(d) {
@@ -386,13 +403,14 @@ export function handleSquareFootageCellChange(event) {
 
     if (isNaN(newSF) || newSF < 0) {
         // Find the original value to revert to if input is invalid
-        const originalComponent = state.originalData[phaseKey].costOfWork.find(c => c.name === componentName);
+        const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+        const originalComponent = originalPredesignScheme ? originalPredesignScheme.costOfWork.find(c => c.name === componentName) : null;
         input.value = originalComponent ? originalComponent.square_footage.toLocaleString('en-US') : '0';
         return;
     }
 
-    const phase = state.currentData[phaseKey];
-    const component = phase.costOfWork.find(c => c.name === componentName);
+    // For phase2, use the current scheme data
+    const component = state.currentScheme.costOfWork.find(c => c.name === componentName);
 
     if (component) {
         component.square_footage = newSF;
@@ -453,7 +471,8 @@ function dragEnded(event, d) {
  */
 function renderLockControls() {
     const phaseKey = 'phase2';
-    const costOfWork = state.currentData[phaseKey].costOfWork;
+    // For phase2, use the current scheme data
+    const costOfWork = state.currentScheme.costOfWork;
     const lockSets = state.currentData.lockSets || [];
 
     // Clear existing controls
@@ -562,7 +581,8 @@ function renderLockControls() {
  */
 export function balanceToGmp() {
     const phaseKey = 'phase2';
-    const phase = state.currentData[phaseKey];
+    // For phase2, use the current scheme data
+    const phase = { costOfWork: state.currentScheme.costOfWork };
     const unlockedComponents = phase.costOfWork.filter(c => {
         const key = `${phaseKey}-${c.name}`;
         return !state.lockedCostOfWork.has(key) && c.square_footage > 0
@@ -577,7 +597,7 @@ export function balanceToGmp() {
     const totalCow = utils.calculateTotalCostOfWork(phase.costOfWork);
     const currentIndirectCosts = totalCow * totalIndirectPercentage;
     const currentTotalCost = totalCow + currentIndirectCosts;
-    const targetBudget = phase.totalProjectBudget;
+    const targetBudget = state.originalData.phase2.totalProjectBudget;
     const difference = targetBudget - currentTotalCost;
 
     if (Math.abs(difference) < 1) {

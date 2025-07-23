@@ -12,6 +12,7 @@ export const state = {
     snapshots: [],
     indirectCostPercentages: [],
     shelledFloors: [],
+    currentScheme: null, // The currently active scheme (starts with Predesign)
 
     /**
      * Calculates the indirect cost percentages based on the original data.
@@ -36,7 +37,28 @@ export const state = {
         this.snapshots = [];
         this.lockedCostOfWork.clear();
         this.calculateIndirectCostPercentages();
-        this.shelledFloors = new Array(this.originalData.phase2.floors).fill(false);
+        
+        // Reset to the original Predesign scheme with initial target values
+        const originalPredesignScheme = this.originalData.schemes && this.originalData.schemes.find(s => s.name === 'Predesign');
+        if (originalPredesignScheme) {
+            this.currentScheme = JSON.parse(JSON.stringify(originalPredesignScheme));
+            
+            // Merge initial target values
+            this.currentScheme.costOfWork.forEach(component => {
+                const targetValueData = this.originalData.initialTargetValues.find(tv => tv.name === component.name);
+                if (targetValueData) {
+                    component.target_value = Number(targetValueData.target_value) || 0;
+                    component.benchmark_low = Number(targetValueData.benchmark_low) || 0;
+                    component.benchmark_high = Number(targetValueData.benchmark_high) || 0;
+                } else {
+                    component.target_value = 0;
+                    component.benchmark_low = 0;
+                    component.benchmark_high = 0;
+                }
+            });
+            
+            this.shelledFloors = new Array(originalPredesignScheme.floors || 0).fill(false);
+        }
     },
 
     /**
@@ -54,7 +76,7 @@ export const state = {
         if (typeof snapshotOrName === 'string') {
             snapshot = {
                 name: snapshotOrName,
-                costOfWork: JSON.parse(JSON.stringify(this.currentData.phase2.costOfWork)),
+                costOfWork: JSON.parse(JSON.stringify(this.currentScheme.costOfWork)),
                 grossSF: this.currentData.grossSF
             };
         } else if (typeof snapshotOrName === 'object' && snapshotOrName !== null) {
@@ -92,21 +114,28 @@ export const state = {
         if (this.currentData.grossSF !== this.originalData.grossSF) return true;
 
         // Check if any component target_value or square_footage has changed
-        const currentCostOfWork = this.currentData.phase2.costOfWork;
-        const originalCostOfWork = this.originalData.phase2.costOfWork;
+        const originalPredesignScheme = this.originalData.schemes && this.originalData.schemes.find(s => s.name === 'Predesign');
+        if (!this.currentScheme || !this.originalData.initialTargetValues || !originalPredesignScheme) return false;
+        
+        const currentCostOfWork = this.currentScheme.costOfWork;
+        const originalTargetValues = this.originalData.initialTargetValues;
+        const originalCostOfWork = originalPredesignScheme.costOfWork;
 
         for (let i = 0; i < currentCostOfWork.length; i++) {
             const current = currentCostOfWork[i];
-            const original = originalCostOfWork[i];
+            const originalTargetValue = originalTargetValues.find(tv => tv.name === current.name);
+            const originalSquareFootage = originalCostOfWork.find(oc => oc.name === current.name);
             
-            if (current.target_value !== original.target_value || 
-                current.square_footage !== original.square_footage) {
+            if (!originalTargetValue || !originalSquareFootage) continue;
+            
+            if (current.target_value !== originalTargetValue.target_value || 
+                current.square_footage !== originalSquareFootage.square_footage) {
                 return true;
             }
         }
 
         // Check if shelled floors have changed
-        const originalShelledFloors = new Array(this.originalData.phase2.floors || 0).fill(false);
+        const originalShelledFloors = new Array(originalPredesignScheme.floors || 0).fill(false);
         if (this.shelledFloors.length !== originalShelledFloors.length) return true;
         for (let i = 0; i < this.shelledFloors.length; i++) {
             if (this.shelledFloors[i] !== originalShelledFloors[i]) return true;

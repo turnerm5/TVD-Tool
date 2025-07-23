@@ -21,20 +21,7 @@ const sampleData = {
         ]
     },
     "phase2": {
-        "totalProjectBudget": 40000000,
-        "grossSF": 45000,
-        "floors": 4,
-        "costOfWork": [
-            { "name": "A Substructure", "square_footage": 12500, "target_value": 33.50 },
-            { "name": "B10 Superstructure", "square_footage": 45000, "target_value": 98 },
-            { "name": "B20 Enclosure", "square_footage": 30000, "target_value": 100 },
-            { "name": "B30 Roofing", "square_footage": 12500, "target_value": 15 },
-            { "name": "C Interiors", "square_footage": 45000, "target_value": 115},
-            { "name": "D Services", "square_footage": 45000, "target_value": 265 },
-            { "name": "E Equipment and Furnishings", "square_footage": 45000, "target_value": 50.00 },
-            { "name": "F Special Construction", "square_footage": 10000, "target_value": 20 },
-            { "name": "G Building Sitework", "square_footage": 25000, "target_value": 42 }
-        ]
+        "totalProjectBudget": 40000000
     },
     "indirectCosts": [
         { "Category": "GCs and Insurance", "Subcategory": "Precon and Fee", "Percentage": 0.0686 },
@@ -43,7 +30,36 @@ const sampleData = {
         { "Category": "GCs and Insurance", "Subcategory": "Bonds and Insurance", "Percentage": 0.0437 },
         { "Category": "Permits", "Subcategory": "Building Permit", "Percentage": 0.0034 }
     ],
+    "initialTargetValues": [
+        { "name": "A Substructure", "target_value": 33.50 },
+        { "name": "B10 Superstructure", "target_value": 98 },
+        { "name": "B20 Enclosure", "target_value": 100 },
+        { "name": "B30 Roofing", "target_value": 15 },
+        { "name": "C Interiors", "target_value": 115 },
+        { "name": "D Services", "target_value": 265 },
+        { "name": "E Equipment and Furnishings", "target_value": 50.00 },
+        { "name": "F Special Construction", "target_value": 20 },
+        { "name": "G Building Sitework", "target_value": 42 }
+    ],
     "schemes": [
+        {
+            "name": "Predesign",
+            "description": "A simple, rectangular massing with a single floor plate. Four shelled floors.",
+            "image": "img/schemes/hub.jpg",
+            "grossSF": 45000,
+            "floors": 4,
+            "costOfWork": [
+                { "name": "A Substructure", "square_footage": 12500 },
+                { "name": "B10 Superstructure", "square_footage": 45000 },
+                { "name": "B20 Enclosure", "square_footage": 30000 },
+                { "name": "B30 Roofing", "square_footage": 12500 },
+                { "name": "C Interiors", "square_footage": 45000 },
+                { "name": "D Services", "square_footage": 45000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 45000 },
+                { "name": "F Special Construction", "square_footage": 10000 },
+                { "name": "G Building Sitework", "square_footage": 25000 }
+            ]
+        },
         {
             "name": "Hub",
             "description": "An L-shaped massing composed of interlocking volumes.",
