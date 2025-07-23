@@ -349,7 +349,7 @@ export function updateSummary() {
         const totals = utils.calculateSeriesTotal(series, state.indirectCostPercentages);
         const { cowTotal, indirectTotal, totalProjectCost } = totals;
 
-        const grossSF = series.projectAreaSF || 0;
+        const grossSF = series.grossSF || 0;
         const costPerSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
         const variance = totalProjectCost - gmp;
         

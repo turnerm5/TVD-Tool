@@ -55,7 +55,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
                 // Create the snapshot object
                 const snapshot = {
                     name: snapshotName,
-                    projectAreaSF: state.currentData.projectAreaSF,
+                    grossSF: state.currentData.grossSF,
                     costOfWork: snapshotCostOfWork
                 };
                 // Add the snapshot to the state
@@ -259,7 +259,7 @@ export function renderPhase2ProgramView() {
     // Add a heading for the scheme selection section
     schemesContainer.append('h3')
         .attr('class', 'text-lg font-bold text-gray-800 mb-3')
-        .text('Select a Scheme');
+        .text('Demonstration Schemes');
 
     // Create a horizontal grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
@@ -279,15 +279,15 @@ export function renderPhase2ProgramView() {
             const updates = [];
 
             // Animate Gross SF change
-            const oldGrossSf = state.currentData.projectAreaSF;
-            const newGrossSf = d.projectAreaSF;
+                    const oldGrossSf = state.currentData.grossSF;
+        const newGrossSf = d.grossSF;
             let grossSf_change = 'none';
             if (newGrossSf > oldGrossSf) grossSf_change = 'increase';
             else if (newGrossSf < oldGrossSf) grossSf_change = 'decrease';
             if (grossSf_change !== 'none') {
                 updates.push({ name: 'Gross SF', sf_change: grossSf_change });
             }
-            state.currentData.projectAreaSF = newGrossSf;
+            state.currentData.grossSF = newGrossSf;
 
             // Animate each component's square footage change
             d.costOfWork.forEach(schemeComponent => {
@@ -336,16 +336,9 @@ export function renderPhase2ProgramView() {
     // Add total SF
     statsContainer.append('div')
         .attr('class', 'mb-1')
-        .html(d => `<strong>Total SF:</strong> ${d.projectAreaSF.toLocaleString()}`);
+                    .html(d => `<strong>Total SF:</strong> ${d.grossSF.toLocaleString()}`);
 
-    // Add shelled space (Superstructure - Equipment and Furnishings)
-    statsContainer.append('div')
-        .html(d => {
-            const superstructure = d.costOfWork.find(c => c.name === 'B10 Superstructure');
-            const equipment = d.costOfWork.find(c => c.name === 'E Equipment and Furnishings');
-            const shelledSpace = (superstructure?.square_footage || 0) - (equipment?.square_footage || 0);
-            return `<strong>Shelled Space:</strong> ${shelledSpace.toLocaleString()} SF`;
-        });
+    
 
     // --- PROGRAM TABLE (Full Width) ---
     const tableContainer = mainContainer.append('div')

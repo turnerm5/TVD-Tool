@@ -85,14 +85,14 @@ export function loadData(data, fileName = 'Sample Data') {
     }
 
     state.originalData = JSON.parse(JSON.stringify(processedData));
-    state.originalData.projectAreaSF = data.phases.phase2.projectAreaSF || 0;
+            state.originalData.grossSF = data.phases.phase2.grossSF || 0;
     state.currentData = processedData;
-    state.currentData.projectAreaSF = data.phases.phase2.projectAreaSF || 0;
+            state.currentData.grossSF = data.phases.phase2.grossSF || 0;
     
     // Calculate indirect cost percentages now that originalData is set
     state.calculateIndirectCostPercentages();
     
-    console.log('Data loaded. Original Gross SF:', state.originalData.projectAreaSF, 'Current Gross SF:', state.currentData.projectAreaSF);
+            console.log('Data loaded. Original Gross SF:', state.originalData.grossSF, 'Current Gross SF:', state.currentData.grossSF);
 
     // Dynamically set the Y-axis domain based on phase 2 data only
     const allCostOfWork = processedData.phases.phase2.costOfWork;

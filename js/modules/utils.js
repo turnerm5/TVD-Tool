@@ -103,7 +103,7 @@ export function createImportedDataSeries(originalData) {
     return {
         name: "Imported Data",
         costOfWork: JSON.parse(JSON.stringify(originalData.phases.phase2.costOfWork)),
-        projectAreaSF: originalData.projectAreaSF
+                    grossSF: originalData.grossSF
     };
 }
 

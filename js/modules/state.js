@@ -31,14 +31,13 @@ export const state = {
      */
     calculateIndirectCostPercentages() {
         const phase2 = this.originalData.phases.phase2;
-        if (!phase2.indirectCosts || !phase2.costOfWork) {
+        if (!phase2.indirectCosts) {
             this.indirectCostPercentages = [];
             return;
         }
-        const totalCow = utils.calculateTotalCostOfWork(phase2.costOfWork);
         this.indirectCostPercentages = phase2.indirectCosts.map(item => ({
             name: item.Subcategory,
-            percentage: totalCow > 0 ? item.Total / totalCow : 0
+            percentage: item.Percentage || 0
         }));
     },
 
@@ -70,7 +69,7 @@ export const state = {
             snapshot = {
                 name: snapshotOrName,
                 costOfWork: JSON.parse(JSON.stringify(this.currentData.phases.phase2.costOfWork)),
-                projectAreaSF: this.currentData.projectAreaSF
+                grossSF: this.currentData.grossSF
             };
         } else if (typeof snapshotOrName === 'object' && snapshotOrName !== null) {
             snapshot = snapshotOrName;

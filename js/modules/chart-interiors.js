@@ -156,7 +156,7 @@ export function renderInteriorsView() {
     
     grossSfRow.append('td')
         .attr('class', 'py-2 px-1 font-medium text-blue-600')
-        .text(state.currentData.projectAreaSF.toLocaleString('en-US'));
+                    .text(state.currentData.grossSF.toLocaleString('en-US'));
 
     const centerPanel = grid.append('div').attr('class', 'col-span-7');
     centerPanel.append('h3').attr('class', 'text-lg font-bold mb-4 text-center').text('Interiors Breakdown');
@@ -213,7 +213,7 @@ function recalculateAndUpdate() {
     // Calculate gross SF from efficiency if efficiency is being used to drive the calculation
     if (interiorsData.building_efficiency > 0) {
         const calculatedGrossSf = totalSpaceTypeSf / interiorsData.building_efficiency;
-        state.currentData.projectAreaSF = calculatedGrossSf;
+        state.currentData.grossSF = calculatedGrossSf;
     }
     
     // Update the actual interiors square footage (this should equal totalSpaceTypeSf for our new simplified model)

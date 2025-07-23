@@ -17,6 +17,19 @@ export function setDependencies(fns) {
 }
 
 /**
+ * Calculates the effective square footage for a component, accounting for building efficiency.
+ * @param {object} component - The component data.
+ * @returns {number} The effective square footage.
+ */
+function getEffectiveSf(component) {
+    if (component.name === 'C Interiors' && component.building_efficiency) {
+        return component.square_footage / component.building_efficiency;
+    }
+    return component.square_footage;
+}
+
+
+/**
  * Distributes cost changes across unlocked components.
  * When a component's value is changed, this function calculates the delta
  * and distributes the inverse of that delta proportionally across all other unlocked components.
@@ -30,7 +43,8 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // 1. Calculate the initial change in absolute cost from the user's action.
     const originalRom = changedComponent.target_value;
     const newRom = Math.max(0, newValue); // Ensure new value isn't negative
-    const initialCostChange = (newRom - originalRom) * changedComponent.square_footage;
+    const changedComponentEffectiveSf = getEffectiveSf(changedComponent);
+    const initialCostChange = (newRom - originalRom) * changedComponentEffectiveSf;
 
     if (Math.abs(initialCostChange) < 0.01) return;
 
@@ -53,34 +67,49 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // 4. Calculate the total cost that needs to be absorbed by the other components.
     const costToAbsorb = -initialCostChange;
 
-    // 5. Distribute this cost change, handling cases where components bottom out at 0.
-    // This loop ensures that if one component hits $0/SF, the remaining cost is
-    // redistributed among the other available components.
+    // 5. Distribute this cost change proportionally, handling cases where components bottom out at 0.
     let remainingCostToAbsorb = costToAbsorb;
     let componentsAvailableToAbsorb = [...unlockedCostOfWork];
     let iterations = 0; // Safety break to prevent infinite loops
 
     while (Math.abs(remainingCostToAbsorb) > 0.01 && componentsAvailableToAbsorb.length > 0 && iterations < 10) {
-        const costShare = remainingCostToAbsorb / componentsAvailableToAbsorb.length;
-        remainingCostToAbsorb = 0; // Reset for this iteration
+        
+        // Calculate the total cost of all components available to absorb the change.
+        const totalCostOfAvailableComponents = componentsAvailableToAbsorb.reduce((sum, comp) => {
+            return sum + (comp.target_value * getEffectiveSf(comp));
+        }, 0);
 
+        if (totalCostOfAvailableComponents < 0.01) {
+            // No cost left in components to absorb the change. Stop here.
+            break;
+        }
+
+        const costToDistributeThisIteration = remainingCostToAbsorb;
+        remainingCostToAbsorb = 0;
         const nextComponentsAvailable = [];
 
         componentsAvailableToAbsorb.forEach(comp => {
-            const currentCompRom = comp.target_value;
-            const sf = comp.square_footage;
-            const romChangeForComp = costShare / sf;
-            const newCompRom = currentCompRom + romChangeForComp;
+            const effectiveSf = getEffectiveSf(comp);
+            if (effectiveSf === 0) return; 
 
-            if (newCompRom < 0) {
+            const currentCompCost = comp.target_value * effectiveSf;
+
+            // Calculate this component's proportional share of the cost to absorb.
+            const proportion = totalCostOfAvailableComponents > 0 ? currentCompCost / totalCostOfAvailableComponents : (1 / componentsAvailableToAbsorb.length);
+            const costChangeForComp = costToDistributeThisIteration * proportion;
+            
+            const newCompCost = currentCompCost + costChangeForComp;
+
+            if (newCompCost < 0) {
                 // This component can't absorb its full share. Absorb what it can down to 0.
-                const absorbedCost = -currentCompRom * sf;
-                remainingCostToAbsorb += (costShare - absorbedCost); // Add the un-absorbed amount to the remainder.
+                const absorbedCost = -currentCompCost; // The amount of cost it can actually absorb.
+                remainingCostToAbsorb += (costChangeForComp - absorbedCost); // Add un-absorbed amount to remainder.
                 comp.target_value = 0;
             } else {
-                // This component can absorb its full share for this iteration.
-                comp.target_value = newCompRom;
-                nextComponentsAvailable.push(comp); // This component is still available for future adjustments.
+                // This component can absorb its share.
+                const newRom = newCompCost / effectiveSf;
+                comp.target_value = newRom;
+                nextComponentsAvailable.push(comp);
             }
         });
         
@@ -90,8 +119,8 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
 
     // 6. If any cost remains un-absorbed (because all other components hit 0),
     // apply it back to the originally changed component to maintain the total budget.
-    if (Math.abs(remainingCostToAbsorb) > 0.01 && changedComponent.square_footage > 0) {
-        const leftoverRomChange = remainingCostToAbsorb / changedComponent.square_footage;
+    if (Math.abs(remainingCostToAbsorb) > 0.01 && changedComponentEffectiveSf > 0) {
+        const leftoverRomChange = remainingCostToAbsorb / changedComponentEffectiveSf;
         changedComponent.target_value += leftoverRomChange;
         changedComponent.target_value = Math.max(0, changedComponent.target_value);
     }
@@ -109,7 +138,10 @@ export function renderChart() {
     // Set the number of columns in the CSS grid layout.
     dom.chartContainer.style("grid-template-columns", `repeat(${phaseCostOfWork.length}, 1fr)`);
     // Set the output range for the y-scale based on the container's current height.
-    yScale.range([dom.chartContainer.node().clientHeight - parseFloat(dom.chartContainer.style("padding-bottom")), 0]);
+    const paddingBottom = parseFloat(dom.chartContainer.style("padding-bottom"));
+    const paddingTop = parseFloat(dom.chartContainer.style("padding-top"));
+    const chartHeight = dom.chartContainer.node().clientHeight;
+    yScale.range([chartHeight - paddingBottom, paddingTop]);
     
     // Bind data to the component columns. The key function (d.name) helps D3 track objects.
     const components = dom.chartContainer.selectAll(".component-column").data(phaseCostOfWork, d => d.name);
@@ -132,12 +164,17 @@ export function renderChart() {
     const valueLabelGroup = enterGroup.append("div").attr("class", "value-label-group");
     valueLabelGroup.append("div").attr("class", "current-value-label");
     valueLabelGroup.append("div").attr("class", "delta-label");
-    enterGroup.append("div").attr("class", "lock-icon");
-
+    
     // Merge the enter selection with the update selection.
     // All subsequent operations apply to both new and existing elements.
     const updateGroup = enterGroup.merge(components);
     
+    // --- Update opacity for locked components ---
+    updateGroup.style('opacity', d => {
+        const key = `phase2-${d.name}`;
+        return state.lockedCostOfWork.has(key) ? 0.4 : 1;
+    });
+
     // --- Update positions and styles of all elements ---
     updateGroup.select(".benchmark-range")
         .style("top", d => Math.min(yScale(d.benchmark_low), yScale(d.benchmark_high)) + "px")
@@ -201,26 +238,8 @@ export function renderChart() {
     });
 
     updateGroup.select(".component-label").text(d => d.name);
-    updateGroup.select(".lock-icon")
-        .style('display', 'block')
-        .style('opacity', d => {
-            const key = `phase2-${d.name}`;
-            return state.lockedCostOfWork.has(key) ? 1 : 0.5;
-        })
-        .text(d => {
-            const key = `phase2-${d.name}`;
-            return state.lockedCostOfWork.has(key) ? '🔒' : '🔓';
-        })
-        .on('click', (event, d) => {
-            event.stopPropagation();
-            const key = `phase2-${d.name}`;
-            if (state.lockedCostOfWork.has(key)) {
-                state.lockedCostOfWork.delete(key);
-            } else {
-                state.lockedCostOfWork.add(key);
-            }
-            render();
-        });
+
+    renderLockControls();
 
     // Add Detail button for C Interiors component
     updateGroup.select(".detail-btn").remove(); // Remove any existing detail buttons
@@ -263,7 +282,8 @@ export function renderChart() {
             const benchmarkComp = d.costOfWork.find(c => c.name === componentData.name);
             if (!benchmarkComp) return;
 
-            const yPos = yScale(benchmarkComp.cost);
+            const paddingTop = parseFloat(dom.chartContainer.style("padding-top"));
+            const yPos = yScale(benchmarkComp.cost) + paddingTop;
             
             d3.select(this).select('.benchmark-indicator-line').attr('x1', '20%').attr('x2', '10%').attr('y1', yPos).attr('y2', yPos);
             d3.select(this).select('.benchmark-indicator-circle').attr('cx', '10%').attr('cy', yPos).attr('r', 6);
@@ -389,7 +409,7 @@ export function handleSquareFootageCellChange(event) {
 export function handleGrossSfCellChange(event) {
     const newValue = parseFloat(event.target.value.replace(/,/g, ''));
     if (!isNaN(newValue)) {
-        state.currentData.projectAreaSF = newValue;
+        state.currentData.grossSF = newValue;
         render();
     }
 }
@@ -425,12 +445,114 @@ function dragged(event, d) {
  */
 function dragEnded(event, d) {
     d3.select(this).classed("active", false);
-    const key = `phase2-${d.name}`;
-    if (!state.lockedCostOfWork.has(key)) {
-        state.lockedCostOfWork.add(key);
-        render(); // Rerender to update the lock icon
-    }
 }
+
+/**
+ * Renders the lock controls table in the sidebar.
+ */
+function renderLockControls() {
+    const phaseKey = 'phase2';
+    const costOfWork = state.currentData.phases[phaseKey].costOfWork;
+    const lockSets = state.currentData.lockSets || [];
+
+    // Clear existing controls
+    dom.lockControls.html('');
+
+    // --- Lock Set Buttons ---
+    if (lockSets.length > 0) {
+        const lockSetContainer = dom.lockControls.append('div')
+            .attr('class', 'mb-4 p-2 bg-gray-100 rounded');
+
+        lockSetContainer.append('h4')
+            .attr('class', 'font-bold text-sm mb-2')
+            .text('TVD Decision Examples');
+
+        lockSetContainer.selectAll('.lock-set-btn')
+            .data(lockSets)
+            .enter()
+            .append('button')
+            .attr('class', 'lock-set-btn w-full text-left text-sm p-1.5 rounded hover:bg-gray-300 transition mb-1')
+            .text(d => d.name)
+            .on('click', (event, d) => {
+                const allComponentNames = costOfWork.map(c => c.name);
+                const unlockedSet = new Set(d.unlocked);
+
+                state.lockedCostOfWork.clear();
+
+                allComponentNames.forEach(name => {
+                    if (!unlockedSet.has(name)) {
+                        const key = `${phaseKey}-${name}`;
+                        state.lockedCostOfWork.add(key);
+                    }
+                });
+                render();
+            });
+    }
+
+
+    // Create a table
+    const table = dom.lockControls.append('table').attr('class', 'w-full text-sm');
+    const thead = table.append('thead');
+    const tbody = table.append('tbody');
+
+    thead.append('tr')
+        .selectAll('th')
+        .data(['Component', 'Locked'])
+        .enter()
+        .append('th')
+        .attr('class', 'text-left font-semibold p-2')
+        .text(d => d);
+
+    const rows = tbody.selectAll('tr')
+        .data(costOfWork, d => d.name)
+        .enter()
+        .append('tr');
+
+    rows.append('td')
+        .attr('class', 'p-2')
+        .text(d => d.name);
+
+    const lockCell = rows.append('td')
+        .attr('class', 'p-2 text-center');
+
+    lockCell.append('input')
+        .attr('type', 'checkbox')
+        .property('checked', d => {
+            const key = `${phaseKey}-${d.name}`;
+            return state.lockedCostOfWork.has(key);
+        })
+        .on('change', (event, d) => {
+            const key = `${phaseKey}-${d.name}`;
+            if (event.target.checked) {
+                state.lockedCostOfWork.add(key);
+            } else {
+                state.lockedCostOfWork.delete(key);
+            }
+            render();
+        });
+
+    // --- Toggle Lock/Unlock All Button ---
+    const anyLocked = costOfWork.some(c => state.lockedCostOfWork.has(`${phaseKey}-${c.name}`));
+
+    dom.lockControls.append('div')
+        .attr('class', 'mt-4') // Add some space above the button
+        .append('button')
+        .attr('class', 'w-full text-sm p-1.5 rounded bg-gray-200 hover:bg-gray-300 transition')
+        .text(anyLocked ? 'Unlock All' : 'Lock All')
+        .on('click', () => {
+            const currentlyAnyLocked = costOfWork.some(c => state.lockedCostOfWork.has(`${phaseKey}-${c.name}`));
+
+            if (currentlyAnyLocked) {
+                // Unlock all components
+                costOfWork.forEach(c => state.lockedCostOfWork.delete(`${phaseKey}-${c.name}`));
+            } else {
+                // Lock all components
+                costOfWork.forEach(c => state.lockedCostOfWork.add(`${phaseKey}-${c.name}`));
+            }
+            render(); // Re-render the chart and controls
+        });
+}
+
 
 /**
  * Automatically adjusts all unlocked components to meet the total project budget.
@@ -475,12 +597,7 @@ export function balanceToGmp() {
 
 
     // Now distribute cowDifference across unlocked components
-    const totalUnlockedSf = unlockedComponents.reduce((acc, c) => {
-        if (c.name === 'C Interiors' && c.building_efficiency) {
-            return acc + (c.square_footage / c.building_efficiency);
-        }
-        return acc + c.square_footage;
-    }, 0);
+    const totalUnlockedSf = unlockedComponents.reduce((acc, c) => acc + getEffectiveSf(c), 0);
 
     if (totalUnlockedSf === 0) {
         alert("Cannot balance: total square footage of unlocked components is zero.");
@@ -494,12 +611,7 @@ export function balanceToGmp() {
     const componentsAvailable = [...unlockedComponents];
     let iterations = 0;
     while(Math.abs(costRemainingToDistribute) > 1 && iterations < 5) {
-        const sfAvailable = componentsAvailable.reduce((acc, c) => {
-             if (c.name === 'C Interiors' && c.building_efficiency) {
-                return acc + (c.square_footage / c.building_efficiency);
-            }
-            return acc + c.square_footage;
-        }, 0);
+        const sfAvailable = componentsAvailable.reduce((acc, c) => acc + getEffectiveSf(c), 0);
         if (sfAvailable === 0) break;
         
         const costPerSf = costRemainingToDistribute / sfAvailable;
@@ -508,9 +620,7 @@ export function balanceToGmp() {
         const componentsForNextRound = [];
 
         componentsAvailable.forEach(c => {
-            const effectiveSf = (c.name === 'C Interiors' && c.building_efficiency) 
-                ? c.square_footage / c.building_efficiency
-                : c.square_footage;
+            const effectiveSf = getEffectiveSf(c);
             
             const romChange = costPerSf; // change in $/SF
             const newRom = c.target_value + romChange;

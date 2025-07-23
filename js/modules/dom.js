@@ -8,6 +8,7 @@ export const splashScreen = document.getElementById('splash-screen');
 export const mainContent = document.getElementById('main-content');
 export const chartContainer = d3.select("#chart-container");
 export const yAxisLabelsContainer = d3.select("#y-axis-labels-container");
+export const lockControls = d3.select('#lock-controls');
 export const resetButton = document.getElementById('reset-button');
 export const startOverBtn = document.getElementById('start-over-btn');
 export const exportJsonBtn = document.getElementById('export-json-btn');
@@ -29,6 +30,7 @@ export const benchmarksView = document.getElementById('benchmarks-view');
 export const summaryView = document.getElementById('summary-view');
 export const phase1View = document.getElementById('phase1-view');
 export const interiorsView = document.getElementById('interiors-view');
+export const sliderView = d3.select('#slider-view');
 
 export const summaryPanel = document.getElementById('summary-panel');
 export const legend = document.getElementById('legend');
