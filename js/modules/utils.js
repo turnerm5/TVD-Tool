@@ -3,6 +3,8 @@
  * @description Utility and helper functions for the TVD Tool.
  */
 
+import { state } from './state.js';
+
 /**
  * Formats a number into a currency string (e.g., $123.45).
  * @param {number} d - The number to format.
@@ -94,16 +96,16 @@ export function calculateComponentValue(component) {
 }
 
 /**
- * Creates a stable "Imported Data" series using pure original data.
- * This represents the baseline imported values and never changes.
- * @param {object} originalData - The original data from state.originalData
- * @returns {object} The imported data series object
+ * Creates a stable "Baseline" series using pure original data.
+ * This is used as the reference point in summary charts.
+ * @returns {object} The baseline data series object
  */
-export function createImportedDataSeries(originalData) {
+export function createImportedDataSeries() {
     return {
-        name: "Imported Data",
-        costOfWork: JSON.parse(JSON.stringify(originalData.phases.phase2.costOfWork)),
-                    grossSF: originalData.grossSF
+        name: "Baseline",
+        color: "#9ca3af", // gray-400
+        costOfWork: state.originalData.phases.phase2.costOfWork,
+        grossSF: state.originalData.phases.phase2.grossSF
     };
 }
 

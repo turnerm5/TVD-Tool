@@ -9,7 +9,7 @@ An interactive web-based tool for visualizing, adjusting, and analyzing project 
     - **Slider View:** An interactive bar chart for visually adjusting component costs. Drag the "Current ROM" bar to see real-time cost balancing across unlocked components.
     - **Program View:** A detailed tabular breakdown of all Phase 2 components, allowing for precise numerical input and at-a-glance comparison.
     - **Benchmarks View:** A gallery of benchmark projects used for comparison, displaying their overall cost per square foot.
-    - **Summary View:** A comprehensive summary table and charts that compare the imported data against various "what-if" scenarios (snapshots).
+    - **Summary View:** A comprehensive summary table and charts that compare the baseline data against various "what-if" scenarios (snapshots).
 
 - **Dynamic Data Visualization:**
     - **Component Sliders:** Each component is represented by a vertical bar, showing its relationship to benchmark ranges and the target value.
