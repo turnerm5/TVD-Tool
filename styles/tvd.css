@@ -448,3 +448,14 @@ body {
     font-size: 12px;
     text-anchor: end;
 }
+
+.view-btn.active {
+    background-color: #e5e7eb; /* A light gray background */
+    border-color: #3b82f6; /* A blue bottom border */
+    color: #1f2937; /* Darker text color */
+}
+
+#controls-container {
+    display: flex;
+    justify-content: center;
+}
