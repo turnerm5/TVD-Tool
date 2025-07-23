@@ -125,6 +125,16 @@ const sampleData = {
             ]
         }
     ],
+   "lockSets": [
+        {
+            "name": "Structure & Interiors",
+            "unlocked": ["B10 Superstructure", "C Interiors"]
+        },
+        {
+            "name": "Enclosure & Services",
+            "unlocked": ["B20 Enclosure", "D Services"]
+        }
+   ],
    "benchmarks": [
         {
             "id": "A",
@@ -176,7 +186,7 @@ const sampleData = {
                 { 
                     "name": "A Substructure", 
                     "cost": 19.42,
-                    "systemDetail": "Conventional foundation system assumed due to lack of specific data; connects to campus steam utility."
+                    "systemDetail": "Detail needed."
                 },
                 { 
                     "name": "B10 Superstructure", 

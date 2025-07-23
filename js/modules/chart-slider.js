@@ -137,6 +137,12 @@ export function renderChart() {
     // All subsequent operations apply to both new and existing elements.
     const updateGroup = enterGroup.merge(components);
     
+    // --- Update opacity for locked components ---
+    updateGroup.style('opacity', d => {
+        const key = `phase2-${d.name}`;
+        return state.lockedCostOfWork.has(key) ? 0.4 : 1;
+    });
+
     // --- Update positions and styles of all elements ---
     updateGroup.select(".benchmark-range")
         .style("top", d => Math.min(yScale(d.benchmark_low), yScale(d.benchmark_high)) + "px")
@@ -414,9 +420,42 @@ function dragEnded(event, d) {
 function renderLockControls() {
     const phaseKey = 'phase2';
     const costOfWork = state.currentData.phases[phaseKey].costOfWork;
+    const lockSets = state.currentData.lockSets || [];
 
     // Clear existing controls
     dom.lockControls.html('');
+
+    // --- Lock Set Buttons ---
+    if (lockSets.length > 0) {
+        const lockSetContainer = dom.lockControls.append('div')
+            .attr('class', 'mb-4 p-2 bg-gray-100 rounded');
+
+        lockSetContainer.append('h4')
+            .attr('class', 'font-bold text-sm mb-2')
+            .text('TVD Decision Examples');
+
+        lockSetContainer.selectAll('.lock-set-btn')
+            .data(lockSets)
+            .enter()
+            .append('button')
+            .attr('class', 'lock-set-btn w-full text-left text-sm p-1.5 rounded hover:bg-gray-300 transition mb-1')
+            .text(d => d.name)
+            .on('click', (event, d) => {
+                const allComponentNames = costOfWork.map(c => c.name);
+                const unlockedSet = new Set(d.unlocked);
+
+                state.lockedCostOfWork.clear();
+
+                allComponentNames.forEach(name => {
+                    if (!unlockedSet.has(name)) {
+                        const key = `${phaseKey}-${name}`;
+                        state.lockedCostOfWork.add(key);
+                    }
+                });
+                render();
+            });
+    }
+
 
     // Create a table
     const table = dom.lockControls.append('table').attr('class', 'w-full text-sm');
