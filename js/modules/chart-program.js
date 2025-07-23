@@ -1,4 +1,3 @@
-
 import { state } from './state.js';
 import * as dom from './dom.js';
 import * as utils from './utils.js';
@@ -184,6 +183,7 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         .attr('value', d => d.square_footage.toLocaleString('en-US'))
         .attr('data-phase', 'phase2')
         .attr('data-name', d => d.name)
+        .property('disabled', d => d.name === 'C Interiors')
         .on('change', function(event, d) {
             handleSquareFootageCellChange(event);
         });
@@ -262,8 +262,9 @@ function updatePhase2ProgramTable(container, initialRender = false) {
         indirectRows.append('td')
             .attr('class', 'px-6 py-4')
             .html(d => {
-                let valueText = utils.formatCurrencyBig(utils.calculateComponentValue(d));
-                return valueText;
+                const value = utils.calculateComponentValue(d);
+                indirectsTotal += value;
+                return utils.formatCurrencyBig(value);
             });
     }
 

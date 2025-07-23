@@ -72,7 +72,12 @@ export function calculateUsableSF(grossSF, costOfWorkItems) {
  */
 export function calculateTotalCostOfWork(costOfWorkItems) {
     return d3.sum(costOfWorkItems, c => {
-        return c.target_value * c.square_footage;
+        // Ensure we only sum items that have a target_value and square_footage,
+        // effectively excluding indirect costs which are calculated differently.
+        if (c.target_value && c.square_footage) {
+            return c.target_value * c.square_footage;
+        }
+        return 0;
     });
 }
 
@@ -82,7 +87,13 @@ export function calculateTotalCostOfWork(costOfWorkItems) {
  * @returns {number} The calculated value for this component.
  */
 export function calculateComponentValue(component) {
-    return component.target_value * component.square_footage;
+    // Check if the component is an indirect cost by looking for a 'percentage' property
+    if (component.hasOwnProperty('percentage')) {
+        const totalCow = calculateTotalCostOfWork(state.currentData.phases.phase2.costOfWork);
+        return totalCow * (component.percentage || 0);
+    }
+    // Default calculation for regular "Cost of Work" items
+    return (component.target_value || 0) * (component.square_footage || 0);
 }
 
 /**
