@@ -24,6 +24,7 @@ const sampleData = {
         "phase2": {
             "totalProjectBudget": 40000000,
             "grossSF": 45000,
+            "floors": 4,
             "indirectCosts": [
                 { "Category": "GCs and Insurance", "Subcategory": "Precon and Fee", "Percentage": 0.0686 },
                 { "Category": "Escalation & Contingency", "Subcategory": "Design Contingency", "Percentage": 0.0538 },
@@ -61,6 +62,7 @@ const sampleData = {
             "description": "An L-shaped massing composed of interlocking volumes.",
             "image": "img/schemes/hub.jpg",
             "grossSF": 62600,
+            "floors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 17200 },
                 { "name": "B10 Superstructure", "square_footage": 62600 },
@@ -78,6 +80,7 @@ const sampleData = {
             "description": "Simple rectangular block with three identical 16,000 SF floor plates.",
             "image": "img/schemes/pavilion.jpg",
             "grossSF": 56000,
+            "floors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 16000 },
                 { "name": "B10 Superstructure", "square_footage": 56000 },
@@ -95,6 +98,7 @@ const sampleData = {
             "description": "A more compact, vertically-oriented massing organized along a central axis.",
             "image": "img/schemes/axial.jpg",
             "grossSF": 54200,
+            "floors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 14800 },
                 { "name": "B10 Superstructure", "square_footage": 54200 },
@@ -112,6 +116,7 @@ const sampleData = {
             "description": "A two-story scheme with a large, rectangular footprint designed to maximize the buildable floor area.",
             "image": "img/schemes/max-floor.jpg",
             "grossSF": 60000,
+            "floors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 25000 },
                 { "name": "B10 Superstructure", "square_footage": 60000 },

@@ -12,6 +12,7 @@ export const state = {
     interiorsEntryState: null,
     snapshots: [],
     indirectCostPercentages: [],
+    shelledFloors: [],
 
     /**
      * Initializes the application state.
@@ -23,6 +24,7 @@ export const state = {
         this.snapshots = [];
         this.lockedCostOfWork.clear();
         this.calculateIndirectCostPercentages();
+        this.shelledFloors = new Array(data.phases.phase2.floors).fill(false);
     },
 
     /**
@@ -48,9 +50,8 @@ export const state = {
         this.currentData = JSON.parse(JSON.stringify(this.originalData));
         this.snapshots = [];
         this.lockedCostOfWork.clear();
-        // Recalculating percentages isn't strictly necessary if they are based on original data,
-        // but it's good practice to ensure consistency.
         this.calculateIndirectCostPercentages();
+        this.shelledFloors = new Array(this.originalData.phases.phase2.floors).fill(false);
     },
 
     /**

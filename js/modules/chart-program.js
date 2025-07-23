@@ -19,8 +19,41 @@ function updatePhase2ProgramTable(container, initialRender = false) {
     // --- SNAPSHOT BUTTON UI ---
 
     // Create a container for the snapshot button
-    const buttonContainer = container.append('div')
-        .attr('class', 'flex justify-end mb-4');
+    const controlsContainer = container.append('div')
+        .attr('class', 'flex justify-between items-center mb-4');
+
+    // --- CHECKBOXES UI ---
+    const checkboxContainer = controlsContainer.append('div')
+        .attr('class', 'flex items-center space-x-4');
+
+    checkboxContainer.append('label')
+        .attr('class', 'font-semibold text-gray-700')
+        .text('Shell Floors:');
+
+    const floors = state.currentData.phases.phase2.floors || 0;
+    for (let i = 0; i < floors; i++) {
+        const checkboxWrapper = checkboxContainer.append('div')
+            .attr('class', 'flex items-center');
+
+        checkboxWrapper.append('input')
+            .attr('type', 'checkbox')
+            .attr('id', `shell-floor-${i + 1}`)
+            .attr('class', 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
+            .property('checked', state.shelledFloors[i])
+            .on('change', function(event) {
+                state.shelledFloors[i] = event.target.checked;
+                updateCInteriorsSF();
+                render();
+            });
+
+        checkboxWrapper.append('label')
+            .attr('for', `shell-floor-${i + 1}`)
+            .attr('class', 'ml-2 text-sm text-gray-900')
+            .text(`Floor ${i + 1}`);
+    }
+
+    // Create a container for the snapshot button
+    const buttonContainer = controlsContainer.append('div');
 
     // Add the "Take Snapshot" button
     buttonContainer.append('button')
@@ -64,6 +97,19 @@ function updatePhase2ProgramTable(container, initialRender = false) {
                 console.log('All snapshots:', state.snapshots);
             }
         });
+
+    function updateCInteriorsSF() {
+        const cInteriors = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
+        const originalCInteriors = state.originalData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
+
+        if (cInteriors && originalCInteriors) {
+            const totalFloors = state.currentData.phases.phase2.floors || 0;
+            const shelledFloorsCount = state.shelledFloors.filter(Boolean).length;
+            const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
+            
+            cInteriors.square_footage = originalCInteriors.square_footage * (1 - shelledPercentage);
+        }
+    }
 
     // --- PROGRAM TABLE ---
 
@@ -254,7 +300,7 @@ export function renderPhase2ProgramView() {
 
     // Create a container for the scheme selection cards
     const schemesContainer = mainContainer.append('div')
-        .attr('class', 'schemes-container mb-4 p-4 bg-gray-50 rounded-lg');
+        .attr('class', 'schemes-container mb-4 pb-4 bg-gray-50 rounded-lg');
 
     // Add a heading for the scheme selection section
     schemesContainer.append('h3')
@@ -277,6 +323,9 @@ export function renderPhase2ProgramView() {
         .on('click', (event, d) => {
             // When a scheme card is clicked:
             const updates = [];
+
+            // Reset shelled floors
+            state.shelledFloors.fill(false);
 
             // Animate Gross SF change
                     const oldGrossSf = state.currentData.grossSF;
@@ -304,6 +353,9 @@ export function renderPhase2ProgramView() {
                     currentComponent.square_footage = newSf;
                 }
             });
+
+            // After updating from scheme, recalculate C Interiors based on shelled state
+            updateCInteriorsSF();
 
             render();
         });
