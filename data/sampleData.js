@@ -23,103 +23,104 @@ const sampleData = {
         },
         "phase2": {
             "totalProjectBudget": 40000000,
-            "projectAreaSF": 49050,
+            "projectAreaSF": 56000,
             "indirectCosts": [
                 { "Category": "GCs and Insurance", "Subcategory": "Precon and Fee", "Total": 2744000 },
-                { "Category": "Escalation & Contingency", "Subcategory": "Contingency", "Total": 4304000 },
+                { "Category": "Escalation & Contingency", "Subcategory": "Design Contingency", "Total": 2152000 },
+                { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Total": 2152000 },
                 { "Category": "GCs and Insurance", "Subcategory": "Bonds and Insurance", "Total": 1748000 },
                 { "Category": "Permits", "Subcategory": "Building Permit", "Total": 136000 }
             ],
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 40000, "target_value": 33.50 },
-                { "name": "B10 Superstructure", "square_footage": 40000, "target_value": 98 },
-                { "name": "B20 Enclosure", "square_footage": 30000, "target_value": 100 },
-                { "name": "B30 Roofing", "square_footage": 10000, "target_value": 15 },
+                { "name": "A Substructure", "square_footage": 16000, "target_value": 33.50 },
+                { "name": "B10 Superstructure", "square_footage": 56000, "target_value": 98 },
+                { "name": "B20 Enclosure", "square_footage": 35000, "target_value": 100 },
+                { "name": "B30 Roofing", "square_footage": 16000, "target_value": 15 },
                 { 
                     "name": "C Interiors", 
-                    "square_footage": 40000, 
+                    "square_footage": 48000, 
                     "target_value": 115,
                     "building_efficiency": 0.575,
                     "breakdown": [
-                        { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 10000 },
-                        { "name": "Research", "percentage": 0.35, "cost": 150, "sf": 6000 },
-                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 3000 },
-                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 4000 }
+                        { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 19200 },
+                        { "name": "Research", "percentage": 0.35, "cost": 150, "sf": 16800 },
+                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 7200 },
+                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 4800 }
                     ]
                 },
-                { "name": "D Services", "square_footage": 40000, "target_value": 265 },
-                { "name": "E Equipment and Furnishings", "square_footage": 40000, "target_value": 50.00 },
+                { "name": "D Services", "square_footage": 48000, "target_value": 265 },
+                { "name": "E Equipment and Furnishings", "square_footage": 48000, "target_value": 50.00 },
                 { "name": "F Special Construction", "square_footage": 10000, "target_value": 20 },
-                { "name": "G Building Sitework", "square_footage": 20000, "target_value": 42 }
+                { "name": "G Building Sitework", "square_footage": 64000, "target_value": 42 }
             ]
         }
     },
     "schemes": [
         {
-            "name": "Four Story + Shell Space",
-            "description": "A four story, cubical building with two stories of shell space for future expansion.",
-            "image": "https://placecats.com/g/400/320",
+            "name": "Hub",
+            "description": "An L-shaped massing composed of interlocking volumes.",
+            "image": "img/schemes/hub.jpg",
+            "projectAreaSF": 62600,
+            "costOfWork": [
+                { "name": "A Substructure", "square_footage": 17200 },
+                { "name": "B10 Superstructure", "square_footage": 62600 },
+                { "name": "B20 Enclosure", "square_footage": 50000 },
+                { "name": "B30 Roofing", "square_footage": 18200 },
+                { "name": "C Interiors", "square_footage": 52600 },
+                { "name": "D Services", "square_footage": 62600 },
+                { "name": "E Equipment and Furnishings", "square_footage": 52600 },
+                { "name": "F Special Construction", "square_footage": 10000 },
+                { "name": "G Building Sitework", "square_footage": 62800 }
+            ]
+        },
+        {
+            "name": "Pavilion",
+            "description": "Simple rectangular block with three identical 16,000 SF floor plates.",
+            "image": "img/schemes/pavilion.jpg",
+            "projectAreaSF": 56000,
+            "costOfWork": [
+                { "name": "A Substructure", "square_footage": 16000 },
+                { "name": "B10 Superstructure", "square_footage": 56000 },
+                { "name": "B20 Enclosure", "square_footage": 35000 },
+                { "name": "B30 Roofing", "square_footage": 16000 },
+                { "name": "C Interiors", "square_footage": 48000 },
+                { "name": "D Services", "square_footage": 56000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 48000 },
+                { "name": "F Special Construction", "square_footage": 10000 },
+                { "name": "G Building Sitework", "square_footage": 64000 }
+            ]
+        },
+        {
+            "name": "Axial",
+            "description": "A more compact, vertically-oriented massing organized along a central axis.",
+            "image": "img/schemes/axial.jpg",
+            "projectAreaSF": 54200,
+            "costOfWork": [
+                { "name": "A Substructure", "square_footage": 14800 },
+                { "name": "B10 Superstructure", "square_footage": 54200 },
+                { "name": "B20 Enclosure", "square_footage": 40000 },
+                { "name": "B30 Roofing", "square_footage": 15700 },
+                { "name": "C Interiors", "square_footage": 46200 },
+                { "name": "D Services", "square_footage": 54200 },
+                { "name": "E Equipment and Furnishings", "square_footage": 46200 },
+                { "name": "F Special Construction", "square_footage": 10000 },
+                { "name": "G Building Sitework", "square_footage": 65200 }
+            ]
+        },
+        {
+            "name": "Max Floor",
+            "description": "A two-story scheme with a large, rectangular footprint designed to maximize the buildable floor area.",
+            "image": "img/schemes/max-floor.jpg",
             "projectAreaSF": 60000,
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 15000 },
+                { "name": "A Substructure", "square_footage": 25000 },
                 { "name": "B10 Superstructure", "square_footage": 60000 },
-                { "name": "B20 Enclosure", "square_footage": 50000 },
-                { "name": "B30 Roofing", "square_footage": 15000 },
-                { "name": "C Interiors", "square_footage": 30000 },
+                { "name": "B20 Enclosure", "square_footage": 45000 },
+                { "name": "B30 Roofing", "square_footage": 25000 },
+                { "name": "C Interiors", "square_footage": 50000 },
                 { "name": "D Services", "square_footage": 60000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 20000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
                 { "name": "F Special Construction", "square_footage": 10000 },
-                { "name": "G Building Sitework", "square_footage": 40000 }
-            ]
-        },
-        {
-            "name": "Three Story + Shell Space",
-            "description": "A three story, rectangular building with a single story of shell space for future expansion.",
-            "image": "https://placecats.com/g/401/300",
-            "projectAreaSF": 40000,
-            "costOfWork": [
-                { "name": "A Substructure", "square_footage": 40000 },
-                { "name": "B10 Superstructure", "square_footage": 40000 },
-                { "name": "B20 Enclosure", "square_footage": 40000 },
-                { "name": "B30 Roofing", "square_footage": 10000 },
-                { "name": "C Interiors", "square_footage": 20000 },
-                { "name": "D Services", "square_footage": 30000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 20000 },
-                { "name": "F Special Construction", "square_footage": 15000 },
-                { "name": "G Building Sitework", "square_footage": 60000 }
-            ]
-        },
-        {
-            "name": "Medium Rectangular + No Shell Space",
-            "description": "A medium-sized building with no shell space. Medium amount of sitework.",
-            "image": "https://placecats.com/g/400/301",
-            "projectAreaSF": 45000,
-            "costOfWork": [
-                { "name": "A Substructure", "square_footage": 22500 },
-                { "name": "B10 Superstructure", "square_footage": 45000 },
-                { "name": "B20 Enclosure", "square_footage": 45000 },
-                { "name": "B30 Roofing", "square_footage": 22500 },
-                { "name": "C Interiors", "square_footage": 45000 },
-                { "name": "D Services", "square_footage": 45000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 45000 },
-                { "name": "F Special Construction", "square_footage": 8000 },
-                { "name": "G Building Sitework", "square_footage": 45000 }
-            ]
-        },
-        {
-            "name": "Medium Cubical + No Shell Space",
-            "description": "A medium-sized building with no shell space. Medium amount of sitework.",
-            "image": "https://placecats.com/g/401/301",
-            "projectAreaSF": 45000,
-            "costOfWork": [
-                { "name": "A Substructure", "square_footage": 45000 },
-                { "name": "B10 Superstructure", "square_footage": 45000 },
-                { "name": "B20 Enclosure", "square_footage": 45000 },
-                { "name": "B30 Roofing", "square_footage": 10000 },
-                { "name": "C Interiors", "square_footage": 45000 },
-                { "name": "D Services", "square_footage": 45000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 45000 },
-                { "name": "F Special Construction", "square_footage": 12000 },
                 { "name": "G Building Sitework", "square_footage": 55000 }
             ]
         }
@@ -128,7 +129,7 @@ const sampleData = {
         {
             "id": "A",
             "name": "BSU Materials Science",
-            "image": "img/bsu-mat.jpg",
+            "image": "img/benchmarks/bsu-mat.jpg",
             "overall_sf_cost": 643.43,
             "projectAreaSF": 89800,
             "costOfWork": [
@@ -146,7 +147,7 @@ const sampleData = {
         {
             "id": "B",
             "name": "OSU Johnson Hall",
-            "image": "img/osu-johnson-hall.jpg",
+            "image": "img/benchmarks/osu-johnson-hall.jpg",
             "overall_sf_cost": 778.76,
             "projectAreaSF": 61886,
             "costOfWork": [
@@ -164,7 +165,7 @@ const sampleData = {
         {
             "id": "C",
             "name": "UI Integrated Research Building",
-            "image": "img/ui-iric.jpg",
+            "image": "img/benchmarks/ui-iric.jpg",
             "overall_sf_cost": 817.28,
             "projectAreaSF": 78267,
             "costOfWork": [
@@ -182,7 +183,7 @@ const sampleData = {
         {
             "id": "D",
             "name": "UO Knight Campus Phase 2",
-            "image": "img/uo-knight-2.jpg",
+            "image": "img/benchmarks/uo-knight-2.jpg",
             "overall_sf_cost": 922.89,
             "projectAreaSF": 186729,
             "costOfWork": [
@@ -200,7 +201,7 @@ const sampleData = {
         {
             "id": "E",
             "name": "UW Molecular Engineering",
-            "image": "img/uw-mole.jpg",
+            "image": "img/benchmarks/uw-mole.jpg",
             "overall_sf_cost": 742.65,
             "projectAreaSF": 90374,
             "costOfWork": [
@@ -218,7 +219,7 @@ const sampleData = {
         {
             "id": "F",
             "name": "WSU Tri-Cities",
-            "image": "img/wsu-tricities.jpg",
+            "image": "img/benchmarks/wsu-tricities.jpg",
             "overall_sf_cost": 544.25,
             "projectAreaSF": 38391,
             "costOfWork": [

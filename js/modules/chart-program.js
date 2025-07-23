@@ -259,7 +259,7 @@ export function renderPhase2ProgramView() {
     // Add a heading for the scheme selection section
     schemesContainer.append('h3')
         .attr('class', 'text-lg font-bold text-gray-800 mb-3')
-        .text('Select a Scheme');
+        .text('Demonstration Schemes');
 
     // Create a horizontal grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
@@ -338,14 +338,7 @@ export function renderPhase2ProgramView() {
         .attr('class', 'mb-1')
         .html(d => `<strong>Total SF:</strong> ${d.projectAreaSF.toLocaleString()}`);
 
-    // Add shelled space (Superstructure - Equipment and Furnishings)
-    statsContainer.append('div')
-        .html(d => {
-            const superstructure = d.costOfWork.find(c => c.name === 'B10 Superstructure');
-            const equipment = d.costOfWork.find(c => c.name === 'E Equipment and Furnishings');
-            const shelledSpace = (superstructure?.square_footage || 0) - (equipment?.square_footage || 0);
-            return `<strong>Shelled Space:</strong> ${shelledSpace.toLocaleString()} SF`;
-        });
+    
 
     // --- PROGRAM TABLE (Full Width) ---
     const tableContainer = mainContainer.append('div')
