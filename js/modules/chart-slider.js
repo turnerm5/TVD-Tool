@@ -296,7 +296,7 @@ export function renderChart() {
             .on('mouseenter', function(event, d) {
                 clearTimeout(benchmarkHoverTimeout);
                 benchmarkHoverTimeout = setTimeout(() => {
-                    showBenchmarkTooltip(event, d);
+                    showBenchmarkTooltip(event, d, componentData);
                 }, 200);
             })
             .on('mouseleave', function() {
@@ -310,9 +310,13 @@ export function renderChart() {
  * Shows a tooltip with benchmark project details.
  * @param {MouseEvent} event - The mouse event for positioning.
  * @param {object} benchmarkData - The data for the benchmark project.
+ * @param {object} componentData - The data for the component column being hovered.
  */
-function showBenchmarkTooltip(event, benchmarkData) {
+function showBenchmarkTooltip(event, benchmarkData, componentData) {
     hideBenchmarkTooltip(); // Ensure no duplicates
+
+    // Find the specific component within the benchmark data that matches the current column
+    const benchmarkComponent = benchmarkData.costOfWork.find(c => c.name === componentData.name);
 
     const tooltip = d3.select('body').append('div')
         .attr('class', 'benchmark-tooltip');
@@ -323,6 +327,26 @@ function showBenchmarkTooltip(event, benchmarkData) {
     tooltip.append('div')
         .attr('class', 'benchmark-tooltip-name')
         .text(benchmarkData.name);
+    
+    // Add system details if they exist
+    if (benchmarkComponent) {
+        if (benchmarkComponent.systemDetail && benchmarkComponent.systemDetail !== "Detail needed.") {
+            tooltip.append('div')
+                .attr('class', 'benchmark-tooltip-detail')
+                .style('margin-top', '8px')
+                .text(benchmarkComponent.systemDetail);
+        }
+        if (benchmarkComponent.pros) {
+            const prosDiv = tooltip.append('div').attr('class', 'benchmark-tooltip-pros').style('margin-top', '8px');
+            prosDiv.append('span').style('font-weight', 'bold').text('✅ Pros: ');
+            prosDiv.append('span').text(benchmarkComponent.pros);
+        }
+        if (benchmarkComponent.cons) {
+            const consDiv = tooltip.append('div').attr('class', 'benchmark-tooltip-cons').style('margin-top', '4px');
+            consDiv.append('span').style('font-weight', 'bold').text('❌ Cons: ');
+            consDiv.append('span').text(benchmarkComponent.cons);
+        }
+    }
     
     const tooltipNode = tooltip.node();
     const tooltipWidth = tooltipNode.offsetWidth;
