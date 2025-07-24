@@ -281,7 +281,7 @@ export function renderChart() {
             const yPos = yScale(benchmarkComp.cost) + paddingTop;
             
             d3.select(this).select('.benchmark-indicator-line').attr('x1', '20%').attr('x2', '10%').attr('y1', yPos).attr('y2', yPos);
-            d3.select(this).select('.benchmark-indicator-circle').attr('cx', '10%').attr('cy', yPos).attr('r', 6);
+            d3.select(this).select('.benchmark-indicator-circle').attr('cx', '10%').attr('cy', yPos).attr('r', 7);
             d3.select(this).select('.benchmark-indicator-label').attr('x', '10%').attr('y', yPos).attr('dy', '0.35em').text(d.id);
         });
         
@@ -322,25 +322,29 @@ function showBenchmarkTooltip(event, benchmarkData, componentData) {
     tooltip.append('img')
         .attr('src', imageSource);
 
-    tooltip.append('div')
+    // Create content container for the text on the right side
+    const contentContainer = tooltip.append('div')
+        .attr('class', 'benchmark-tooltip-content');
+
+    contentContainer.append('div')
         .attr('class', 'benchmark-tooltip-name')
         .text(benchmarkData.name);
     
     // Add system details if they exist
     if (benchmarkComponent) {
         if (benchmarkComponent.systemDetail && benchmarkComponent.systemDetail !== "Detail needed.") {
-            tooltip.append('div')
+            contentContainer.append('div')
                 .attr('class', 'benchmark-tooltip-detail')
                 .style('margin-top', '8px')
                 .text(benchmarkComponent.systemDetail);
         }
         if (benchmarkComponent.pros) {
-            const prosDiv = tooltip.append('div').attr('class', 'benchmark-tooltip-pros').style('margin-top', '8px');
+            const prosDiv = contentContainer.append('div').attr('class', 'benchmark-tooltip-pros').style('margin-top', '8px');
             prosDiv.append('span').style('font-weight', 'bold').text('✅ Pros: ');
             prosDiv.append('span').text(benchmarkComponent.pros);
         }
         if (benchmarkComponent.cons) {
-            const consDiv = tooltip.append('div').attr('class', 'benchmark-tooltip-cons').style('margin-top', '4px');
+            const consDiv = contentContainer.append('div').attr('class', 'benchmark-tooltip-cons').style('margin-top', '4px');
             consDiv.append('span').style('font-weight', 'bold').text('❌ Cons: ');
             consDiv.append('span').text(benchmarkComponent.cons);
         }

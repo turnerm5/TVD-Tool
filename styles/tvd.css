@@ -182,6 +182,7 @@ body {
     z-index: 2; /* Position it below the drag handle but above the range lines */
     pointer-events: none; /* Let clicks pass through the SVG container */
 }
+
 .benchmark-indicator-group {
     cursor: pointer;
     pointer-events: all; /* Make sure the group itself is interactive */
@@ -201,7 +202,7 @@ body {
 
 .benchmark-indicator-label {
     fill: #fff;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: bold;
     text-anchor: middle;
     pointer-events: none;
@@ -369,17 +370,24 @@ body {
     z-index: 100;
     pointer-events: none;
     transition: opacity 0.2s;
-    font-size: 0.875rem;
-    max-width: 500px;
+    font-size: 1rem;
+    max-width: 800px;
+    display: flex;
+    gap: 1rem;
 }
 
 .benchmark-tooltip img {
     width: 240px;
     height: 180px;
     object-fit: cover;
-    display: block;
-    margin-bottom: 0.75rem;
     border-radius: 0.25rem;
+    flex-shrink: 0;
+}
+
+.benchmark-tooltip-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .benchmark-tooltip-name {
