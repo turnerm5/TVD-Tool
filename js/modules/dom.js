@@ -7,7 +7,7 @@
 export const splashScreen = document.getElementById('splash-screen');
 export const mainContent = document.getElementById('main-content');
 export const chartContainer = d3.select("#chart-container");
-export const yAxisLabelsContainer = d3.select("#y-axis-labels-container");
+export const yAxisLabelsContainer = document.getElementById('y-axis-labels-container');
 export const lockControls = d3.select('#lock-controls');
 export const resetButton = document.getElementById('reset-button');
 export const startOverBtn = document.getElementById('start-over-btn');
@@ -36,3 +36,10 @@ export const legend = document.getElementById('legend');
 export const summaryLegend = document.getElementById('summary-legend');
 export const maximizeBtn = document.getElementById('maximize-gmp-btn');
 export const takeSnapshotBtn = document.getElementById('take-snapshot-btn'); 
+
+// Help Modal Elements
+export const helpButton = document.getElementById('help-button');
+export const helpModal = document.getElementById('help-modal');
+export const closeHelpModal = document.getElementById('close-help-modal');
+export const helpTitle = document.getElementById('help-title');
+export const helpContent = document.getElementById('help-content'); 

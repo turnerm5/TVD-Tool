@@ -6,6 +6,7 @@
 import * as dom from './dom.js';
 import { state } from './state.js';
 import * as utils from './utils.js';
+import { helpTopics } from '../../data/help-topics.js';
 
 // Forward declare render function to avoid circular dependencies
 // This is a common pattern when modules depend on each other.
@@ -213,5 +214,56 @@ export function showConfirmDialog(title, message, confirmText = 'Yes', cancelTex
         confirmText,
         cancelText,
         isConfirmation: true
+    });
+}
+
+/**
+ * Updates the help modal content based on the current view.
+ */
+function updateHelpContent() {
+    const currentView = state.currentView || 'splash-screen';
+    const topic = helpTopics[currentView];
+
+    if (topic) {
+        dom.helpTitle.textContent = topic.title;
+        dom.helpContent.innerHTML = topic.content;
+    } else {
+        dom.helpTitle.textContent = 'Help';
+        dom.helpContent.innerHTML = '<p>Select a view to see relevant help information.</p>';
+    }
+}
+
+/**
+ * Shows the help modal.
+ */
+function showHelpModal() {
+    updateHelpContent();
+    dom.helpModal.classList.remove('hidden');
+}
+
+/**
+ * Hides the help modal.
+ */
+function hideHelpModal() {
+    dom.helpModal.classList.add('hidden');
+}
+
+/**
+ * Initializes the help modal functionality.
+ */
+export function initializeHelpModal() {
+    dom.helpButton.addEventListener('click', showHelpModal);
+    dom.closeHelpModal.addEventListener('click', hideHelpModal);
+    // Hide modal on escape key press
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !dom.helpModal.classList.contains('hidden')) {
+            hideHelpModal();
+        }
+    });
+    // Hide modal on overlay click
+    dom.helpModal.addEventListener('click', (e) => {
+        if (e.target === dom.helpModal) {
+            hideHelpModal();
+        }
     });
 } 

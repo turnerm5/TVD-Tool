@@ -189,4 +189,5 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', render);
 
     // Initial load
+    ui.initializeHelpModal();
 }); 

@@ -8,6 +8,7 @@
     <script type="module" src="js/d3.v7.min.js"></script>
     <script type="module" src="js/d3-sankey.min.js"></script>
     <link rel="stylesheet" href="styles/tvd.css">
+    <link rel="stylesheet" href="styles/help.css">
     <link rel="icon" href="img/logos/wsu.svg" type="image/svg+xml">
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -127,6 +128,29 @@
         <footer id="summary-panel-container" class="mt-8">
             <!-- Summary panel is now inside the table-view div -->
         </footer>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-button" class="fixed bottom-8 right-8 bg-blue-500 text-white w-14 h-14 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-blue-600 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <text x="12" y="18" text-anchor="middle" font-size="18" font-family="Arial, sans-serif" fill="currentColor" stroke="none">?</text>
+        </svg>
+    </div>
+
+    <div id="help-modal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-8 z-50">
+        <div class="bg-white rounded-lg shadow-2xl p-8 max-w-4xl w-full max-h-full overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="help-title" class="text-3xl font-bold text-gray-900">?</h2>
+                <button id="close-help-modal" class="text-gray-500 hover:text-gray-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="help-content" class="prose max-w-none">
+                <!-- Help content will be dynamically inserted here -->
+            </div>
+        </div>
     </div>
 
     <script src="data/sampleData.js"></script>

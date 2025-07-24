@@ -8,7 +8,7 @@ export const state = {
     currentData: null,
     originalData: null,
     lockedCostOfWork: new Set(),
-    currentView: 'program', // 'summary', 'slider', 'program'
+    currentView: 'splash-screen', // 'summary', 'slider', 'program'
     snapshots: [],
     indirectCostPercentages: [],
     shelledFloors: [],
