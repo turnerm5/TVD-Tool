@@ -3,23 +3,26 @@ import * as dom from './dom.js';
 import * as utils from './utils.js';
 import * as ui from './ui.js';
 
-function updateCInteriorsSF() {
-    const cInteriors = state.currentScheme.costOfWork.find(c => c.name === 'C Interiors');
+export function updateSFForShelledFloors() {
+    const componentsToUpdate = ['C Interiors', 'E Equipment and Furnishings'];
     const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
-    const originalCInteriors = originalPredesignScheme ? originalPredesignScheme.costOfWork.find(c => c.name === 'C Interiors') : null;
+    if (!originalPredesignScheme) return;
 
-    if (cInteriors && originalCInteriors) {
-        const totalFloors = state.currentScheme.floors || 0;
-        const shelledFloorsCount = state.shelledFloors.filter(Boolean).length;
-        const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
-        
-        // Store previous value before changing for change tracking
-        if (state.previousSquareFootage['C Interiors'] === undefined) {
-            state.previousSquareFootage['C Interiors'] = cInteriors.square_footage;
+    const totalFloors = state.currentScheme.floors || 0;
+    const shelledFloorsCount = state.shelledFloors.filter(Boolean).length;
+    const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
+
+    componentsToUpdate.forEach(componentName => {
+        const currentComponent = state.currentScheme.costOfWork.find(c => c.name === componentName);
+        const originalComponent = originalPredesignScheme.costOfWork.find(c => c.name === componentName);
+
+        if (currentComponent && originalComponent) {
+            if (state.previousSquareFootage[componentName] === undefined) {
+                state.previousSquareFootage[componentName] = currentComponent.square_footage;
+            }
+            currentComponent.square_footage = originalComponent.square_footage * (1 - shelledPercentage);
         }
-        
-        cInteriors.square_footage = originalCInteriors.square_footage * (1 - shelledPercentage);
-    }
+    });
 }
 
 function updatePhase2ProgramTable(container, render, handleSquareFootageCellChange) {
@@ -66,7 +69,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
                     }
                 }
                 
-                updateCInteriorsSF();
+                updateSFForShelledFloors();
                 render();
             });
 
@@ -196,7 +199,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('value', d => utils.formatSquareFootageWithChange(d.square_footage, d.name))
         .attr('data-phase', 'phase2')
         .attr('data-name', d => d.name)
-        .property('disabled', d => d.name === 'C Interiors')
+        .property('disabled', d => ['C Interiors', 'E Equipment and Furnishings'].includes(d.name))
         .on('focus', function(event, d) {
             // When focusing, show just the number for easy editing
             this.value = d.square_footage.toLocaleString('en-US');
@@ -337,7 +340,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
 
     // Create a horizontal grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
-        .attr('class', 'grid grid-cols-5 gap-4')
+        .attr('class', 'grid grid-cols-6 gap-4')
         .style('height', '300px');
 
     // Get the list of available schemes from the current data
@@ -433,7 +436,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             });
 
             // After updating from scheme, recalculate C Interiors based on shelled state
-            updateCInteriorsSF();
+            updateSFForShelledFloors();
 
             render();
         });
@@ -461,7 +464,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
 
     // Add stats container
     const statsContainer = contentContainer.append('div')
-        .attr('class', 'text-xs text-gray-700');
+        .attr('class', 'text-sm text-gray-700');
 
     // Add total SF
     statsContainer.append('div')

@@ -50,14 +50,16 @@ export function formatNumber(num) {
  * @returns {string} The formatted square footage string with change indication.
  */
 export function formatSquareFootageWithChange(currentSF, componentName) {
-    const change = state.getSquareFootageChange(componentName, currentSF);
-    const formattedSF = currentSF.toLocaleString('en-US');
+    // Round to nearest integer for display
+    const roundedSF = Math.round(currentSF);
+    const change = state.getSquareFootageChange(componentName, roundedSF);
+    const formattedSF = roundedSF.toLocaleString('en-US');
     
     if (change === 0) {
         return `${formattedSF} SF`;
     }
     
-    const changeFormatted = Math.abs(change).toLocaleString('en-US');
+    const changeFormatted = Math.abs(Math.round(change)).toLocaleString('en-US');
     const changeSign = change > 0 ? '+' : '-';
     return `${formattedSF} SF (${changeSign}${changeFormatted} SF)`;
 }
@@ -125,15 +127,35 @@ export function calculateComponentValue(component) {
 export function createImportedDataSeries() {
     const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
     const initialTargetValues = state.originalData.initialTargetValues || [];
-    
+
     let costOfWork = [];
     if (originalPredesignScheme) {
+        // Calculate the shelled floor reduction specifically for the predesign scheme
+        const totalFloors = originalPredesignScheme.floors || 0;
+        let shelledFloorsCount = 0;
+        if (totalFloors > 4) {
+            shelledFloorsCount = 4;
+        } else {
+            shelledFloorsCount = totalFloors;
+        }
+        const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
+        const componentsToAdjust = ['C Interiors', 'E Equipment and Furnishings'];
+
         // Merge square_footage from Predesign scheme with target_value from initialTargetValues
         costOfWork = originalPredesignScheme.costOfWork.map(component => {
             const targetValueData = initialTargetValues.find(tv => tv.name === component.name);
+            let sf = Number(component.square_footage) || 0;
+
+            // If this is a component that needs adjustment, calculate its shelled value
+            if (componentsToAdjust.includes(component.name)) {
+                const originalComponentData = originalPredesignScheme.costOfWork.find(c => c.name === component.name);
+                const originalSF = originalComponentData ? originalComponentData.square_footage : 0;
+                sf = originalSF * (1 - shelledPercentage);
+            }
+
             return {
                 name: component.name,
-                square_footage: Number(component.square_footage) || 0,
+                square_footage: sf,
                 target_value: targetValueData ? Number(targetValueData.target_value) || 0 : 0,
                 benchmark_low: targetValueData ? Number(targetValueData.benchmark_low) || 0 : 0,
                 benchmark_high: targetValueData ? Number(targetValueData.benchmark_high) || 0 : 0

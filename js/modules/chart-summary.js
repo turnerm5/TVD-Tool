@@ -31,7 +31,7 @@ function wrap(text, width) {
         while (word = words.pop()) {
             line.push(word);
             tspan.text(line.join(" "));
-            if (tspan.node().getComputedTextLength() > width) {
+            if (tspan.node().getComputedTextLength() > width && line.length > 1) {
                 line.pop();
                 tspan.text(line.join(" "));
                 line = [word];
@@ -92,7 +92,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .domain(seriesNames)
         .range([0, x0.bandwidth()])
         .padding(0.05);
-
+    
     const yMax = d3.max(allSeriesData, series => 
                         d3.max(series.costOfWork, c => utils.calculateComponentValue(c))
     );
@@ -122,7 +122,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .attr("class", "component-group")
         .attr("transform", d => `translate(${x0(d)},0)`);
 
-    const bars = componentGroup.selectAll("g.bar-group")
+    const barGroups = componentGroup.selectAll("g.bar-group")
         .data(componentName => allSeriesData.map(series => {
             const comp = series.costOfWork.find(c => c.name === componentName);
             return {
@@ -130,9 +130,10 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
                 value: comp ? utils.calculateComponentValue(comp) : 0
             };
         }))
-        .enter().append("g").attr("class", "bar-group");
-        
-    bars.append("rect")
+        .enter().append("g")
+        .attr("class", "bar-group");
+
+    barGroups.append("rect")
         .attr("x", d => x1(d.seriesName))
         .attr("y", d => y(d.value))
         .attr("width", x1.bandwidth())
@@ -140,7 +141,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .attr("fill", d => color(d.seriesName));
 
     // --- Bar Labels ---
-    bars.append("text")
+    barGroups.append("text")
         .attr("class", "bar-label")
         .attr("x", d => x1(d.seriesName) + x1.bandwidth() / 2)
         .attr("y", d => y(d.value) - 5)
@@ -343,9 +344,10 @@ export function updateSummary() {
             <th scope="col" class="px-6 py-3 text-right">COW</th>
             <th scope="col" class="px-6 py-3 text-right">Indirects</th>
             <th scope="col" class="px-6 py-3 text-right">Total</th>
-            <th scope="col" class="px-6 py-3 text-right">Gross SF</th>
-            <th scope="col" class="px-6 py-3 text-right">$/SF</th>
-            <th scope="col" class="px-6 py-3 text-right">Variance</th>
+            <th scope="col" class="px-6 py-3 text-right">GSF</th>
+            <th scope="col" class="px-6 py-3 text-right">ASF</th>
+            <th scope="col" class="px-6 py-3 text-right">$/GSF</th>
+            <th scope="col" class="px-6 py-3 text-right">Budget &#x0394;</th>
         </tr>
     `;
 
@@ -355,7 +357,13 @@ export function updateSummary() {
         const { cowTotal, indirectTotal, totalProjectCost } = totals;
 
         const grossSF = series.grossSF || 0;
-        const costPerSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
+        
+        // Assignable SF is calculated from the 'C Interiors' component's square footage
+        const cInteriorsComponent = series.costOfWork.find(c => c.name === 'C Interiors');
+        const assignedSF = cInteriorsComponent ? cInteriorsComponent.square_footage : 0;
+
+        const costPerGSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
+        const costPerASF = assignedSF > 0 ? totalProjectCost / assignedSF : 0;
         const variance = totalProjectCost - gmp;
         
         const row = tbody.insertRow();
@@ -366,7 +374,8 @@ export function updateSummary() {
             <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(indirectTotal)}</td>
             <td class="px-6 py-4 text-right font-semibold">${utils.formatCurrencyBig(totalProjectCost)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerSF)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatNumber(assignedSF)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerGSF)}</td>
             <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
                 ${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}
             </td>

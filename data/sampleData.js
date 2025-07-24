@@ -47,19 +47,19 @@ const sampleData = {
             "name": "Predesign",
             "description": "A simple, rectangular massing with a single floor plate. Four shelled floors.",
             "image": "img/schemes/hub.jpg",
-            "grossSF": 45000,
+            "grossSF": 62500,
             "floors": 5,
             "shelledFloors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 12500 },
-                { "name": "B10 Superstructure", "square_footage": 45000 },
-                { "name": "B20 Enclosure", "square_footage": 30000 },
+                { "name": "B10 Superstructure", "square_footage": 62500 },
+                { "name": "B20 Enclosure", "square_footage": 40000 },
                 { "name": "B30 Roofing", "square_footage": 12500 },
-                { "name": "C Interiors", "square_footage": 45000 },
-                { "name": "D Services", "square_footage": 45000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 45000 },
+                { "name": "C Interiors", "square_footage": 62500 },
+                { "name": "D Services", "square_footage": 62500 },
+                { "name": "E Equipment and Furnishings", "square_footage": 62500 },
                 { "name": "F Special Construction", "square_footage": 10000 },
-                { "name": "G Building Sitework", "square_footage": 25000 }
+                { "name": "G Building Sitework", "square_footage": 32495 }
             ]
         },
         {
@@ -67,7 +67,7 @@ const sampleData = {
             "description": "An L-shaped massing composed of interlocking volumes.",
             "image": "img/schemes/hub.jpg",
             "grossSF": 62600,
-            "floors": 4,
+            "floors": 3,
             "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 17200 },
@@ -86,7 +86,7 @@ const sampleData = {
             "description": "Simple rectangular block with three identical 16,000 SF floor plates.",
             "image": "img/schemes/pavilion.jpg",
             "grossSF": 56000,
-            "floors": 4,
+            "floors": 3,
             "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 16000 },
@@ -105,7 +105,7 @@ const sampleData = {
             "description": "A more compact, vertically-oriented massing organized along a central axis.",
             "image": "img/schemes/axial.jpg",
             "grossSF": 54200,
-            "floors": 4,
+            "floors": 3,
             "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 14800 },
@@ -121,6 +121,25 @@ const sampleData = {
         },
         {
             "name": "Max Floor",
+            "description": "A two-story scheme with a large, rectangular footprint designed to maximize the buildable floor area.",
+            "image": "img/schemes/max-floor.jpg",
+            "grossSF": 60000,
+            "floors": 2,
+            "shelledFloors": 0,
+            "costOfWork": [
+                { "name": "A Substructure", "square_footage": 25000 },
+                { "name": "B10 Superstructure", "square_footage": 60000 },
+                { "name": "B20 Enclosure", "square_footage": 45000 },
+                { "name": "B30 Roofing", "square_footage": 25000 },
+                { "name": "C Interiors", "square_footage": 50000 },
+                { "name": "D Services", "square_footage": 60000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
+                { "name": "F Special Construction", "square_footage": 10000 },
+                { "name": "G Building Sitework", "square_footage": 55000 }
+            ]
+        },
+        {
+            "name": "Scheme TBD",
             "description": "A two-story scheme with a large, rectangular footprint designed to maximize the buildable floor area.",
             "image": "img/schemes/max-floor.jpg",
             "grossSF": 60000,
