@@ -347,7 +347,6 @@ export function updateSummary() {
             <th scope="col" class="px-6 py-3 text-right">GSF</th>
             <th scope="col" class="px-6 py-3 text-right">ASF</th>
             <th scope="col" class="px-6 py-3 text-right">$/GSF</th>
-            <th scope="col" class="px-6 py-3 text-right">$/ASF</th>
             <th scope="col" class="px-6 py-3 text-right">Budget &#x0394;</th>
         </tr>
     `;
@@ -377,7 +376,6 @@ export function updateSummary() {
             <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(assignedSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerGSF)}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerASF)}</td>
             <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
                 ${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}
             </td>
