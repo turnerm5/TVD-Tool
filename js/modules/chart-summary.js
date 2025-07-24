@@ -92,7 +92,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .domain(seriesNames)
         .range([0, x0.bandwidth()])
         .padding(0.05);
-
+    
     const yMax = d3.max(allSeriesData, series => 
                         d3.max(series.costOfWork, c => utils.calculateComponentValue(c))
     );
@@ -122,7 +122,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .attr("class", "component-group")
         .attr("transform", d => `translate(${x0(d)},0)`);
 
-    const bars = componentGroup.selectAll("g.bar-group")
+    const barGroups = componentGroup.selectAll("g.bar-group")
         .data(componentName => allSeriesData.map(series => {
             const comp = series.costOfWork.find(c => c.name === componentName);
             return {
@@ -130,9 +130,10 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
                 value: comp ? utils.calculateComponentValue(comp) : 0
             };
         }))
-        .enter().append("g").attr("class", "bar-group");
-        
-    bars.append("rect")
+        .enter().append("g")
+        .attr("class", "bar-group");
+
+    barGroups.append("rect")
         .attr("x", d => x1(d.seriesName))
         .attr("y", d => y(d.value))
         .attr("width", x1.bandwidth())
@@ -140,7 +141,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .attr("fill", d => color(d.seriesName));
 
     // --- Bar Labels ---
-    bars.append("text")
+    barGroups.append("text")
         .attr("class", "bar-label")
         .attr("x", d => x1(d.seriesName) + x1.bandwidth() / 2)
         .attr("y", d => y(d.value) - 5)

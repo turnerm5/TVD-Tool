@@ -337,7 +337,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
 
     // Create a horizontal grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
-        .attr('class', 'grid grid-cols-5 gap-4')
+        .attr('class', 'grid grid-cols-6 gap-4')
         .style('height', '300px');
 
     // Get the list of available schemes from the current data
@@ -461,7 +461,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
 
     // Add stats container
     const statsContainer = contentContainer.append('div')
-        .attr('class', 'text-xs text-gray-700');
+        .attr('class', 'text-sm text-gray-700');
 
     // Add total SF
     statsContainer.append('div')
