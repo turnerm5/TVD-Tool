@@ -3,6 +3,7 @@ const sampleData = {
         "totalProjectBudget": 20000000,
         "costOfWork": [
             { "Category": "Special Construction & Demo", "Subcategory": "Demolition", "Total": 5338387 },
+            { "Category": "Special Construction & Demo", "Subcategory": "Abelson / Eastlick Enclosure", "Total": 1000000 },
             { "Category": "Sitework", "Subcategory": "Site Preparation", "Total": 0 },
             { "Category": "Sitework", "Subcategory": "Site Improvements", "Total": 0 },
             { "Category": "Sitework", "Subcategory": "Civil & Mechanical Utilities", "Total": 0 },
@@ -266,8 +267,8 @@ const sampleData = {
         },
         {
             "id": "D",
-            "name": "UO Knight Campus Phase 2",
-            "image": "img/benchmarks/uo-knight-2.jpg",
+            "name": "UO Knight Campus Phase 1",
+            "image": "img/benchmarks/uo-knight/uo-knight.jpg",
             "overall_sf_cost": 922.89,
             "grossSF": 186729,
             "costOfWork": [
@@ -279,29 +280,45 @@ const sampleData = {
                 { 
                     "name": "B10 Superstructure", 
                     "cost": 136.08,
-                    "systemDetail": "Hybrid system of concrete and mass timber (Cross-Laminated Timber, glulam, and mass plywood panels), including a vibration-controlled mass timber lab."
+                    "systemDetail": "Hybrid system of concrete and mass timber (Cross-Laminated Timber, glulam, and mass plywood panels), including a vibration-controlled mass timber lab.",
+                    "image": "img/benchmarks/uo-knight/superstructure.jpg"
                 },
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 140.63,
-                    "systemDetail": "Signature double-skin 'Cascading Wall' facade with folded, fritted glass panels on a cantilevered outrigger system; includes a tied-arch pedestrian skybridge."
+                    "systemDetail": "Signature double-skin 'Cascading Wall' facade with folded, fritted glass panels on a cantilevered outrigger system; includes a tied-arch pedestrian skybridge.",
+                    "image": "img/benchmarks/uo-knight/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 13.32 },
                 { 
                     "name": "C Interiors", 
                     "cost": 137.02,
-                    "systemDetail": "Double-height research floors with floating faculty mezzanines overlooking open labs; features a basement cleanroom and a Biofabrication and Bioanalysis Core Facility."
+                    "systemDetail": "Double-height research floors with floating faculty mezzanines overlooking open labs; features a basement cleanroom and a Biofabrication and Bioanalysis Core Facility.",
+                    "image": "img/benchmarks/uo-knight/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
                     "cost": 391.72,
                     "systemDetail": "Chilled beam system for cooling combined with a heat recovery chiller that repurposes waste heat for building heating and hot water.",
                     "pros": "Very energy efficient due to chilled beams and extensive heat recovery; quiet, draft-free cooling enhances occupant comfort.",
-                    "cons": "Requires careful humidity control to prevent condensation; a separate air system is still needed for fume hood ventilation."
+                    "cons": "Requires careful humidity control to prevent condensation; a separate air system is still needed for fume hood ventilation.",
+                    "image": "img/benchmarks/uo-knight/services.jpg"
                 },
-                { "name": "E Equipment and Furnishings", "cost": 44.18 },
-                { "name": "F Special Construction", "cost": 0.00 },
-                { "name": "G Building Sitework", "cost": 35.79 }
+                { 
+                    "name": "E Equipment and Furnishings", 
+                    "cost": 44.18,
+                    "image": "img/benchmarks/uo-knight/equipment.jpg"
+                },
+                { 
+                    "name": "F Special Construction", 
+                    "cost": 0.00,
+                    "image": "img/benchmarks/uo-knight/special.jpg"
+                },
+                { 
+                    "name": "G Building Sitework", 
+                    "cost": 35.79, 
+                    "image": "img/benchmarks/uo-knight/sitework.jpg" 
+                }
             ]
         },
         {
