@@ -15,7 +15,6 @@ import * as summary from './modules/chart-summary.js';
 import * as sankey from './modules/chart-sankey.js';
 import * as program from './modules/chart-program.js';
 import * as benchmarks from './modules/chart-benchmarks.js';
-import * as interiors from './modules/chart-interiors.js';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
@@ -30,13 +29,20 @@ const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
 function render() {
     if (!state.currentData) return;
 
+    // Update yScale domain based on current data
+    if (state.yDomainMax) {
+        yScale.domain([0, state.yDomainMax]);
+    }
+
+    // Update Reset button state based on whether data has changed
+    state.updateResetButtonState();
+
     // --- 1. Hide all views and deactivate all buttons ---
     dom.mainChart.classList.add('hidden');
     dom.programView.classList.add('hidden');
     dom.phase1View.classList.add('hidden');
     dom.benchmarksView.classList.add('hidden');
     dom.summaryView.classList.add('hidden');
-    dom.interiorsView.classList.add('hidden');
     dom.legend.classList.add('hidden');
     dom.summaryLegend.classList.add('hidden');
     dom.maximizeBtn.classList.add('hidden');
@@ -61,7 +67,7 @@ function render() {
     } else if (state.currentView === 'program') {
         dom.programView.classList.remove('hidden');
         dom.programViewBtn.classList.add('active');
-        program.renderPhase2ProgramView();
+        program.renderPhase2ProgramView(render, slider.handleSquareFootageCellChange);
     } else if (state.currentView === 'phase1') {
         dom.phase1View.classList.remove('hidden');
         dom.phase1ViewBtn.classList.add('active');
@@ -82,16 +88,7 @@ function render() {
             summary.renderSummaryCharts();
             summary.updateSummary();
         });
-    } else if (state.currentView === 'interiors') {
-        dom.interiorsView.classList.remove('hidden');
-        // No specific button gets active class since this is accessed via Detail button
-        requestAnimationFrame(() => {
-            interiors.renderInteriorsView();
-        });
     }
-
-    // --- 3. Update reset button state ---
-    dom.resetButton.disabled = JSON.stringify(state.originalData) === JSON.stringify(state.currentData);
 }
 
 // --- DEPENDENCY INJECTION ---
@@ -103,15 +100,7 @@ slider.setDependencies({
     render: render,
     yScale: yScale
 });
-program.setDependencies({
-    render: render,
-    handleSquareFootageCellChange: slider.handleSquareFootageCellChange,
-    handleGrossSfCellChange: slider.handleGrossSfCellChange
-});
 summary.setRender(render);
-interiors.setDependencies({
-    render: render
-});
 
 
 // --- GLOBAL EVENT LISTENERS ---
@@ -145,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         if (confirmed) {
             fileHandlers.loadData(state.originalData);
+            // Reset button state will be updated by the loadData function's call to updateResetButtonState
         }
     });
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);
@@ -163,12 +153,11 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cancel"
         );
         if (snapshotName) {
-            const phase2CostOfWork = state.currentData.phases.phase2.costOfWork;
+            const phase2CostOfWork = state.currentScheme.costOfWork;
             const snapshotCostOfWork = phase2CostOfWork.map(c => ({
                 name: c.name,
                 target_value: c.target_value,
-                square_footage: c.square_footage,
-                building_efficiency: c.building_efficiency // Include building_efficiency for C Interiors
+                square_footage: c.square_footage
             }));
             const snapshot = {
                 name: snapshotName,

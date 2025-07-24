@@ -8,7 +8,7 @@ import * as ui from './ui.js';
  * @param {object} data - The data to be visualized.
  */
 export function renderSankeyChart(data) {
-    const phase1Data = data.phases.phase1;
+    const phase1Data = data.phase1;
     const { totalProjectBudget, costOfWork } = phase1Data;
 
     // Filter out items with a total of 0
@@ -193,7 +193,7 @@ export function renderSankeyChart(data) {
     // Add labels
     svg.append("g")
         .attr("font-family", "sans-serif")
-        .attr("font-size", 12)
+        .attr("font-size", 16)
         .selectAll("text")
         .data(graphNodes)
         .join("text")

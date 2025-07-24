@@ -1,66 +1,72 @@
 const sampleData = {
-    "phases": {
-        "phase1": {
-            "totalProjectBudget": 20000000,
+    "phase1": {
+        "totalProjectBudget": 20000000,
+        "costOfWork": [
+            { "Category": "Special Construction & Demo", "Subcategory": "Demolition", "Total": 5338387 },
+            { "Category": "Special Construction & Demo", "Subcategory": "Abelson / Eastlick Enclosure", "Total": 1000000 },
+            { "Category": "Sitework", "Subcategory": "Site Preparation", "Total": 0 },
+            { "Category": "Sitework", "Subcategory": "Site Improvements", "Total": 0 },
+            { "Category": "Sitework", "Subcategory": "Civil & Mechanical Utilities", "Total": 0 },
+            { "Category": "Sitework", "Subcategory": "Site Electrical Utilities", "Total": 0 },
+            { "Category": "Sitework", "Subcategory": "Site Lighting", "Total": 0 },
+            { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Total": 500000 },
+            { "Category": "Escalation & Contingency", "Subcategory": "Escalation", "Total": 524000 },
+            { "Category": "Escalation & Contingency", "Subcategory": "Escalation Phase 2", "Total": 0 },
+            { "Category": "Design", "Subcategory": "Design Fees", "Total": 4300000 },
+            { "Category": "Design", "Subcategory": "MEP Design", "Total": 2000000 },
+            { "Category": "GCs and Insurance", "Subcategory": "Preconstruction", "Total": 600000 },
+            { "Category": "GCs and Insurance", "Subcategory": "Subcontractor Default Insurance", "Total": 0 },
+            { "Category": "GCs and Insurance", "Subcategory": "Hoffman Bond", "Total": 0 },
+            { "Category": "GCs and Insurance", "Subcategory": "Builder's Risk Insurance", "Total": 0 },
+            { "Category": "GCs and Insurance", "Subcategory": "General Requirements (SGC, OH, FEE)", "Total": 2076000 }
+        ]
+    },
+    "phase2": {
+        "totalProjectBudget": 40000000
+    },
+    "indirectCosts": [
+        { "Category": "GCs and Insurance", "Subcategory": "Precon and Fee", "Percentage": 0.0686 },
+        { "Category": "Escalation & Contingency", "Subcategory": "Design Contingency", "Percentage": 0.0538 },
+        { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Percentage": 0.0538 },
+        { "Category": "GCs and Insurance", "Subcategory": "Bonds and Insurance", "Percentage": 0.0437 },
+        { "Category": "Permits", "Subcategory": "Building Permit", "Percentage": 0.0034 }
+    ],
+    "initialTargetValues": [
+        { "name": "A Substructure", "target_value": 33.50 },
+        { "name": "B10 Superstructure", "target_value": 98 },
+        { "name": "B20 Enclosure", "target_value": 100 },
+        { "name": "B30 Roofing", "target_value": 15 },
+        { "name": "C Interiors", "target_value": 115 },
+        { "name": "D Services", "target_value": 265 },
+        { "name": "E Equipment and Furnishings", "target_value": 50.00 },
+        { "name": "F Special Construction", "target_value": 20 },
+        { "name": "G Building Sitework", "target_value": 42 }
+    ],
+    "schemes": [
+        {
+            "name": "Predesign",
+            "description": "A simple, rectangular massing with a single floor plate. Four shelled floors.",
+            "image": "img/schemes/hub.jpg",
+            "grossSF": 45000,
+            "floors": 4,
             "costOfWork": [
-                { "Category": "Special Construction & Demo", "Subcategory": "Demolition", "Total": 5338387 },
-                { "Category": "Sitework", "Subcategory": "Site Preparation", "Total": 0 },
-                { "Category": "Sitework", "Subcategory": "Site Improvements", "Total": 0 },
-                { "Category": "Sitework", "Subcategory": "Civil & Mechanical Utilities", "Total": 0 },
-                { "Category": "Sitework", "Subcategory": "Site Electrical Utilities", "Total": 0 },
-                { "Category": "Sitework", "Subcategory": "Site Lighting", "Total": 0 },
-                { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Total": 500000 },
-                { "Category": "Escalation & Contingency", "Subcategory": "Escalation", "Total": 524000 },
-                { "Category": "Escalation & Contingency", "Subcategory": "Escalation Phase 2", "Total": 0 },
-                { "Category": "Design", "Subcategory": "Design Fees", "Total": 4300000 },
-                { "Category": "Design", "Subcategory": "MEP Design", "Total": 2000000 },
-                { "Category": "GCs and Insurance", "Subcategory": "Preconstruction", "Total": 600000 },
-                { "Category": "GCs and Insurance", "Subcategory": "Subcontractor Default Insurance", "Total": 0 },
-                { "Category": "GCs and Insurance", "Subcategory": "Hoffman Bond", "Total": 0 },
-                { "Category": "GCs and Insurance", "Subcategory": "Builder's Risk Insurance", "Total": 0 },
-                { "Category": "GCs and Insurance", "Subcategory": "General Requirements (SGC, OH, FEE)", "Total": 2076000 }
+                { "name": "A Substructure", "square_footage": 12500 },
+                { "name": "B10 Superstructure", "square_footage": 45000 },
+                { "name": "B20 Enclosure", "square_footage": 30000 },
+                { "name": "B30 Roofing", "square_footage": 12500 },
+                { "name": "C Interiors", "square_footage": 45000 },
+                { "name": "D Services", "square_footage": 45000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 45000 },
+                { "name": "F Special Construction", "square_footage": 10000 },
+                { "name": "G Building Sitework", "square_footage": 25000 }
             ]
         },
-        "phase2": {
-            "totalProjectBudget": 40000000,
-            "grossSF": 45000,
-            "indirectCosts": [
-                { "Category": "GCs and Insurance", "Subcategory": "Precon and Fee", "Percentage": 0.0686 },
-                { "Category": "Escalation & Contingency", "Subcategory": "Design Contingency", "Percentage": 0.0538 },
-                { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Percentage": 0.0538 },
-                { "Category": "GCs and Insurance", "Subcategory": "Bonds and Insurance", "Percentage": 0.0437 },
-                { "Category": "Permits", "Subcategory": "Building Permit", "Percentage": 0.0034 }
-            ],
-            "costOfWork": [
-                { "name": "A Substructure", "square_footage": 12500, "target_value": 33.50 },
-                { "name": "B10 Superstructure", "square_footage": 45000, "target_value": 98 },
-                { "name": "B20 Enclosure", "square_footage": 30000, "target_value": 100 },
-                { "name": "B30 Roofing", "square_footage": 12500, "target_value": 15 },
-                { 
-                    "name": "C Interiors", 
-                    "square_footage": 45000, 
-                    "target_value": 115,
-                    "building_efficiency": 0.575,
-                    "breakdown": [
-                        { "name": "Classroom", "percentage": 0.40, "cost": 125, "sf": 10000},
-                        { "name": "Research", "percentage": 0.35, "cost": 150, "sf": 9000 },
-                        { "name": "Student Space", "percentage": 0.15, "cost": 100, "sf": 4000 },
-                        { "name": "Offices", "percentage": 0.10, "cost": 120, "sf": 2500 }
-                    ]
-                },
-                { "name": "D Services", "square_footage": 45000, "target_value": 265 },
-                { "name": "E Equipment and Furnishings", "square_footage": 45000, "target_value": 50.00 },
-                { "name": "F Special Construction", "square_footage": 10000, "target_value": 20 },
-                { "name": "G Building Sitework", "square_footage": 25000, "target_value": 42 }
-            ]
-        }
-    },
-    "schemes": [
         {
             "name": "Hub",
             "description": "An L-shaped massing composed of interlocking volumes.",
             "image": "img/schemes/hub.jpg",
             "grossSF": 62600,
+            "floors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 17200 },
                 { "name": "B10 Superstructure", "square_footage": 62600 },
@@ -78,6 +84,7 @@ const sampleData = {
             "description": "Simple rectangular block with three identical 16,000 SF floor plates.",
             "image": "img/schemes/pavilion.jpg",
             "grossSF": 56000,
+            "floors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 16000 },
                 { "name": "B10 Superstructure", "square_footage": 56000 },
@@ -95,6 +102,7 @@ const sampleData = {
             "description": "A more compact, vertically-oriented massing organized along a central axis.",
             "image": "img/schemes/axial.jpg",
             "grossSF": 54200,
+            "floors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 14800 },
                 { "name": "B10 Superstructure", "square_footage": 54200 },
@@ -112,6 +120,7 @@ const sampleData = {
             "description": "A two-story scheme with a large, rectangular footprint designed to maximize the buildable floor area.",
             "image": "img/schemes/max-floor.jpg",
             "grossSF": 60000,
+            "floors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 25000 },
                 { "name": "B10 Superstructure", "square_footage": 60000 },
@@ -156,24 +165,31 @@ const sampleData = {
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 99.10,
-                    "systemDetail": "Facade of brick and metal panels with ceramic fritted glass on south-facing windows; exterior materials wrap into the interior."
+                    "systemDetail": "Facade of brick and metal panels with ceramic fritted glass on south-facing windows; exterior materials wrap into the interior.",
+                    "image": "img/benchmarks/bsu-mat/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 11.39 },
                 { 
                     "name": "C Interiors", 
                     "cost": 78.63,
-                    "systemDetail": "Over 40 materials science labs, including core facilities for electron microscopy and surface science; features polished concrete and end-grain wood floors."
+                    "systemDetail": "Over 40 materials science labs, including core facilities for electron microscopy and surface science; features polished concrete and end-grain wood floors.",
+                    "image": "img/benchmarks/bsu-mat/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
                     "cost": 281.02,
                     "systemDetail": "High-precision Variable Air Volume (VAV) system with HEPA filtration and low-velocity laminar airflow for vibration and particulate control.",
                     "pros": "Provides exceptional environmental stability (temperature, vibration, particulates) for sensitive research; highly responsive.",
-                    "cons": "High energy consumption due to tight controls and filtration; complex to design, install, and commission."
+                    "cons": "High energy consumption due to tight controls and filtration; complex to design, install, and commission.",
+                    "image": "img/benchmarks/bsu-mat/services.jpg"
                 },
                 { "name": "E Equipment and Furnishings", "cost": 54.78 },
                 { "name": "F Special Construction", "cost": 4.14 },
-                { "name": "G Building Sitework", "cost": 34.09 }
+                { 
+                    "name": "G Building Sitework", 
+                    "cost": 34.09,
+                    "image": "img/benchmarks/bsu-mat/sitework.jpg"
+                }
             ]
         },
         {
@@ -231,25 +247,29 @@ const sampleData = {
                 { 
                     "name": "B10 Superstructure", 
                     "cost": 80.71,
-                    "systemDetail": "Structural system accommodates a three-story central atrium; specific framing material and type are not available."
+                    "systemDetail": "Structural system accommodates a three-story central atrium; specific framing material and type are not available.",
+                    "image": "img/benchmarks/ui-iric/superstructure.jpg"
                 },
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 118.38,
-                    "systemDetail": "Perforated aluminum screen panel system over glazed curtainwall for solar shading; features a tiered, walkable green roof."
+                    "systemDetail": "Perforated aluminum screen panel system over glazed curtainwall for solar shading; features a tiered, walkable green roof.",
+                    "image": "img/benchmarks/ui-iric/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 21.72 },
                 { 
                     "name": "C Interiors", 
                     "cost": 118.56,
-                    "systemDetail": "Raised access flooring system with cementitious panels and modular workbenches to provide maximum lab flexibility for rotating research teams."
+                    "systemDetail": "Raised access flooring system with cementitious panels and modular workbenches to provide maximum lab flexibility for rotating research teams.",
+                    "image": "img/benchmarks/ui-iric/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
                     "cost": 349.49,
                     "systemDetail": "Mixed system with Variable Air Volume (VAV) controllers for labs, fan coil units for general spaces, and chilled beams for supplemental cooling.",
                     "pros": "Flexible design accommodates different research needs; uses proven VAV technology for lab safety; biomass boiler provides sustainable energy.",
-                    "cons": "VAV portion has high energy use and potential for noise; multiple system types increase maintenance complexity."
+                    "cons": "VAV portion has high energy use and potential for noise; multiple system types increase maintenance complexity.",
+                    "image": "img/benchmarks/ui-iric/services.jpg"
                 },
                 { "name": "E Equipment and Furnishings", "cost": 49.78 },
                 { "name": "F Special Construction", "cost": 0.35 },
@@ -258,8 +278,8 @@ const sampleData = {
         },
         {
             "id": "D",
-            "name": "UO Knight Campus Phase 2",
-            "image": "img/benchmarks/uo-knight-2.jpg",
+            "name": "UO Knight Campus Phase 1",
+            "image": "img/benchmarks/uo-knight/uo-knight.jpg",
             "overall_sf_cost": 922.89,
             "grossSF": 186729,
             "costOfWork": [
@@ -271,29 +291,45 @@ const sampleData = {
                 { 
                     "name": "B10 Superstructure", 
                     "cost": 136.08,
-                    "systemDetail": "Hybrid system of concrete and mass timber (Cross-Laminated Timber, glulam, and mass plywood panels), including a vibration-controlled mass timber lab."
+                    "systemDetail": "Hybrid system of concrete and mass timber (Cross-Laminated Timber, glulam, and mass plywood panels), including a vibration-controlled mass timber lab.",
+                    "image": "img/benchmarks/uo-knight/superstructure.jpg"
                 },
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 140.63,
-                    "systemDetail": "Signature double-skin 'Cascading Wall' facade with folded, fritted glass panels on a cantilevered outrigger system; includes a tied-arch pedestrian skybridge."
+                    "systemDetail": "Signature double-skin 'Cascading Wall' facade with folded, fritted glass panels on a cantilevered outrigger system; includes a tied-arch pedestrian skybridge.",
+                    "image": "img/benchmarks/uo-knight/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 13.32 },
                 { 
                     "name": "C Interiors", 
                     "cost": 137.02,
-                    "systemDetail": "Double-height research floors with floating faculty mezzanines overlooking open labs; features a basement cleanroom and a Biofabrication and Bioanalysis Core Facility."
+                    "systemDetail": "Double-height research floors with floating faculty mezzanines overlooking open labs; features a basement cleanroom and a Biofabrication and Bioanalysis Core Facility.",
+                    "image": "img/benchmarks/uo-knight/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
                     "cost": 391.72,
                     "systemDetail": "Chilled beam system for cooling combined with a heat recovery chiller that repurposes waste heat for building heating and hot water.",
                     "pros": "Very energy efficient due to chilled beams and extensive heat recovery; quiet, draft-free cooling enhances occupant comfort.",
-                    "cons": "Requires careful humidity control to prevent condensation; a separate air system is still needed for fume hood ventilation."
+                    "cons": "Requires careful humidity control to prevent condensation; a separate air system is still needed for fume hood ventilation.",
+                    "image": "img/benchmarks/uo-knight/services.jpg"
                 },
-                { "name": "E Equipment and Furnishings", "cost": 44.18 },
-                { "name": "F Special Construction", "cost": 0.00 },
-                { "name": "G Building Sitework", "cost": 35.79 }
+                { 
+                    "name": "E Equipment and Furnishings", 
+                    "cost": 44.18,
+                    "image": "img/benchmarks/uo-knight/equipment.jpg"
+                },
+                { 
+                    "name": "F Special Construction", 
+                    "cost": 0.00,
+                    "image": "img/benchmarks/uo-knight/special.jpg"
+                },
+                { 
+                    "name": "G Building Sitework", 
+                    "cost": 35.79, 
+                    "image": "img/benchmarks/uo-knight/sitework.jpg" 
+                }
             ]
         },
         {
@@ -311,25 +347,29 @@ const sampleData = {
                 { 
                     "name": "B10 Superstructure", 
                     "cost": 28.49,
-                    "systemDetail": "Long-span structural frame designed to create large, open, and reconfigurable laboratory and office areas with minimal interior columns."
+                    "systemDetail": "Long-span structural frame designed to create large, open, and reconfigurable laboratory and office areas with minimal interior columns.",
+                    "image": "img/benchmarks/uw-mole/superstructure.jpg"
                 },
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 121.03,
-                    "systemDetail": "High-performance, factory-assembled unitized curtainwall system with integrated sun shades, automated ventilation windows, and an adjacent stone rainscreen."
+                    "systemDetail": "High-performance, factory-assembled unitized curtainwall system with integrated sun shades, automated ventilation windows, and an adjacent stone rainscreen.",
+                    "image": "img/benchmarks/uw-mole/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 14.37 },
                 { 
                     "name": "C Interiors", 
                     "cost": 64.70,
-                    "systemDetail": "Open-plan, shared labs with reconfigurable elements and 100% outside air systems; houses the Molecular Analysis Facility in the vibration-free basement."
+                    "systemDetail": "Open-plan, shared labs with reconfigurable elements and 100% outside air systems; houses the Molecular Analysis Facility in the vibration-free basement.",
+                    "image": "img/benchmarks/uw-mole/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
                     "cost": 265.79,
                     "systemDetail": "Hybrid system featuring naturally ventilated offices and an optimized lab ventilation system using energy-efficient chilled beams.",
                     "pros": "Extremely energy efficient by using natural ventilation for offices; chilled beams provide quiet, comfortable lab cooling.",
-                    "cons": "Natural ventilation is climate-dependent; lab system requires separate air handling for fume hoods and humidity control."
+                    "cons": "Natural ventilation is climate-dependent; lab system requires separate air handling for fume hoods and humidity control.",
+                    "image": "img/benchmarks/uw-mole/services.jpg"
                 },
                 { "name": "E Equipment and Furnishings", "cost": 33.60 },
                 { "name": "F Special Construction", "cost": 34.30 },
@@ -356,13 +396,15 @@ const sampleData = {
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 71.53,
-                    "systemDetail": "Detail needed."
+                    "systemDetail": "Simple, durable, and environmentally friendly finishes hold up under high traffic and aesthetically connect to the palette of the local desert ecosystem.",
+                    "image": "img/benchmarks/wsu-tricities/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 14.36 },
                 { 
                     "name": "C Interiors", 
                     "cost": 63.08,
-                    "systemDetail": "Central feature is a grand staircase with integrated seating within an open atrium; contains a suite of teaching labs for core science disciplines."
+                    "systemDetail": "Central feature is a grand staircase with integrated seating within an open atrium; contains a suite of teaching labs for core science disciplines.",
+                    "image": "img/benchmarks/wsu-tricities/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 

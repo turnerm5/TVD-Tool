@@ -11,7 +11,7 @@ body {
     padding-top: 1rem;
     padding-bottom: 6rem; /* Increased padding */
     width: 100%;
-    height: 600px;
+    height: 700px;
     background-color: #f8fafc;
 }
 
@@ -38,9 +38,9 @@ body {
 /* New Benchmark Range Styling */
 .benchmark-range {
     position: absolute;
-    left: calc(50% - 0.5px);
-    width: 1px;
-    background-color: #38bdf8; /* a pleasant blue */
+    left: 25%;
+    width: 50%;
+    background-color: #dbeafe; /* light blue */
     z-index: 1;
 }
 .benchmark-cap {
@@ -85,17 +85,15 @@ body {
 }
 .component-label {
     position: absolute;
-    bottom: -3.5rem; /* Position it below the component column */
+    bottom: -4.5rem; /* Position it below the component column */
     left: 50%;
     transform: translateX(-50%); /* Center the label horizontally */
     width: 100%;
     text-align: center;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: #475569;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.2;
 }
 .component-column .lock-icon {
     position: absolute;
@@ -182,6 +180,7 @@ body {
     z-index: 2; /* Position it below the drag handle but above the range lines */
     pointer-events: none; /* Let clicks pass through the SVG container */
 }
+
 .benchmark-indicator-group {
     cursor: pointer;
     pointer-events: all; /* Make sure the group itself is interactive */
@@ -201,7 +200,7 @@ body {
 
 .benchmark-indicator-label {
     fill: #fff;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: bold;
     text-anchor: middle;
     pointer-events: none;
@@ -369,16 +368,24 @@ body {
     z-index: 100;
     pointer-events: none;
     transition: opacity 0.2s;
-    font-size: 0.875rem;
-    max-width: 500px;
+    font-size: 1.25rem;
+    max-width: 800px;
+    display: flex;
+    gap: 1rem;
 }
 
 .benchmark-tooltip img {
     width: 240px;
     height: 180px;
-    display: block;
-    margin-bottom: 0.75rem;
+    object-fit: cover;
     border-radius: 0.25rem;
+    flex-shrink: 0;
+}
+
+.benchmark-tooltip-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .benchmark-tooltip-name {
@@ -447,4 +454,15 @@ body {
     fill: red;
     font-size: 12px;
     text-anchor: end;
+}
+
+.view-btn.active {
+    background-color: #e5e7eb; /* A light gray background */
+    border-color: #3b82f6; /* A blue bottom border */
+    color: #1f2937; /* Darker text color */
+}
+
+#controls-container {
+    display: flex;
+    justify-content: center;
 }

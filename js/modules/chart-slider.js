@@ -7,12 +7,10 @@ import { state } from './state.js';
 import * as dom from './dom.js';
 import * as utils from './utils.js';
 
-// Forward-declare dependencies
-let render, renderProgramView, updateSummary, yScale;
+let render, yScale;
+
 export function setDependencies(fns) {
     render = fns.render;
-    renderProgramView = fns.renderProgramView;
-    updateSummary = fns.updateSummary;
     yScale = fns.yScale;
 }
 
@@ -22,9 +20,6 @@ export function setDependencies(fns) {
  * @returns {number} The effective square footage.
  */
 function getEffectiveSf(component) {
-    if (component.name === 'C Interiors' && component.building_efficiency) {
-        return component.square_footage / component.building_efficiency;
-    }
     return component.square_footage;
 }
 
@@ -38,7 +33,8 @@ function getEffectiveSf(component) {
  * @param {string} phaseKey - The key for the current phase ('phase1' or 'phase2').
  */
 function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
-    const phase = state.currentData.phases[phaseKey];
+    // For phase2, use the current scheme data
+    const phase = { costOfWork: state.currentScheme.costOfWork };
 
     // 1. Calculate the initial change in absolute cost from the user's action.
     const originalRom = changedComponent.target_value;
@@ -134,7 +130,7 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
  * This function uses the D3 enter/update/exit pattern to create and update the component columns.
  */
 export function renderChart() {
-    const phaseCostOfWork = state.currentData.phases.phase2.costOfWork;
+            const phaseCostOfWork = state.currentScheme.costOfWork;
     // Set the number of columns in the CSS grid layout.
     dom.chartContainer.style("grid-template-columns", `repeat(${phaseCostOfWork.length}, 1fr)`);
     // Set the output range for the y-scale based on the container's current height.
@@ -205,7 +201,23 @@ export function renderChart() {
         });
     
     // Create a map of original component values for quick lookup.
-    const originalComponents = state.originalData.phases.phase2.costOfWork.reduce((acc, val) => ({ ...acc, [val.name]: val }), {});
+            const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+            const originalTargetValues = state.originalData.initialTargetValues || [];
+            
+            // Merge original square footage with original target values
+            const originalComponents = {};
+            if (originalPredesignScheme) {
+                originalPredesignScheme.costOfWork.forEach(component => {
+                    const targetValueData = originalTargetValues.find(tv => tv.name === component.name);
+                                         originalComponents[component.name] = {
+                        name: component.name,
+                        square_footage: Number(component.square_footage) || 0,
+                        target_value: targetValueData ? Number(targetValueData.target_value) || 0 : 0,
+                        benchmark_low: targetValueData ? Number(targetValueData.benchmark_low) || 0 : 0,
+                        benchmark_high: targetValueData ? Number(targetValueData.benchmark_high) || 0 : 0
+                    };
+                });
+            }
     
     // Update labels and ghost bars for each component.
     updateGroup.each(function(d) {
@@ -241,23 +253,6 @@ export function renderChart() {
 
     renderLockControls();
 
-    // Add Detail button for C Interiors component
-    updateGroup.select(".detail-btn").remove(); // Remove any existing detail buttons
-    updateGroup.filter(d => d.name === 'C Interiors')
-        .append("div")
-        .attr("class", "detail-btn")
-        .text('Detail')
-        .on('click', (event, d) => {
-            event.stopPropagation();
-            // Store the current interiors state when entering detail view
-            const interiorsData = state.currentData.phases.phase2.costOfWork.find(c => c.name === 'C Interiors');
-            if (interiorsData) {
-                state.interiorsEntryState = JSON.parse(JSON.stringify(interiorsData));
-            }
-            state.currentView = 'interiors';
-            render();
-        });
-
     // --- Render the benchmark indicators (A, B, C, D) within each column's SVG ---
     updateGroup.each(function(componentData) {
         const group = d3.select(this);
@@ -286,7 +281,7 @@ export function renderChart() {
             const yPos = yScale(benchmarkComp.cost) + paddingTop;
             
             d3.select(this).select('.benchmark-indicator-line').attr('x1', '20%').attr('x2', '10%').attr('y1', yPos).attr('y2', yPos);
-            d3.select(this).select('.benchmark-indicator-circle').attr('cx', '10%').attr('cy', yPos).attr('r', 6);
+            d3.select(this).select('.benchmark-indicator-circle').attr('cx', '10%').attr('cy', yPos).attr('r', 8);
             d3.select(this).select('.benchmark-indicator-label').attr('x', '10%').attr('y', yPos).attr('dy', '0.35em').text(d.id);
         });
         
@@ -321,28 +316,35 @@ function showBenchmarkTooltip(event, benchmarkData, componentData) {
     const tooltip = d3.select('body').append('div')
         .attr('class', 'benchmark-tooltip');
 
+    // Use component-specific image if available, otherwise fall back to general project image
+    const imageSource = (benchmarkComponent && benchmarkComponent.image) ? benchmarkComponent.image : benchmarkData.image;
+    
     tooltip.append('img')
-        .attr('src', benchmarkData.image);
+        .attr('src', imageSource);
 
-    tooltip.append('div')
+    // Create content container for the text on the right side
+    const contentContainer = tooltip.append('div')
+        .attr('class', 'benchmark-tooltip-content');
+
+    contentContainer.append('div')
         .attr('class', 'benchmark-tooltip-name')
         .text(benchmarkData.name);
     
     // Add system details if they exist
     if (benchmarkComponent) {
         if (benchmarkComponent.systemDetail && benchmarkComponent.systemDetail !== "Detail needed.") {
-            tooltip.append('div')
+            contentContainer.append('div')
                 .attr('class', 'benchmark-tooltip-detail')
                 .style('margin-top', '8px')
                 .text(benchmarkComponent.systemDetail);
         }
         if (benchmarkComponent.pros) {
-            const prosDiv = tooltip.append('div').attr('class', 'benchmark-tooltip-pros').style('margin-top', '8px');
+            const prosDiv = contentContainer.append('div').attr('class', 'benchmark-tooltip-pros').style('margin-top', '8px');
             prosDiv.append('span').style('font-weight', 'bold').text('✅ Pros: ');
             prosDiv.append('span').text(benchmarkComponent.pros);
         }
         if (benchmarkComponent.cons) {
-            const consDiv = tooltip.append('div').attr('class', 'benchmark-tooltip-cons').style('margin-top', '4px');
+            const consDiv = contentContainer.append('div').attr('class', 'benchmark-tooltip-cons').style('margin-top', '4px');
             consDiv.append('span').style('font-weight', 'bold').text('❌ Cons: ');
             consDiv.append('span').text(benchmarkComponent.cons);
         }
@@ -402,27 +404,35 @@ export function renderYAxisLabels() {
  */
 export function handleSquareFootageCellChange(event) {
     const input = event.target;
-    let newSF = parseFloat(input.value.replace(/,/g, ''));
+    // Extract just the number from the input value (removing "SF" and change indicators)
+    const cleanValue = input.value.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+    let newSF = parseFloat(cleanValue);
     const componentName = input.dataset.name;
     const phaseKey = 'phase2';
 
     if (isNaN(newSF) || newSF < 0) {
         // Find the original value to revert to if input is invalid
-        const originalComponent = state.originalData.phases[phaseKey].costOfWork.find(c => c.name === componentName);
-        input.value = originalComponent ? originalComponent.square_footage.toLocaleString('en-US') : '0';
+        const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+        const originalComponent = originalPredesignScheme ? originalPredesignScheme.costOfWork.find(c => c.name === componentName) : null;
+        const revertValue = originalComponent ? originalComponent.square_footage : 0;
+        // Don't format here - let the blur event handle formatting
+        input.value = revertValue.toLocaleString('en-US');
         return;
     }
 
-    const phase = state.currentData.phases[phaseKey];
-    const component = phase.costOfWork.find(c => c.name === componentName);
+    // For phase2, use the current scheme data
+    const component = state.currentScheme.costOfWork.find(c => c.name === componentName);
 
     if (component) {
+        // Store the previous value before changing it
+        if (state.previousSquareFootage[componentName] === undefined) {
+            state.previousSquareFootage[componentName] = component.square_footage;
+        }
+        
         component.square_footage = newSF;
-        // Format the input value with commas
-        input.value = newSF.toLocaleString('en-US');
+        // Don't format the input here - let the blur event handle formatting
         // A change in square footage affects the total budget, so re-render everything.
         render();
-        updateSummary();
     }
 }
 
@@ -476,7 +486,8 @@ function dragEnded(event, d) {
  */
 function renderLockControls() {
     const phaseKey = 'phase2';
-    const costOfWork = state.currentData.phases[phaseKey].costOfWork;
+    // For phase2, use the current scheme data
+    const costOfWork = state.currentScheme.costOfWork;
     const lockSets = state.currentData.lockSets || [];
 
     // Clear existing controls
@@ -514,43 +525,34 @@ function renderLockControls() {
     }
 
 
-    // Create a table
-    const table = dom.lockControls.append('table').attr('class', 'w-full text-sm');
-    const thead = table.append('thead');
-    const tbody = table.append('tbody');
+    // Create locked components section
+    const lockedSection = dom.lockControls.append('div')
+        .attr('class', 'mb-4');
 
-    thead.append('tr')
-        .selectAll('th')
-        .data(['Component', 'Locked'])
-        .enter()
-        .append('th')
-        .attr('class', 'text-left font-semibold p-2')
-        .text(d => d);
+    lockedSection.append('h4')
+        .attr('class', 'font-semibold text-sm mb-2')
+        .text('Locked');
 
-    const rows = tbody.selectAll('tr')
+    const componentButtons = lockedSection.selectAll('.component-btn')
         .data(costOfWork, d => d.name)
         .enter()
-        .append('tr');
-
-    rows.append('td')
-        .attr('class', 'p-2')
-        .text(d => d.name);
-
-    const lockCell = rows.append('td')
-        .attr('class', 'p-2 text-center');
-
-    lockCell.append('input')
-        .attr('type', 'checkbox')
-        .property('checked', d => {
+        .append('button')
+        .attr('class', d => {
             const key = `${phaseKey}-${d.name}`;
-            return state.lockedCostOfWork.has(key);
+            const isLocked = state.lockedCostOfWork.has(key);
+            return `component-btn w-full text-left text-sm p-2 rounded mb-1 transition ${
+                isLocked 
+                    ? 'bg-red-200 border-2 border-red-400 text-red-800' 
+                    : 'bg-gray-100 hover:bg-gray-200 border-2 border-transparent'
+            }`;
         })
-        .on('change', (event, d) => {
+        .text(d => d.name)
+        .on('click', (event, d) => {
             const key = `${phaseKey}-${d.name}`;
-            if (event.target.checked) {
-                state.lockedCostOfWork.add(key);
-            } else {
+            if (state.lockedCostOfWork.has(key)) {
                 state.lockedCostOfWork.delete(key);
+            } else {
+                state.lockedCostOfWork.add(key);
             }
             render();
         });
@@ -585,7 +587,8 @@ function renderLockControls() {
  */
 export function balanceToGmp() {
     const phaseKey = 'phase2';
-    const phase = state.currentData.phases[phaseKey];
+    // For phase2, use the current scheme data
+    const phase = { costOfWork: state.currentScheme.costOfWork };
     const unlockedComponents = phase.costOfWork.filter(c => {
         const key = `${phaseKey}-${c.name}`;
         return !state.lockedCostOfWork.has(key) && c.square_footage > 0
@@ -600,7 +603,7 @@ export function balanceToGmp() {
     const totalCow = utils.calculateTotalCostOfWork(phase.costOfWork);
     const currentIndirectCosts = totalCow * totalIndirectPercentage;
     const currentTotalCost = totalCow + currentIndirectCosts;
-    const targetBudget = phase.totalProjectBudget;
+    const targetBudget = state.originalData.phase2.totalProjectBudget;
     const difference = targetBudget - currentTotalCost;
 
     if (Math.abs(difference) < 1) {
@@ -663,7 +666,4 @@ export function balanceToGmp() {
     }
 
     render();
-    if (document.getElementById('program-view').style.display !== 'none') {
-        renderProgramView();
-    }
 } 

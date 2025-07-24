@@ -44,6 +44,25 @@ export function formatNumber(num) {
 }
 
 /**
+ * Formats square footage with change indication.
+ * @param {number} currentSF - The current square footage value.
+ * @param {string} componentName - The name of the component for change tracking.
+ * @returns {string} The formatted square footage string with change indication.
+ */
+export function formatSquareFootageWithChange(currentSF, componentName) {
+    const change = state.getSquareFootageChange(componentName, currentSF);
+    const formattedSF = currentSF.toLocaleString('en-US');
+    
+    if (change === 0) {
+        return `${formattedSF} SF`;
+    }
+    
+    const changeFormatted = Math.abs(change).toLocaleString('en-US');
+    const changeSign = change > 0 ? '+' : '-';
+    return `${formattedSF} SF (${changeSign}${changeFormatted} SF)`;
+}
+
+/**
  * Generates a formatted timestamp string (e.g., "2023-10-27_15-30").
  * @returns {string} The formatted timestamp.
  */
@@ -61,10 +80,6 @@ export function getFormattedTimestamp() {
  * @returns {number} The calculated usable square footage.
  */
 export function calculateUsableSF(grossSF, costOfWorkItems) {
-    const costOfWork = costOfWorkItems.find(d => d.name === 'C Interiors');
-    if (costOfWork && costOfWork.building_efficiency) {
-        return grossSF / costOfWork.building_efficiency;
-    }
     return grossSF * 0.8; // Default if not found or no efficiency specified
 }
 
@@ -76,10 +91,12 @@ export function calculateUsableSF(grossSF, costOfWorkItems) {
  */
 export function calculateTotalCostOfWork(costOfWorkItems) {
     return d3.sum(costOfWorkItems, c => {
-        if (c.name === 'C Interiors' && c.building_efficiency) {
-            return (c.square_footage / c.building_efficiency) * c.target_value;
+        // Ensure we only sum items that have a target_value and square_footage,
+        // effectively excluding indirect costs which are calculated differently.
+        if (c.target_value && c.square_footage) {
+            return c.target_value * c.square_footage;
         }
-        return c.target_value * c.square_footage;
+        return 0;
     });
 }
 
@@ -89,23 +106,46 @@ export function calculateTotalCostOfWork(costOfWorkItems) {
  * @returns {number} The calculated value for this component.
  */
 export function calculateComponentValue(component) {
-    if (component.name === 'C Interiors' && component.building_efficiency) {
-        return (component.square_footage / component.building_efficiency) * component.target_value;
+    // Check if the component is an indirect cost by looking for a 'percentage' property
+    if (component.hasOwnProperty('percentage')) {
+        const totalCow = calculateTotalCostOfWork(state.currentScheme.costOfWork);
+        return totalCow * (Number(component.percentage) || 0);
     }
-    return component.target_value * component.square_footage;
+    // Default calculation for regular "Cost of Work" items
+    const targetValue = Number(component.target_value) || 0;
+    const squareFootage = Number(component.square_footage) || 0;
+    return targetValue * squareFootage;
 }
 
 /**
- * Creates a stable "Baseline" series using pure original data.
+ * Creates a stable "Predesign" series using pure original data.
  * This is used as the reference point in summary charts.
- * @returns {object} The baseline data series object
+ * @returns {object} The predesign data series object
  */
 export function createImportedDataSeries() {
+    const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+    const initialTargetValues = state.originalData.initialTargetValues || [];
+    
+    let costOfWork = [];
+    if (originalPredesignScheme) {
+        // Merge square_footage from Predesign scheme with target_value from initialTargetValues
+        costOfWork = originalPredesignScheme.costOfWork.map(component => {
+            const targetValueData = initialTargetValues.find(tv => tv.name === component.name);
+            return {
+                name: component.name,
+                square_footage: Number(component.square_footage) || 0,
+                target_value: targetValueData ? Number(targetValueData.target_value) || 0 : 0,
+                benchmark_low: targetValueData ? Number(targetValueData.benchmark_low) || 0 : 0,
+                benchmark_high: targetValueData ? Number(targetValueData.benchmark_high) || 0 : 0
+            };
+        });
+    }
+    
     return {
-        name: "Baseline",
+        name: "Predesign",
         color: "#9ca3af", // gray-400
-        costOfWork: state.originalData.phases.phase2.costOfWork,
-        grossSF: state.originalData.phases.phase2.grossSF
+        costOfWork: costOfWork,
+        grossSF: state.originalData.grossSF
     };
 }
 

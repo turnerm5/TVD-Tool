@@ -8,21 +8,35 @@ export const state = {
     currentData: null,
     originalData: null,
     lockedCostOfWork: new Set(),
-    currentView: 'summary', // 'summary', 'slider', 'interiors', 'program'
-    interiorsEntryState: null,
+    currentView: 'program', // 'summary', 'slider', 'program'
     snapshots: [],
     indirectCostPercentages: [],
+    shelledFloors: [],
+    currentScheme: null, // The currently active scheme (starts with Predesign)
+    selectedSchemeName: null, // The name of the scheme card that should be highlighted
+    previousSquareFootage: {}, // Track previous square footage values for showing changes
 
     /**
-     * Initializes the application state.
-     * @param {object} data - The initial data loaded from sampleData.js.
+     * Stores current square footage values as the new "previous" values for change tracking.
      */
-    init(data) {
-        this.originalData = data;
-        this.currentData = JSON.parse(JSON.stringify(data)); // Deep copy
-        this.snapshots = [];
-        this.lockedCostOfWork.clear();
-        this.calculateIndirectCostPercentages();
+    updatePreviousSquareFootage() {
+        if (this.currentScheme && this.currentScheme.costOfWork) {
+            this.currentScheme.costOfWork.forEach(component => {
+                this.previousSquareFootage[component.name] = component.square_footage;
+            });
+        }
+    },
+
+    /**
+     * Gets the change amount for a component's square footage.
+     * @param {string} componentName - The name of the component
+     * @param {number} currentSF - The current square footage value
+     * @returns {number} The change amount (positive for increase, negative for decrease)
+     */
+    getSquareFootageChange(componentName, currentSF) {
+        const previousSF = this.previousSquareFootage[componentName];
+        if (previousSF === undefined) return 0;
+        return currentSF - previousSF;
     },
 
     /**
@@ -30,12 +44,11 @@ export const state = {
      * This establishes a baseline for how indirect costs relate to COW.
      */
     calculateIndirectCostPercentages() {
-        const phase2 = this.originalData.phases.phase2;
-        if (!phase2.indirectCosts) {
+        if (!this.originalData.indirectCosts) {
             this.indirectCostPercentages = [];
             return;
         }
-        this.indirectCostPercentages = phase2.indirectCosts.map(item => ({
+        this.indirectCostPercentages = this.originalData.indirectCosts.map(item => ({
             name: item.Subcategory,
             percentage: item.Percentage || 0
         }));
@@ -48,9 +61,37 @@ export const state = {
         this.currentData = JSON.parse(JSON.stringify(this.originalData));
         this.snapshots = [];
         this.lockedCostOfWork.clear();
-        // Recalculating percentages isn't strictly necessary if they are based on original data,
-        // but it's good practice to ensure consistency.
         this.calculateIndirectCostPercentages();
+        
+        // Set default view to Phase 2 Program
+        this.currentView = 'program';
+        
+        // Reset to the original Predesign scheme with initial target values
+        const originalPredesignScheme = this.originalData.schemes && this.originalData.schemes.find(s => s.name === 'Predesign');
+        if (originalPredesignScheme) {
+            this.currentScheme = JSON.parse(JSON.stringify(originalPredesignScheme));
+            
+            // Merge initial target values
+            this.currentScheme.costOfWork.forEach(component => {
+                const targetValueData = this.originalData.initialTargetValues.find(tv => tv.name === component.name);
+                if (targetValueData) {
+                    component.target_value = Number(targetValueData.target_value) || 0;
+                    component.benchmark_low = Number(targetValueData.benchmark_low) || 0;
+                    component.benchmark_high = Number(targetValueData.benchmark_high) || 0;
+                } else {
+                    component.target_value = 0;
+                    component.benchmark_low = 0;
+                    component.benchmark_high = 0;
+                }
+            });
+            
+            this.shelledFloors = new Array(originalPredesignScheme.floors || 0).fill(false);
+            this.selectedSchemeName = 'Predesign'; // Set default selected scheme
+            
+            // Initialize previous square footage tracking
+            this.previousSquareFootage = {};
+            this.updatePreviousSquareFootage();
+        }
     },
 
     /**
@@ -68,7 +109,7 @@ export const state = {
         if (typeof snapshotOrName === 'string') {
             snapshot = {
                 name: snapshotOrName,
-                costOfWork: JSON.parse(JSON.stringify(this.currentData.phases.phase2.costOfWork)),
+                costOfWork: JSON.parse(JSON.stringify(this.currentScheme.costOfWork)),
                 grossSF: this.currentData.grossSF
             };
         } else if (typeof snapshotOrName === 'object' && snapshotOrName !== null) {
@@ -93,5 +134,56 @@ export const state = {
      */
     clearSnapshots() {
         this.snapshots = [];
+    },
+
+    /**
+     * Checks if the current data has changed from the original data.
+     * @returns {boolean} - True if data has changed, false otherwise.
+     */
+    hasDataChanged() {
+        if (!this.currentData || !this.originalData) return false;
+
+        // Check if gross SF has changed
+        if (this.currentData.grossSF !== this.originalData.grossSF) return true;
+
+        // Check if any component target_value or square_footage has changed
+        const originalPredesignScheme = this.originalData.schemes && this.originalData.schemes.find(s => s.name === 'Predesign');
+        if (!this.currentScheme || !this.originalData.initialTargetValues || !originalPredesignScheme) return false;
+        
+        const currentCostOfWork = this.currentScheme.costOfWork;
+        const originalTargetValues = this.originalData.initialTargetValues;
+        const originalCostOfWork = originalPredesignScheme.costOfWork;
+
+        for (let i = 0; i < currentCostOfWork.length; i++) {
+            const current = currentCostOfWork[i];
+            const originalTargetValue = originalTargetValues.find(tv => tv.name === current.name);
+            const originalSquareFootage = originalCostOfWork.find(oc => oc.name === current.name);
+            
+            if (!originalTargetValue || !originalSquareFootage) continue;
+            
+            if (current.target_value !== originalTargetValue.target_value || 
+                current.square_footage !== originalSquareFootage.square_footage) {
+                return true;
+            }
+        }
+
+        // Check if shelled floors have changed
+        const originalShelledFloors = new Array(originalPredesignScheme.floors || 0).fill(false);
+        if (this.shelledFloors.length !== originalShelledFloors.length) return true;
+        for (let i = 0; i < this.shelledFloors.length; i++) {
+            if (this.shelledFloors[i] !== originalShelledFloors[i]) return true;
+        }
+
+        return false;
+    },
+
+    /**
+     * Updates the Reset button's disabled state based on whether data has changed.
+     */
+    updateResetButtonState() {
+        const resetButton = document.getElementById('reset-button');
+        if (resetButton) {
+            resetButton.disabled = !this.hasDataChanged();
+        }
     }
 }; 
