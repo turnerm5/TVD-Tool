@@ -153,7 +153,7 @@ const sampleData = {
         {
             "id": "A",
             "name": "BSU Materials Science",
-            "image": "img/benchmarks/bsu-mat.jpg",
+            "image": "img/benchmarks/bsu-mat/bsu-mat.jpg",
             "overall_sf_cost": 643.43,
             "grossSF": 89800,
             "costOfWork": [
@@ -200,7 +200,7 @@ const sampleData = {
         {
             "id": "B",
             "name": "OSU Johnson Hall",
-            "image": "img/benchmarks/osu-johnson-hall.jpg",
+            "image": "img/benchmarks/osu-johnson-hall/osu-johnson-hall.jpg",
             "overall_sf_cost": 778.76,
             "grossSF": 61886,
             "costOfWork": [
@@ -212,7 +212,7 @@ const sampleData = {
                 { 
                     "name": "B10 Superstructure", 
                     "cost": 65.66,
-                    "systemDetail": "Structural steel frame with composite metal decks; features a full-story steel transfer truss to create a column-free auditorium."
+                    "systemDetail": "Five 52-foot, freestanding concrete shear walls. Structural steel frame with composite metal decks; features a full-story steel transfer truss to create a column-free auditorium."
                 },
                 { 
                     "name": "B20 Enclosure", 
@@ -240,7 +240,7 @@ const sampleData = {
         {
             "id": "C",
             "name": "UI Integrated Research Building",
-            "image": "img/benchmarks/ui-iric.jpg",
+            "image": "img/benchmarks/ui-iric/ui-iric.jpg",
             "overall_sf_cost": 817.28,
             "grossSF": 78267,
             "costOfWork": [
@@ -340,7 +340,7 @@ const sampleData = {
         {
             "id": "E",
             "name": "UW Molecular Engineering",
-            "image": "img/benchmarks/uw-mole.jpg",
+            "image": "img/benchmarks/uw-mole/uw-mole.jpg",
             "overall_sf_cost": 742.65,
             "grossSF": 90374,
             "costOfWork": [
@@ -384,7 +384,7 @@ const sampleData = {
         {
             "id": "F",
             "name": "WSU Tri-Cities",
-            "image": "img/benchmarks/wsu-tricities.jpg",
+            "image": "img/benchmarks/wsu-tricities/wsu-tricities.jpg",
             "overall_sf_cost": 544.25,
             "grossSF": 38391,
             "costOfWork": [
