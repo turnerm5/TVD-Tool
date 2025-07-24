@@ -240,25 +240,29 @@ const sampleData = {
                 { 
                     "name": "B10 Superstructure", 
                     "cost": 80.71,
-                    "systemDetail": "Structural system accommodates a three-story central atrium; specific framing material and type are not available."
+                    "systemDetail": "Structural system accommodates a three-story central atrium; specific framing material and type are not available.",
+                    "image": "img/benchmarks/ui-iric/superstructure.jpg"
                 },
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 118.38,
-                    "systemDetail": "Perforated aluminum screen panel system over glazed curtainwall for solar shading; features a tiered, walkable green roof."
+                    "systemDetail": "Perforated aluminum screen panel system over glazed curtainwall for solar shading; features a tiered, walkable green roof.",
+                    "image": "img/benchmarks/ui-iric/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 21.72 },
                 { 
                     "name": "C Interiors", 
                     "cost": 118.56,
-                    "systemDetail": "Raised access flooring system with cementitious panels and modular workbenches to provide maximum lab flexibility for rotating research teams."
+                    "systemDetail": "Raised access flooring system with cementitious panels and modular workbenches to provide maximum lab flexibility for rotating research teams.",
+                    "image": "img/benchmarks/ui-iric/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
                     "cost": 349.49,
                     "systemDetail": "Mixed system with Variable Air Volume (VAV) controllers for labs, fan coil units for general spaces, and chilled beams for supplemental cooling.",
                     "pros": "Flexible design accommodates different research needs; uses proven VAV technology for lab safety; biomass boiler provides sustainable energy.",
-                    "cons": "VAV portion has high energy use and potential for noise; multiple system types increase maintenance complexity."
+                    "cons": "VAV portion has high energy use and potential for noise; multiple system types increase maintenance complexity.",
+                    "image": "img/benchmarks/ui-iric/services.jpg"
                 },
                 { "name": "E Equipment and Furnishings", "cost": 49.78 },
                 { "name": "F Special Construction", "cost": 0.35 },
