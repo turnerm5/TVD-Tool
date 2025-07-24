@@ -361,8 +361,16 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             // Set the selected scheme name for visual feedback
             state.selectedSchemeName = d.name;
 
-            // Reset shelled floors
-            state.shelledFloors.fill(false);
+            // Set shelled floors based on scheme's shelledFloors property
+            const shelledFloorsCount = d.shelledFloors || 0;
+            const totalFloors = d.floors || 0;
+            state.shelledFloors = new Array(totalFloors).fill(false);
+            // Mark the top N floors as shelled (checked)
+            for (let i = totalFloors - shelledFloorsCount; i < totalFloors; i++) {
+                if (i >= 0 && i < totalFloors) {
+                    state.shelledFloors[i] = true;
+                }
+            }
 
             // Animate Gross SF change
             const oldGrossSf = state.currentData.grossSF;

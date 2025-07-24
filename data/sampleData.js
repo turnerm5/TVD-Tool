@@ -48,7 +48,8 @@ const sampleData = {
             "description": "A simple, rectangular massing with a single floor plate. Four shelled floors.",
             "image": "img/schemes/hub.jpg",
             "grossSF": 45000,
-            "floors": 4,
+            "floors": 5,
+            "shelledFloors": 4,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 12500 },
                 { "name": "B10 Superstructure", "square_footage": 45000 },
@@ -67,6 +68,7 @@ const sampleData = {
             "image": "img/schemes/hub.jpg",
             "grossSF": 62600,
             "floors": 4,
+            "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 17200 },
                 { "name": "B10 Superstructure", "square_footage": 62600 },
@@ -85,6 +87,7 @@ const sampleData = {
             "image": "img/schemes/pavilion.jpg",
             "grossSF": 56000,
             "floors": 4,
+            "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 16000 },
                 { "name": "B10 Superstructure", "square_footage": 56000 },
@@ -103,6 +106,7 @@ const sampleData = {
             "image": "img/schemes/axial.jpg",
             "grossSF": 54200,
             "floors": 4,
+            "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 14800 },
                 { "name": "B10 Superstructure", "square_footage": 54200 },
@@ -121,6 +125,7 @@ const sampleData = {
             "image": "img/schemes/max-floor.jpg",
             "grossSF": 60000,
             "floors": 4,
+            "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 25000 },
                 { "name": "B10 Superstructure", "square_footage": 60000 },
