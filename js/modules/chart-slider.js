@@ -404,7 +404,9 @@ export function renderYAxisLabels() {
  */
 export function handleSquareFootageCellChange(event) {
     const input = event.target;
-    let newSF = parseFloat(input.value.replace(/,/g, ''));
+    // Extract just the number from the input value (removing "SF" and change indicators)
+    const cleanValue = input.value.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+    let newSF = parseFloat(cleanValue);
     const componentName = input.dataset.name;
     const phaseKey = 'phase2';
 
@@ -412,7 +414,9 @@ export function handleSquareFootageCellChange(event) {
         // Find the original value to revert to if input is invalid
         const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
         const originalComponent = originalPredesignScheme ? originalPredesignScheme.costOfWork.find(c => c.name === componentName) : null;
-        input.value = originalComponent ? originalComponent.square_footage.toLocaleString('en-US') : '0';
+        const revertValue = originalComponent ? originalComponent.square_footage : 0;
+        // Don't format here - let the blur event handle formatting
+        input.value = revertValue.toLocaleString('en-US');
         return;
     }
 
@@ -420,9 +424,13 @@ export function handleSquareFootageCellChange(event) {
     const component = state.currentScheme.costOfWork.find(c => c.name === componentName);
 
     if (component) {
+        // Store the previous value before changing it
+        if (state.previousSquareFootage[componentName] === undefined) {
+            state.previousSquareFootage[componentName] = component.square_footage;
+        }
+        
         component.square_footage = newSF;
-        // Format the input value with commas
-        input.value = newSF.toLocaleString('en-US');
+        // Don't format the input here - let the blur event handle formatting
         // A change in square footage affects the total budget, so re-render everything.
         render();
     }

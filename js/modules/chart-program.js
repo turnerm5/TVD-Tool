@@ -13,6 +13,11 @@ function updateCInteriorsSF() {
         const shelledFloorsCount = state.shelledFloors.filter(Boolean).length;
         const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
         
+        // Store previous value before changing for change tracking
+        if (state.previousSquareFootage['C Interiors'] === undefined) {
+            state.previousSquareFootage['C Interiors'] = cInteriors.square_footage;
+        }
+        
         cInteriors.square_footage = originalCInteriors.square_footage * (1 - shelledPercentage);
     }
 }
@@ -188,11 +193,27 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
     sfCells.append('input')
         .attr('type', 'text')
         .attr('class', 'text-left program-table-input')
-        .attr('value', d => d.square_footage.toLocaleString('en-US'))
+        .attr('value', d => utils.formatSquareFootageWithChange(d.square_footage, d.name))
         .attr('data-phase', 'phase2')
         .attr('data-name', d => d.name)
         .property('disabled', d => d.name === 'C Interiors')
+        .on('focus', function(event, d) {
+            // When focusing, show just the number for easy editing
+            this.value = d.square_footage.toLocaleString('en-US');
+        })
+        .on('blur', function(event, d) {
+            // When losing focus, show the formatted version with changes
+            const cleanValue = this.value.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+            const newSF = parseFloat(cleanValue);
+            if (!isNaN(newSF) && newSF >= 0) {
+                this.value = utils.formatSquareFootageWithChange(newSF, d.name);
+            } else {
+                this.value = utils.formatSquareFootageWithChange(d.square_footage, d.name);
+            }
+        })
         .on('change', function(event, d) {
+            // Clear the selected scheme when square footage is manually changed
+            state.selectedSchemeName = null;
             handleSquareFootageCellChange(event);
         });
 
@@ -326,10 +347,19 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     const schemeCards = schemeGrid.selectAll('.scheme-card')
         .data(schemeData, d => d.name)
         .join('div')
-        .attr('class', 'scheme-card relative rounded-lg overflow-hidden shadow-md cursor-pointer h-full')
+        .attr('class', d => {
+            const isSelected = state.selectedSchemeName === d.name;
+            return `scheme-card relative rounded-lg overflow-hidden shadow-md cursor-pointer h-full ${isSelected ? 'ring-4 ring-red-500' : 'border border-gray-200'}`;
+        })
         .on('click', (event, d) => {
             // When a scheme card is clicked:
             const updates = [];
+
+            // Store current square footage values as previous before switching schemes
+            state.updatePreviousSquareFootage();
+
+            // Set the selected scheme name for visual feedback
+            state.selectedSchemeName = d.name;
 
             // Reset shelled floors
             state.shelledFloors.fill(false);
@@ -413,12 +443,12 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
 
     // Add scheme name
     contentContainer.append('h4')
-        .attr('class', 'font-semibold text-sm text-gray-800 mb-1')
+        .attr('class', 'font-semibold text-base text-gray-800 mb-1')
         .text(d => d.name);
 
     // Add description
     contentContainer.append('p')
-        .attr('class', 'text-xs text-gray-600 mb-2 leading-tight')
+        .attr('class', 'text-sm text-gray-600 mb-2 leading-tight')
         .text(d => d.description);
 
     // Add stats container

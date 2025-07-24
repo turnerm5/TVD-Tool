@@ -8,11 +8,36 @@ export const state = {
     currentData: null,
     originalData: null,
     lockedCostOfWork: new Set(),
-    currentView: 'summary', // 'summary', 'slider', 'program'
+    currentView: 'program', // 'summary', 'slider', 'program'
     snapshots: [],
     indirectCostPercentages: [],
     shelledFloors: [],
     currentScheme: null, // The currently active scheme (starts with Predesign)
+    selectedSchemeName: null, // The name of the scheme card that should be highlighted
+    previousSquareFootage: {}, // Track previous square footage values for showing changes
+
+    /**
+     * Stores current square footage values as the new "previous" values for change tracking.
+     */
+    updatePreviousSquareFootage() {
+        if (this.currentScheme && this.currentScheme.costOfWork) {
+            this.currentScheme.costOfWork.forEach(component => {
+                this.previousSquareFootage[component.name] = component.square_footage;
+            });
+        }
+    },
+
+    /**
+     * Gets the change amount for a component's square footage.
+     * @param {string} componentName - The name of the component
+     * @param {number} currentSF - The current square footage value
+     * @returns {number} The change amount (positive for increase, negative for decrease)
+     */
+    getSquareFootageChange(componentName, currentSF) {
+        const previousSF = this.previousSquareFootage[componentName];
+        if (previousSF === undefined) return 0;
+        return currentSF - previousSF;
+    },
 
     /**
      * Calculates the indirect cost percentages based on the original data.
@@ -38,6 +63,9 @@ export const state = {
         this.lockedCostOfWork.clear();
         this.calculateIndirectCostPercentages();
         
+        // Set default view to Phase 2 Program
+        this.currentView = 'program';
+        
         // Reset to the original Predesign scheme with initial target values
         const originalPredesignScheme = this.originalData.schemes && this.originalData.schemes.find(s => s.name === 'Predesign');
         if (originalPredesignScheme) {
@@ -58,6 +86,11 @@ export const state = {
             });
             
             this.shelledFloors = new Array(originalPredesignScheme.floors || 0).fill(false);
+            this.selectedSchemeName = 'Predesign'; // Set default selected scheme
+            
+            // Initialize previous square footage tracking
+            this.previousSquareFootage = {};
+            this.updatePreviousSquareFootage();
         }
     },
 

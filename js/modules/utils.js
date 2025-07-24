@@ -44,6 +44,25 @@ export function formatNumber(num) {
 }
 
 /**
+ * Formats square footage with change indication.
+ * @param {number} currentSF - The current square footage value.
+ * @param {string} componentName - The name of the component for change tracking.
+ * @returns {string} The formatted square footage string with change indication.
+ */
+export function formatSquareFootageWithChange(currentSF, componentName) {
+    const change = state.getSquareFootageChange(componentName, currentSF);
+    const formattedSF = currentSF.toLocaleString('en-US');
+    
+    if (change === 0) {
+        return `${formattedSF} SF`;
+    }
+    
+    const changeFormatted = Math.abs(change).toLocaleString('en-US');
+    const changeSign = change > 0 ? '+' : '-';
+    return `${formattedSF} SF (${changeSign}${changeFormatted} SF)`;
+}
+
+/**
  * Generates a formatted timestamp string (e.g., "2023-10-27_15-30").
  * @returns {string} The formatted timestamp.
  */

@@ -126,6 +126,10 @@ export function loadData(data, fileName = 'Sample Data') {
     // Reset shelled floors state
     state.shelledFloors = new Array(predesignScheme.floors || 0).fill(false);
     
+    // Initialize previous square footage tracking
+    state.previousSquareFootage = {};
+    state.updatePreviousSquareFootage();
+    
             console.log('Data loaded. Original Gross SF:', state.originalData.grossSF, 'Current Gross SF:', state.currentData.grossSF);
 
     // Dynamically set the Y-axis domain based on initialTargetValues AND benchmark data
@@ -157,6 +161,10 @@ export function loadData(data, fileName = 'Sample Data') {
 
     // Update UI
     document.getElementById('file-name').textContent = fileName;
+    
+    // Set default view to Phase 2 Program
+    state.currentView = 'program';
+    
     ui.showMainContent();
     
     // Update Reset button state since we just loaded fresh data
