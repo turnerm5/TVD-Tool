@@ -340,25 +340,29 @@ const sampleData = {
                 { 
                     "name": "B10 Superstructure", 
                     "cost": 28.49,
-                    "systemDetail": "Long-span structural frame designed to create large, open, and reconfigurable laboratory and office areas with minimal interior columns."
+                    "systemDetail": "Long-span structural frame designed to create large, open, and reconfigurable laboratory and office areas with minimal interior columns.",
+                    "image": "img/benchmarks/uw-mole/superstructure.jpg"
                 },
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 121.03,
-                    "systemDetail": "High-performance, factory-assembled unitized curtainwall system with integrated sun shades, automated ventilation windows, and an adjacent stone rainscreen."
+                    "systemDetail": "High-performance, factory-assembled unitized curtainwall system with integrated sun shades, automated ventilation windows, and an adjacent stone rainscreen.",
+                    "image": "img/benchmarks/uw-mole/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 14.37 },
                 { 
                     "name": "C Interiors", 
                     "cost": 64.70,
-                    "systemDetail": "Open-plan, shared labs with reconfigurable elements and 100% outside air systems; houses the Molecular Analysis Facility in the vibration-free basement."
+                    "systemDetail": "Open-plan, shared labs with reconfigurable elements and 100% outside air systems; houses the Molecular Analysis Facility in the vibration-free basement.",
+                    "image": "img/benchmarks/uw-mole/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
                     "cost": 265.79,
                     "systemDetail": "Hybrid system featuring naturally ventilated offices and an optimized lab ventilation system using energy-efficient chilled beams.",
                     "pros": "Extremely energy efficient by using natural ventilation for offices; chilled beams provide quiet, comfortable lab cooling.",
-                    "cons": "Natural ventilation is climate-dependent; lab system requires separate air handling for fume hoods and humidity control."
+                    "cons": "Natural ventilation is climate-dependent; lab system requires separate air handling for fume hoods and humidity control.",
+                    "image": "img/benchmarks/uw-mole/services.jpg"
                 },
                 { "name": "E Equipment and Furnishings", "cost": 33.60 },
                 { "name": "F Special Construction", "cost": 34.30 },
@@ -385,13 +389,15 @@ const sampleData = {
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 71.53,
-                    "systemDetail": "Detail needed."
+                    "systemDetail": "Simple, durable, and environmentally friendly finishes hold up under high traffic and aesthetically connect to the palette of the local desert ecosystem.",
+                    "image": "img/benchmarks/wsu-tricities/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 14.36 },
                 { 
                     "name": "C Interiors", 
                     "cost": 63.08,
-                    "systemDetail": "Central feature is a grand staircase with integrated seating within an open atrium; contains a suite of teaching labs for core science disciplines."
+                    "systemDetail": "Central feature is a grand staircase with integrated seating within an open atrium; contains a suite of teaching labs for core science disciplines.",
+                    "image": "img/benchmarks/wsu-tricities/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
