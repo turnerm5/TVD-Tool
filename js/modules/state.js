@@ -36,7 +36,10 @@ export const state = {
     getSquareFootageChange(componentName, currentSF) {
         const previousSF = this.previousSquareFootage[componentName];
         if (previousSF === undefined) return 0;
-        return currentSF - previousSF;
+        
+        // Round to avoid floating point issues
+        const change = Math.round(currentSF - previousSF);
+        return change;
     },
 
     /**
