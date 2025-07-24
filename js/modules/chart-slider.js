@@ -316,8 +316,11 @@ function showBenchmarkTooltip(event, benchmarkData, componentData) {
     const tooltip = d3.select('body').append('div')
         .attr('class', 'benchmark-tooltip');
 
+    // Use component-specific image if available, otherwise fall back to general project image
+    const imageSource = (benchmarkComponent && benchmarkComponent.image) ? benchmarkComponent.image : benchmarkData.image;
+    
     tooltip.append('img')
-        .attr('src', benchmarkData.image);
+        .attr('src', imageSource);
 
     tooltip.append('div')
         .attr('class', 'benchmark-tooltip-name')

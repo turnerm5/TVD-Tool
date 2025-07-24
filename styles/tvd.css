@@ -376,6 +376,7 @@ body {
 .benchmark-tooltip img {
     width: 240px;
     height: 180px;
+    object-fit: cover;
     display: block;
     margin-bottom: 0.75rem;
     border-radius: 0.25rem;
