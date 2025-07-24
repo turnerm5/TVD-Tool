@@ -360,10 +360,9 @@ export function updateSummary() {
         
         // Assignable SF is calculated from the 'C Interiors' component's square footage
         const cInteriorsComponent = series.costOfWork.find(c => c.name === 'C Interiors');
-        const assignedSF = cInteriorsComponent ? cInteriorsComponent.square_footage : 0;
+        const assignedSF = cInteriorsComponent ? Math.round(cInteriorsComponent.square_footage) : 0;
 
         const costPerGSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
-        const costPerASF = assignedSF > 0 ? totalProjectCost / assignedSF : 0;
         const variance = totalProjectCost - gmp;
         
         const row = tbody.insertRow();
