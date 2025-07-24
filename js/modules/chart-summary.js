@@ -112,6 +112,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .call(d3.axisBottom(x0))
         .selectAll("text")
         .style("text-anchor", "middle")
+        .style("font-size", "14px")
         .call(wrap, x0.bandwidth());
 
     // --- D3 Bar Rendering ---
@@ -209,7 +210,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
     const container = d3.select("#summary-stacked-chart-container");
     container.html("");
 
-    const margin = { top: 20, right: 20, bottom: 50, left: 40 };
+    const margin = { top: 20, right: 20, bottom: 50, left: 60 };
     const width = container.node().getBoundingClientRect().width - margin.left - margin.right;
     const height = 600 - margin.top - margin.bottom;
 
@@ -268,9 +269,13 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
         .call(d3.axisBottom(x))
         .selectAll("text")
         .style("text-anchor", "middle")
+        .style("font-size", "14px")
         .call(wrap, x.bandwidth());
 
-    g.append("g").call(d3.axisLeft(y).tickFormat(d => `$${d3.format("~s")(d)}`));
+    g.append("g")
+        .call(d3.axisLeft(y).tickFormat(d => `$${d3.format("~s")(d)}`))
+        .selectAll("text")
+        .style("font-size", "14px");
 
     // --- D3 Bar Rendering ---
     const seriesGroup = g.selectAll(".series-group")
@@ -317,8 +322,7 @@ export function updateSummary() {
     const header = document.createElement('div');
     header.className = 'text-center mb-4';
     header.innerHTML = `
-        <h2 class="text-lg font-bold text-gray-700">Phase 2 Summary</h2>
-        <p class="text-xl font-bold text-gray-800">${utils.formatCurrencyBig(gmp)} <span class="text-sm font-medium text-gray-500">Total Project Budget</span></p>
+        <h2 class="text-lg font-bold text-gray-700">Phase 2 Summary: ${utils.formatCurrencyBig(gmp)} Budget</span></h2>
     `;
     summaryPanel.appendChild(header);
 
@@ -330,7 +334,7 @@ export function updateSummary() {
     console.log('Rendering summary table. All series data:', allSeries);
 
     const table = document.createElement('table');
-    table.className = 'w-full text-sm text-left text-gray-500';
+    table.className = 'w-full text-base text-left text-gray-500';
     
     const thead = table.createTHead();
     thead.innerHTML = `
