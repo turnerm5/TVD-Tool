@@ -125,15 +125,37 @@ export function calculateComponentValue(component) {
 export function createImportedDataSeries() {
     const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
     const initialTargetValues = state.originalData.initialTargetValues || [];
-    
+
     let costOfWork = [];
     if (originalPredesignScheme) {
+        // Calculate the shelled floor reduction specifically for the predesign scheme
+        const totalFloors = originalPredesignScheme.floors || 0;
+        let shelledFloorsCount = 0;
+        if (totalFloors > 4) {
+            shelledFloorsCount = 4;
+        } else {
+            shelledFloorsCount = totalFloors;
+        }
+        const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
+
+        // Get the original C Interiors SF and calculate its initial, shelled value
+        const originalCInteriorsData = originalPredesignScheme.costOfWork.find(c => c.name === 'C Interiors');
+        const originalCInteriorsSF = originalCInteriorsData ? originalCInteriorsData.square_footage : 0;
+        const adjustedCInteriorsSF = originalCInteriorsSF * (1 - shelledPercentage);
+
         // Merge square_footage from Predesign scheme with target_value from initialTargetValues
         costOfWork = originalPredesignScheme.costOfWork.map(component => {
             const targetValueData = initialTargetValues.find(tv => tv.name === component.name);
+            let sf = Number(component.square_footage) || 0;
+
+            // If this is the C Interiors component, use the adjusted SF we just calculated
+            if (component.name === 'C Interiors') {
+                sf = adjustedCInteriorsSF;
+            }
+
             return {
                 name: component.name,
-                square_footage: Number(component.square_footage) || 0,
+                square_footage: sf,
                 target_value: targetValueData ? Number(targetValueData.target_value) || 0 : 0,
                 benchmark_low: targetValueData ? Number(targetValueData.benchmark_low) || 0 : 0,
                 benchmark_high: targetValueData ? Number(targetValueData.benchmark_high) || 0 : 0

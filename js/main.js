@@ -96,6 +96,7 @@ function render() {
 ui.setRender(render);
 fileHandlers.setRender(render);
 fileHandlers.setYScale(yScale);
+fileHandlers.setUpdateCInteriorsSF(program.updateCInteriorsSF);
 slider.setDependencies({
     render: render,
     yScale: yScale

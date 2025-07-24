@@ -19,6 +19,12 @@ export function setYScale(scale) {
     yScale = scale;
 }
 
+// Forward-declare the updateCInteriorsSF to be injected later.
+let updateCInteriorsSF;
+export function setUpdateCInteriorsSF(fn) {
+    updateCInteriorsSF = fn;
+}
+
 /**
  * Pre-processes the loaded data.
  * This function calculates the `benchmark_low` and `benchmark_high` values for each component
@@ -123,14 +129,30 @@ export function loadData(data, fileName = 'Sample Data') {
     // Calculate indirect cost percentages now that originalData is set
     state.calculateIndirectCostPercentages();
     
-    // Reset shelled floors state
-    state.shelledFloors = new Array(predesignScheme.floors || 0).fill(false);
+    // Reset shelled floors state and set the top 4 floors to shelled
+    const floorCount = predesignScheme.floors || 0;
+    state.shelledFloors = new Array(floorCount).fill(false);
+    if (floorCount > 4) {
+        for (let i = floorCount - 4; i < floorCount; i++) {
+            state.shelledFloors[i] = true;
+        }
+    } else {
+        // If 4 or fewer floors, shell them all
+        state.shelledFloors.fill(true);
+    }
     
     // Initialize previous square footage tracking
     state.previousSquareFootage = {};
-    state.updatePreviousSquareFootage();
     
-            console.log('Data loaded. Original Gross SF:', state.originalData.grossSF, 'Current Gross SF:', state.currentData.grossSF);
+    // Update C Interiors SF based on initial shelled floors
+    if (updateCInteriorsSF) {
+        updateCInteriorsSF();
+    }
+
+    // Now that C Interiors is adjusted, set the initial baseline for all components
+    state.updatePreviousSquareFootage();
+            
+    console.log('Data loaded. Original Gross SF:', state.originalData.grossSF, 'Current Gross SF:', state.currentData.grossSF);
 
     // Dynamically set the Y-axis domain based on initialTargetValues AND benchmark data
     const maxTargetValue = d3.max(processedData.initialTargetValues, d => d.target_value);

@@ -3,7 +3,7 @@ import * as dom from './dom.js';
 import * as utils from './utils.js';
 import * as ui from './ui.js';
 
-function updateCInteriorsSF() {
+export function updateCInteriorsSF() {
     const cInteriors = state.currentScheme.costOfWork.find(c => c.name === 'C Interiors');
     const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
     const originalCInteriors = originalPredesignScheme ? originalPredesignScheme.costOfWork.find(c => c.name === 'C Interiors') : null;

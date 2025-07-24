@@ -85,7 +85,15 @@ export const state = {
                 }
             });
             
-            this.shelledFloors = new Array(originalPredesignScheme.floors || 0).fill(false);
+            const floorCount = originalPredesignScheme.floors || 0;
+            this.shelledFloors = new Array(floorCount).fill(false);
+            if (floorCount > 4) {
+                for (let i = floorCount - 4; i < floorCount; i++) {
+                    this.shelledFloors[i] = true;
+                }
+            } else {
+                this.shelledFloors.fill(true);
+            }
             this.selectedSchemeName = 'Predesign'; // Set default selected scheme
             
             // Initialize previous square footage tracking
@@ -169,6 +177,14 @@ export const state = {
 
         // Check if shelled floors have changed
         const originalShelledFloors = new Array(originalPredesignScheme.floors || 0).fill(false);
+        const floorCount = originalPredesignScheme.floors || 0;
+        if (floorCount > 4) {
+            for (let i = floorCount - 4; i < floorCount; i++) {
+                originalShelledFloors[i] = true;
+            }
+        } else {
+            originalShelledFloors.fill(true);
+        }
         if (this.shelledFloors.length !== originalShelledFloors.length) return true;
         for (let i = 0; i < this.shelledFloors.length; i++) {
             if (this.shelledFloors[i] !== originalShelledFloors[i]) return true;
