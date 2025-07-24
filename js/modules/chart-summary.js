@@ -344,9 +344,11 @@ export function updateSummary() {
             <th scope="col" class="px-6 py-3 text-right">COW</th>
             <th scope="col" class="px-6 py-3 text-right">Indirects</th>
             <th scope="col" class="px-6 py-3 text-right">Total</th>
-            <th scope="col" class="px-6 py-3 text-right">Gross SF</th>
-            <th scope="col" class="px-6 py-3 text-right">$/SF</th>
-            <th scope="col" class="px-6 py-3 text-right">Variance</th>
+            <th scope="col" class="px-6 py-3 text-right">GSF</th>
+            <th scope="col" class="px-6 py-3 text-right">ASF</th>
+            <th scope="col" class="px-6 py-3 text-right">$/GSF</th>
+            <th scope="col" class="px-6 py-3 text-right">$/ASF</th>
+            <th scope="col" class="px-6 py-3 text-right">Budget &#x0394;</th>
         </tr>
     `;
 
@@ -356,7 +358,13 @@ export function updateSummary() {
         const { cowTotal, indirectTotal, totalProjectCost } = totals;
 
         const grossSF = series.grossSF || 0;
-        const costPerSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
+        
+        // Assignable SF is calculated from the 'C Interiors' component's square footage
+        const cInteriorsComponent = series.costOfWork.find(c => c.name === 'C Interiors');
+        const assignedSF = cInteriorsComponent ? cInteriorsComponent.square_footage : 0;
+
+        const costPerGSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
+        const costPerASF = assignedSF > 0 ? totalProjectCost / assignedSF : 0;
         const variance = totalProjectCost - gmp;
         
         const row = tbody.insertRow();
@@ -367,7 +375,9 @@ export function updateSummary() {
             <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(indirectTotal)}</td>
             <td class="px-6 py-4 text-right font-semibold">${utils.formatCurrencyBig(totalProjectCost)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerSF)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatNumber(assignedSF)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerGSF)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerASF)}</td>
             <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
                 ${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}
             </td>
