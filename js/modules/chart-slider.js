@@ -330,8 +330,15 @@ function showBenchmarkTooltip(event, benchmarkData, componentData) {
         .attr('class', 'benchmark-tooltip-name')
         .text(benchmarkData.name);
     
-    // Add system details if they exist
+    // Add system details and cost/sf if they exist
     if (benchmarkComponent) {
+        // Add cost per square foot if available
+        if (typeof benchmarkComponent.cost === 'number') {
+            contentContainer.append('div')
+                .attr('class', 'text-base benchmark-tooltip-cost')
+                .style('margin-top', '8px')
+                .text(`Cost: $${benchmarkComponent.cost.toFixed(2)}/SF`);
+        }
         if (benchmarkComponent.systemDetail && benchmarkComponent.systemDetail !== "Detail needed.") {
             contentContainer.append('div')
                 .attr('class', 'benchmark-tooltip-detail')
