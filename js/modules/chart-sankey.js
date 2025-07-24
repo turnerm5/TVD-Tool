@@ -193,7 +193,7 @@ export function renderSankeyChart(data) {
     // Add labels
     svg.append("g")
         .attr("font-family", "sans-serif")
-        .attr("font-size", 12)
+        .attr("font-size", 16)
         .selectAll("text")
         .data(graphNodes)
         .join("text")
