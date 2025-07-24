@@ -235,14 +235,16 @@ const sampleData = {
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 121.22,
-                    "systemDetail": "Extensive exterior glazing and interior glass walls to promote 'science on display'; cladding supported by a cold-formed steel backup system."
+                    "cost": 124.22,
+                    "systemDetail": "Extensive exterior glazing and interior glass walls to promote 'science on display'; cladding supported by a cold-formed steel backup system.",
+                    "image": "img/benchmarks/osu-johnson-hall/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 16.35 },
                 { 
                     "name": "C Interiors", 
                     "cost": 97.79,
-                    "systemDetail": "Highly complex labs with 32 different specialty gas piping systems; features a 'Unit Ops' teaching lab and a biomedical prototyping facility."
+                    "systemDetail": "Highly complex labs with 32 different specialty gas piping systems; features a 'Unit Ops' teaching lab and a biomedical prototyping facility.",
+                    "image": "img/benchmarks/osu-johnson-hall/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
@@ -251,9 +253,17 @@ const sampleData = {
                     "pros": "Extremely energy-efficient due to radiant systems and heat recovery; provides superior, quiet occupant comfort.",
                     "cons": "Complex control integration between systems; radiant systems have slow thermal response times; potential condensation risk."
                 },
-                { "name": "E Equipment and Furnishings", "cost": 54.23 },
+                { 
+                    "name": "E Equipment and Furnishings", 
+                    "cost": 54.23,
+                    "image": "img/benchmarks/osu-johnson-hall/equipment.jpg"
+                },
                 { "name": "F Special Construction", "cost": 2.11 },
-                { "name": "G Building Sitework", "cost": 46.20 }
+                { 
+                    "name": "G Building Sitework", 
+                    "cost": 46.20,
+                    "image": "img/benchmarks/osu-johnson-hall/sitework.jpg"
+                }
             ]
         },
         {
