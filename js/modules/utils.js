@@ -99,9 +99,9 @@ export function calculateComponentValue(component) {
 }
 
 /**
- * Creates a stable "Baseline" series using pure original data.
+ * Creates a stable "Predesign" series using pure original data.
  * This is used as the reference point in summary charts.
- * @returns {object} The baseline data series object
+ * @returns {object} The predesign data series object
  */
 export function createImportedDataSeries() {
     const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
@@ -123,7 +123,7 @@ export function createImportedDataSeries() {
     }
     
     return {
-        name: "Baseline",
+        name: "Predesign",
         color: "#9ca3af", // gray-400
         costOfWork: costOfWork,
         grossSF: state.originalData.grossSF

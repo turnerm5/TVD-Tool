@@ -46,7 +46,7 @@ function wrap(text, width) {
  */
 export function renderSummaryCharts() {
     // --- 1. Data Preparation ---
-    // Create stable "Baseline" series using pure original data (never changes)
+    // Create stable "Predesign" series using pure original data (never changes)
     const importedSeries = utils.createImportedDataSeries();
     const allSeriesData = [importedSeries, ...state.snapshots];
     const seriesNames = allSeriesData.map(d => d.name);
@@ -155,17 +155,17 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .append("div")
         .attr("class", "legend-item flex items-center gap-2 relative p-1 rounded")
         .on('mouseenter', function(event, d) {
-            if (d !== 'Baseline') {
+            if (d !== 'Predesign') {
                 d3.select(this).classed('hover-delete', true);
             }
         })
         .on('mouseleave', function(event, d) {
-             if (d !== 'Baseline') {
+             if (d !== 'Predesign') {
                 d3.select(this).classed('hover-delete', false);
             }
         })
         .on('click', async (event, d) => {
-            if (d !== 'Baseline') {
+            if (d !== 'Predesign') {
                 const confirmed = await ui.showConfirmDialog(
                     "Delete Snapshot",
                     `Are you sure you want to delete the "${d}" snapshot?`,
@@ -179,7 +179,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
             }
         });
     
-    legendItems.filter(d => d !== 'Baseline').classed('cursor-pointer', true);
+    legendItems.filter(d => d !== 'Predesign').classed('cursor-pointer', true);
 
     const legendContent = legendItems.append('div')
         .attr('class', 'legend-content flex items-center gap-2');
@@ -192,7 +192,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .attr("class", "font-medium")
         .text(d => d);
 
-    legendItems.filter(d => d !== 'Baseline')
+    legendItems.filter(d => d !== 'Predesign')
         .append('div')
         .attr('class', 'delete-overlay absolute inset-0 flex items-center justify-center font-bold text-white')
         .text('DELETE');
@@ -323,7 +323,7 @@ export function updateSummary() {
     summaryPanel.appendChild(header);
 
     // --- Data Series Table ---
-    // Create stable "Baseline" series using pure original data (never changes)
+    // Create stable "Predesign" series using pure original data (never changes)
     const importedSeries = utils.createImportedDataSeries();
     const allSeries = [importedSeries, ...state.snapshots];
 

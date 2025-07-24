@@ -85,17 +85,15 @@ body {
 }
 .component-label {
     position: absolute;
-    bottom: -3.5rem; /* Position it below the component column */
+    bottom: -4.5rem; /* Position it below the component column */
     left: 50%;
     transform: translateX(-50%); /* Center the label horizontally */
     width: 100%;
     text-align: center;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: #475569;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.2;
 }
 .component-column .lock-icon {
     position: absolute;
