@@ -46,18 +46,18 @@ const sampleData = {
         {
             "name": "Predesign",
             "description": "A simple, rectangular massing with a single floor plate. Four shelled floors.",
-            "image": "img/schemes/hub.jpg",
-            "grossSF": 62500,
+            "image": "img/schemes/predesign.jpg",
+            "grossSF": 82810,
             "floors": 5,
             "shelledFloors": 4,
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 12500 },
-                { "name": "B10 Superstructure", "square_footage": 62500 },
-                { "name": "B20 Enclosure", "square_footage": 40000 },
-                { "name": "B30 Roofing", "square_footage": 12500 },
-                { "name": "C Interiors", "square_footage": 62500 },
-                { "name": "D Services", "square_footage": 62500 },
-                { "name": "E Equipment and Furnishings", "square_footage": 62500 },
+                { "name": "A Substructure", "square_footage": 16500 },
+                { "name": "B10 Superstructure", "square_footage": 82810 },
+                { "name": "B20 Enclosure", "square_footage": 60000 },
+                { "name": "B30 Roofing", "square_footage": 16500 },
+                { "name": "C Interiors", "square_footage": 82810 },
+                { "name": "D Services", "square_footage": 82810 },
+                { "name": "E Equipment and Furnishings", "square_footage": 82810 },
                 { "name": "F Special Construction", "square_footage": 10000 },
                 { "name": "G Building Sitework", "square_footage": 32495 }
             ]
