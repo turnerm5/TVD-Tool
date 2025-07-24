@@ -67,7 +67,7 @@ const sampleData = {
             "description": "An L-shaped massing composed of interlocking volumes.",
             "image": "img/schemes/hub.jpg",
             "grossSF": 62600,
-            "floors": 4,
+            "floors": 3,
             "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 17200 },
@@ -86,7 +86,7 @@ const sampleData = {
             "description": "Simple rectangular block with three identical 16,000 SF floor plates.",
             "image": "img/schemes/pavilion.jpg",
             "grossSF": 56000,
-            "floors": 4,
+            "floors": 3,
             "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 16000 },
@@ -105,7 +105,7 @@ const sampleData = {
             "description": "A more compact, vertically-oriented massing organized along a central axis.",
             "image": "img/schemes/axial.jpg",
             "grossSF": 54200,
-            "floors": 4,
+            "floors": 3,
             "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 14800 },
@@ -124,7 +124,7 @@ const sampleData = {
             "description": "A two-story scheme with a large, rectangular footprint designed to maximize the buildable floor area.",
             "image": "img/schemes/max-floor.jpg",
             "grossSF": 60000,
-            "floors": 4,
+            "floors": 2,
             "shelledFloors": 0,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 25000 },

@@ -19,10 +19,10 @@ export function setYScale(scale) {
     yScale = scale;
 }
 
-// Forward-declare the updateCInteriorsSF to be injected later.
-let updateCInteriorsSF;
-export function setUpdateCInteriorsSF(fn) {
-    updateCInteriorsSF = fn;
+// Forward-declare the updateSFForShelledFloors to be injected later.
+let updateSFForShelledFloors;
+export function setUpdateSFForShelledFloors(fn) {
+    updateSFForShelledFloors = fn;
 }
 
 /**
@@ -145,8 +145,8 @@ export function loadData(data, fileName = 'Sample Data') {
     state.previousSquareFootage = {};
     
     // Update C Interiors SF based on initial shelled floors
-    if (updateCInteriorsSF) {
-        updateCInteriorsSF();
+    if (updateSFForShelledFloors) {
+        updateSFForShelledFloors();
     }
 
     // Now that C Interiors is adjusted, set the initial baseline for all components

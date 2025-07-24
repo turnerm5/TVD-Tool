@@ -50,14 +50,16 @@ export function formatNumber(num) {
  * @returns {string} The formatted square footage string with change indication.
  */
 export function formatSquareFootageWithChange(currentSF, componentName) {
-    const change = state.getSquareFootageChange(componentName, currentSF);
-    const formattedSF = currentSF.toLocaleString('en-US');
+    // Round to nearest integer for display
+    const roundedSF = Math.round(currentSF);
+    const change = state.getSquareFootageChange(componentName, roundedSF);
+    const formattedSF = roundedSF.toLocaleString('en-US');
     
     if (change === 0) {
         return `${formattedSF} SF`;
     }
     
-    const changeFormatted = Math.abs(change).toLocaleString('en-US');
+    const changeFormatted = Math.abs(Math.round(change)).toLocaleString('en-US');
     const changeSign = change > 0 ? '+' : '-';
     return `${formattedSF} SF (${changeSign}${changeFormatted} SF)`;
 }
@@ -137,20 +139,18 @@ export function createImportedDataSeries() {
             shelledFloorsCount = totalFloors;
         }
         const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
-
-        // Get the original C Interiors SF and calculate its initial, shelled value
-        const originalCInteriorsData = originalPredesignScheme.costOfWork.find(c => c.name === 'C Interiors');
-        const originalCInteriorsSF = originalCInteriorsData ? originalCInteriorsData.square_footage : 0;
-        const adjustedCInteriorsSF = originalCInteriorsSF * (1 - shelledPercentage);
+        const componentsToAdjust = ['C Interiors', 'E Equipment and Furnishings'];
 
         // Merge square_footage from Predesign scheme with target_value from initialTargetValues
         costOfWork = originalPredesignScheme.costOfWork.map(component => {
             const targetValueData = initialTargetValues.find(tv => tv.name === component.name);
             let sf = Number(component.square_footage) || 0;
 
-            // If this is the C Interiors component, use the adjusted SF we just calculated
-            if (component.name === 'C Interiors') {
-                sf = adjustedCInteriorsSF;
+            // If this is a component that needs adjustment, calculate its shelled value
+            if (componentsToAdjust.includes(component.name)) {
+                const originalComponentData = originalPredesignScheme.costOfWork.find(c => c.name === component.name);
+                const originalSF = originalComponentData ? originalComponentData.square_footage : 0;
+                sf = originalSF * (1 - shelledPercentage);
             }
 
             return {
