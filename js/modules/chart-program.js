@@ -34,7 +34,8 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('class', 'font-semibold text-gray-700')
         .text('Shell Floors:');
 
-            const floors = state.currentScheme.floors || 0;
+    const floors = state.currentScheme.floors || 0;
+
     for (let i = 0; i < floors; i++) {
         const checkboxWrapper = checkboxContainer.append('div')
             .attr('class', 'flex items-center');
@@ -45,14 +46,28 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
             .attr('class', 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
             .property('checked', state.shelledFloors[i])
             .on('change', function(event) {
-                state.shelledFloors[i] = event.target.checked;
+                const floorIndex = i;
+                const isChecked = event.target.checked;
+                
+                if (isChecked) {
+                    // If checking this floor, also check all floors above it
+                    for (let j = floorIndex; j < floors; j++) {
+                        state.shelledFloors[j] = true;
+                    }
+                } else {
+                    // If unchecking this floor, also uncheck all floors below it and itself
+                    for (let j = 0; j <= floorIndex; j++) {
+                        state.shelledFloors[j] = false;
+                    }
+                }
+                
                 updateCInteriorsSF();
                 render();
             });
 
         checkboxWrapper.append('label')
             .attr('for', `shell-floor-${i + 1}`)
-            .attr('class', 'ml-2 text-sm text-gray-900')
+            .attr('class', 'ml-2 text-base text-gray-900')
             .text(`Floor ${i + 1}`);
     }
 
@@ -105,12 +120,12 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
     // --- PROGRAM TABLE ---
 
     const table = container.append('table')
-        .attr('class', 'w-full text-sm text-left text-gray-500 border border-gray-200 bg-white rounded-lg shadow-sm overflow-hidden');
+        .attr('class', 'w-full text-base text-left text-gray-500 border border-gray-200 bg-white rounded-lg shadow-sm overflow-hidden');
 
     // Header
     const thead = table.append('thead');
     const headerRow = thead.append('tr')
-        .attr('class', 'text-xs text-gray-700 uppercase bg-gray-50');
+        .attr('class', 'text-sm text-gray-700 uppercase bg-gray-50');
 
     // Define the headers
     const headers = [
@@ -172,7 +187,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
 
     sfCells.append('input')
         .attr('type', 'text')
-        .attr('class', 'program-table-input')
+        .attr('class', 'text-left program-table-input')
         .attr('value', d => d.square_footage.toLocaleString('en-US'))
         .attr('data-phase', 'phase2')
         .attr('data-name', d => d.name)
@@ -320,8 +335,8 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             state.shelledFloors.fill(false);
 
             // Animate Gross SF change
-                    const oldGrossSf = state.currentData.grossSF;
-        const newGrossSf = d.grossSF;
+            const oldGrossSf = state.currentData.grossSF;
+            const newGrossSf = d.grossSF;
             let grossSf_change = 'none';
             if (newGrossSf > oldGrossSf) grossSf_change = 'increase';
             else if (newGrossSf < oldGrossSf) grossSf_change = 'decrease';

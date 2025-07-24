@@ -517,43 +517,34 @@ function renderLockControls() {
     }
 
 
-    // Create a table
-    const table = dom.lockControls.append('table').attr('class', 'w-full text-sm');
-    const thead = table.append('thead');
-    const tbody = table.append('tbody');
+    // Create locked components section
+    const lockedSection = dom.lockControls.append('div')
+        .attr('class', 'mb-4');
 
-    thead.append('tr')
-        .selectAll('th')
-        .data(['Component', 'Locked'])
-        .enter()
-        .append('th')
-        .attr('class', 'text-left font-semibold p-2')
-        .text(d => d);
+    lockedSection.append('h4')
+        .attr('class', 'font-semibold text-sm mb-2')
+        .text('Locked');
 
-    const rows = tbody.selectAll('tr')
+    const componentButtons = lockedSection.selectAll('.component-btn')
         .data(costOfWork, d => d.name)
         .enter()
-        .append('tr');
-
-    rows.append('td')
-        .attr('class', 'p-2')
-        .text(d => d.name);
-
-    const lockCell = rows.append('td')
-        .attr('class', 'p-2 text-center');
-
-    lockCell.append('input')
-        .attr('type', 'checkbox')
-        .property('checked', d => {
+        .append('button')
+        .attr('class', d => {
             const key = `${phaseKey}-${d.name}`;
-            return state.lockedCostOfWork.has(key);
+            const isLocked = state.lockedCostOfWork.has(key);
+            return `component-btn w-full text-left text-sm p-2 rounded mb-1 transition ${
+                isLocked 
+                    ? 'bg-red-200 border-2 border-red-400 text-red-800' 
+                    : 'bg-gray-100 hover:bg-gray-200 border-2 border-transparent'
+            }`;
         })
-        .on('change', (event, d) => {
+        .text(d => d.name)
+        .on('click', (event, d) => {
             const key = `${phaseKey}-${d.name}`;
-            if (event.target.checked) {
-                state.lockedCostOfWork.add(key);
-            } else {
+            if (state.lockedCostOfWork.has(key)) {
                 state.lockedCostOfWork.delete(key);
+            } else {
+                state.lockedCostOfWork.add(key);
             }
             render();
         });
