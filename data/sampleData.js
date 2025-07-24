@@ -165,24 +165,31 @@ const sampleData = {
                 { 
                     "name": "B20 Enclosure", 
                     "cost": 99.10,
-                    "systemDetail": "Facade of brick and metal panels with ceramic fritted glass on south-facing windows; exterior materials wrap into the interior."
+                    "systemDetail": "Facade of brick and metal panels with ceramic fritted glass on south-facing windows; exterior materials wrap into the interior.",
+                    "image": "img/benchmarks/bsu-mat/enclosure.jpg"
                 },
                 { "name": "B30 Roofing", "cost": 11.39 },
                 { 
                     "name": "C Interiors", 
                     "cost": 78.63,
-                    "systemDetail": "Over 40 materials science labs, including core facilities for electron microscopy and surface science; features polished concrete and end-grain wood floors."
+                    "systemDetail": "Over 40 materials science labs, including core facilities for electron microscopy and surface science; features polished concrete and end-grain wood floors.",
+                    "image": "img/benchmarks/bsu-mat/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
                     "cost": 281.02,
                     "systemDetail": "High-precision Variable Air Volume (VAV) system with HEPA filtration and low-velocity laminar airflow for vibration and particulate control.",
                     "pros": "Provides exceptional environmental stability (temperature, vibration, particulates) for sensitive research; highly responsive.",
-                    "cons": "High energy consumption due to tight controls and filtration; complex to design, install, and commission."
+                    "cons": "High energy consumption due to tight controls and filtration; complex to design, install, and commission.",
+                    "image": "img/benchmarks/bsu-mat/services.jpg"
                 },
                 { "name": "E Equipment and Furnishings", "cost": 54.78 },
                 { "name": "F Special Construction", "cost": 4.14 },
-                { "name": "G Building Sitework", "cost": 34.09 }
+                { 
+                    "name": "G Building Sitework", 
+                    "cost": 34.09,
+                    "image": "img/benchmarks/bsu-mat/sitework.jpg"
+                }
             ]
         },
         {
