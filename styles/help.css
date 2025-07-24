@@ -1,0 +1,18 @@
+/* Add any specific styles for the help modal here if needed */
+.prose {
+    max-width: 80ch; /* Adjust as needed for optimal reading length */
+} 
+
+.prose p {
+    margin-bottom: 1em; /* Add space between paragraphs */
+}
+
+.prose p:last-child {
+    margin-bottom: 0; /* Remove space after the last paragraph */
+}
+
+.prose ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-top: 1em;
+} 
