@@ -352,7 +352,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         .join('div')
         .attr('class', d => {
             const isSelected = state.selectedSchemeName === d.name;
-            return `scheme-card relative rounded-lg overflow-hidden shadow-md cursor-pointer h-full ${isSelected ? 'ring-4 ring-red-500' : 'border border-gray-200'}`;
+            return `scheme-card bg-white relative rounded-lg overflow-hidden shadow-md cursor-pointer h-full ${isSelected ? 'ring-4 ring-red-500' : 'border border-gray-200'}`;
         })
         .on('click', (event, d) => {
             // When a scheme card is clicked:
