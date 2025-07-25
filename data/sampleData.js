@@ -46,7 +46,7 @@ const sampleData = {
         {
             "name": "Predesign",
             "description": "A simple, rectangular massing with a single floor plate. Multiple shelled floors.",
-            "image": "img/schemes/predesignNew.jpg",
+            "image": "img/schemes/predesign.jpg",
             "grossSF": 58000,
             "floors": 3,
             "shelledFloors": 0,
@@ -307,7 +307,11 @@ const sampleData = {
                 },
                 { "name": "E Equipment and Furnishings", "cost": 49.78 },
                 { "name": "F Special Construction", "cost": 0.35 },
-                { "name": "G Building Sitework", "cost": 49.72 }
+                { 
+                    "name": "G Building Sitework", 
+                    "cost": 49.72,
+                    "image": "img/benchmarks/ui-iric/sitework.jpg"
+                }
             ]
         },
         {
@@ -362,7 +366,7 @@ const sampleData = {
                 { 
                     "name": "G Building Sitework", 
                     "cost": 35.79, 
-                    "image": "img/benchmarks/uo-knight/sitework.jpg" 
+                    "image": "img/benchmarks/uo-knight/sitework.jpg"
                 }
             ]
         },
@@ -376,7 +380,8 @@ const sampleData = {
                 { 
                     "name": "A Substructure", 
                     "cost": 106.72,
-                    "systemDetail": "Partially below-grade construction featuring a massive, isolated concrete foundation to create the largest vibration-free laboratory space on the West Coast."
+                    "systemDetail": "Partially below-grade construction featuring a massive, isolated concrete foundation to create the largest vibration-free laboratory space on the West Coast.",
+                    "image": "img/benchmarks/uw-mole/substructure.jpg"
                 },
                 { 
                     "name": "B10 Superstructure", 
@@ -407,7 +412,11 @@ const sampleData = {
                 },
                 { "name": "E Equipment and Furnishings", "cost": 33.60 },
                 { "name": "F Special Construction", "cost": 34.30 },
-                { "name": "G Building Sitework", "cost": 73.65 }
+                { 
+                    "name": "G Building Sitework", 
+                    "cost": 73.65,
+                    "image": "img/benchmarks/uw-mole/sitework.jpg"
+                }
             ]
         },
         {
