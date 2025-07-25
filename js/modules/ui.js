@@ -1,3 +1,15 @@
+/*
+ * © 2025 Hoffman Construction
+ *
+ * This software is the property of Hoffman Construction.
+ * All rights reserved.
+ *
+ * Unauthorized duplication or distribution of this software,
+ * in whole or in part, is strictly prohibited.
+ *
+ * Author: Marshall Turner
+ */
+
 /**
  * @file ui.js
  * @description Handles general UI updates and view management for the TVD Tool.
