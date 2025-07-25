@@ -1,3 +1,15 @@
+/*
+ * © 2025 Hoffman Construction
+ *
+ * This software is the property of Hoffman Construction.
+ * All rights reserved.
+ *
+ * Unauthorized duplication or distribution of this software,
+ * in whole or in part, is strictly prohibited.
+ *
+ * Author: Marshall Turner
+ */
+
 const sampleData = {
     "phase1": {
         "totalProjectBudget": 20000000,
@@ -124,7 +136,7 @@ const sampleData = {
             ]
         },
         {
-            "name": "All You Can Eat",
+            "name": "Big Quad",
             "pros": ["Maximizes usable area on two efficient floors."],
             "cons": ["Large, deep floor plates are difficult to daylight."],
             "image": "img/schemes/allYouCanEat.jpg",
