@@ -341,7 +341,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     // Create a horizontal grid layout for the scheme cards
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-6 gap-4')
-        .style('height', '300px');
+        .style('height', '350px');
 
     // Get the list of available schemes from the current data
     const schemeData = state.currentData.schemes || [];
@@ -446,7 +446,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         .attr('src', d => d.image)
         .attr('alt', d => d.name)
         .attr('class', 'w-full object-cover')
-        .style('height', '60%');
+        .style('height', '40%');
 
     // Add content container below the image
     const contentContainer = schemeCards.append('div')
@@ -460,7 +460,11 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     // Add description
     contentContainer.append('p')
         .attr('class', 'text-sm text-gray-600 mb-2 leading-tight')
-        .text(d => d.description);
+        .html(d => {
+            const pros = d.pros.map(p => `✅ ${p}`).join('<br>');
+            const cons = d.cons.map(c => `❌ ${c}`).join('<br>');
+            return `${pros}<br>${cons}`;
+        });
 
     // Add stats container
     const statsContainer = contentContainer.append('div')
