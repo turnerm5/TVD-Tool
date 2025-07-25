@@ -13,7 +13,7 @@ export const state = {
     indirectCostPercentages: [],
     shelledFloors: [],
     currentScheme: null, // The currently active scheme (starts with Predesign)
-    selectedSchemeName: null, // The name of the scheme card that should be highlighted
+    selectedSchemeName: 'Predesign', // The name of the scheme card that should be highlighted
     previousSquareFootage: {}, // Track previous square footage values for showing changes
 
     /**

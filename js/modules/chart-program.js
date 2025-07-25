@@ -473,7 +473,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     // Add total SF
     statsContainer.append('div')
         .attr('class', 'mb-1')
-                    .html(d => `<strong>Total SF:</strong> ${d.grossSF.toLocaleString()}`);
+        .html(d => `<strong>Floors:</strong> ${d.floors}<br><strong>Total SF:</strong> ${d.grossSF.toLocaleString()}`);
 
     
 
