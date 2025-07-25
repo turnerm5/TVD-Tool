@@ -45,7 +45,7 @@ const sampleData = {
     "schemes": [
         {
             "name": "Predesign",
-            "description": "A simple, rectangular massing with a single floor plate. Multiple shelled floors.",
+            "description": "✅ Simple, regular form is efficient and flexible.\n❌ Shelled floors provide less usable space initially.",
             "image": "img/schemes/predesign.jpg",
             "grossSF": 58000,
             "floors": 3,
@@ -64,7 +64,7 @@ const sampleData = {
         },
         {
             "name": "SxSW",
-            "description": "An L-shaped massing composed of interlocking volumes.",
+            "description": "✅ Creates useful outdoor spaces and architectural interest.\n❌ Complex form is less efficient and more costly.",
             "image": "img/schemes/sxsw.jpg",
             "grossSF": 50000,
             "floors": 3,
@@ -83,7 +83,7 @@ const sampleData = {
         },
         {
             "name": "Science Court",
-            "description": "Simple rectangular block with three identical 16,000 SF floor plates.",
+            "description": "✅ Highly efficient and repetitive, reducing cost.\n❌ Can result in deep floor plates with poor daylight.",
             "image": "img/schemes/sciencesCourt.jpg",
             "grossSF": 56000,
             "floors": 3,
@@ -102,7 +102,7 @@ const sampleData = {
         },
         {
             "name": "Marquee",
-            "description": "A more compact, vertically-oriented massing organized along a central axis.",
+            "description": "✅ Efficient footprint for tight urban sites.\n❌ Taller and more compact form can feel constrained.",
             "image": "img/schemes/marquee.jpg",
             "grossSF": 54200,
             "floors": 3,
@@ -121,7 +121,7 @@ const sampleData = {
         },
         {
             "name": "All You Can Eat",
-            "description": "A two-story scheme with a large, rectangular footprint designed to maximize the buildable floor area.",
+            "description": "✅ Maximizes usable area on two efficient floors.\n❌ Large, deep floor plates are difficult to daylight.",
             "image": "img/schemes/allYouCanEat.jpg",
             "grossSF": 60000,
             "floors": 2,
@@ -140,7 +140,7 @@ const sampleData = {
         },
         {
             "name": "Hillclimb",
-            "description": "A two-story scheme with a large, rectangular footprint designed to maximize the buildable floor area.",
+            "description": "✅ Creates engaging outdoor terraces and adapts to topography.\n❌ Construction on a slope is complex and costly.",
             "image": "img/schemes/hillclimb.jpg",
             "grossSF": 60000,
             "floors": 4,
