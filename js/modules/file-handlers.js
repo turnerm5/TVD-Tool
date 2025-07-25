@@ -129,16 +129,15 @@ export function loadData(data, fileName = 'Sample Data') {
     // Calculate indirect cost percentages now that originalData is set
     state.calculateIndirectCostPercentages();
     
-    // Reset shelled floors state and set the top 4 floors to shelled
+    // Set shelled floors based on the predesign scheme's setting
     const floorCount = predesignScheme.floors || 0;
+    const shelledFloorsCount = predesignScheme.shelledFloors || 0;
     state.shelledFloors = new Array(floorCount).fill(false);
-    if (floorCount > 4) {
-        for (let i = floorCount - 4; i < floorCount; i++) {
+    // Mark the top N floors as shelled (checked)
+    for (let i = floorCount - shelledFloorsCount; i < floorCount; i++) {
+        if (i >= 0 && i < floorCount) {
             state.shelledFloors[i] = true;
         }
-    } else {
-        // If 4 or fewer floors, shell them all
-        state.shelledFloors.fill(true);
     }
     
     // Initialize previous square footage tracking
