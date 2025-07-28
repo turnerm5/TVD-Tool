@@ -473,9 +473,8 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     contentContainer.append('p')
         .attr('class', 'text-sm text-gray-600 mb-2 leading-tight')
         .html(d => {
-            const pros = d.pros.map(p => `✅ ${p}`).join('<br>');
-            const cons = d.cons.map(c => `❌ ${c}`).join('<br>');
-            return `${pros}<br>${cons}`;
+            const description = d.description;
+            return `${description}`;
         });
 
     // Add stats container

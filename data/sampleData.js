@@ -57,8 +57,7 @@ const sampleData = {
     "schemes": [
         {
             "name": "Predesign",
-            "pros": ["Simple, regular form is efficient and flexible."],
-            "cons": ["Shelled floors provide less usable space initially."],
+            "description": "Northside core built right up to Eastlick. The three story massing version can connect with a ramped bridge to 3rd Level of Abelson.",
             "image": "img/schemes/predesign.jpg",
             "grossSF": 58000,
             "floors": 3,
@@ -77,8 +76,7 @@ const sampleData = {
         },
         {
             "name": "SxSW",
-            "pros": ["Creates useful outdoor spaces and architectural interest."],
-            "cons": ["Complex form is less efficient and more costly."],
+            "description": "Massing is broken down by facade modulation that extends gathering areas to the south and west. Largest skin area.",
             "image": "img/schemes/sxsw.jpg",
             "grossSF": 50000,
             "floors": 3,
@@ -96,9 +94,8 @@ const sampleData = {
             ]
         },
         {
-            "name": "Science Court",
-            "pros": ["Highly efficient and repetitive, reducing cost."],
-            "cons": ["Can result in deep floor plates with poor daylight."],
+            "name": "The Sciences Court",
+            "description": "Creates and inviting courtyard between Abelson and Eastlick by extending a plaza north of ISB and creating a pedestrian connection to college over existing Abelson loading dock.",
             "image": "img/schemes/sciencesCourt.jpg",
             "grossSF": 50000,
             "floors": 3,
@@ -117,8 +114,7 @@ const sampleData = {
         },
         {
             "name": "Marquee",
-            "pros": ["Efficient footprint for tight urban sites."],
-            "cons": ["Taller and more compact form can feel constrained."],
+            "description": "Connected to both Abelson and Eastlick. 4-story massing can connect to the 4th level of Abelson. N-S corridor aligns with central spine of Eastlick.",
             "image": "img/schemes/marquee.jpg",
             "grossSF": 64000,
             "floors": 4,
@@ -136,9 +132,8 @@ const sampleData = {
             ]
         },
         {
-            "name": "Big Quad",
-            "pros": ["Maximizes usable area on two efficient floors."],
-            "cons": ["Large, deep floor plates are difficult to daylight."],
+            "name": "Big Quadrants",
+            "description": "Largest possible footprint, least amount of envelope.",
             "image": "img/schemes/allYouCanEat.jpg",
             "grossSF": 50000,
             "floors": 2,
@@ -157,8 +152,7 @@ const sampleData = {
         },
         {
             "name": "Hillclimb",
-            "pros": ["Creates engaging outdoor terraces and adapts to topography."],
-            "cons": ["Construction on a slope is complex and costly."],
+            "description": "Consolidates gathering spaces in a volume that reaches down to the SW corner of the site.",
             "image": "img/schemes/hillclimb.jpg",
             "grossSF": 58000,
             "floors": 3,
