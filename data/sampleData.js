@@ -141,7 +141,7 @@ const sampleData = {
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 25000 },
                 { "name": "B10 Superstructure", "square_footage": 50000 },
-                { "name": "B20 Enclosure", "square_footage": 40000 },
+                { "name": "B20 Enclosure", "square_footage": 30000 },
                 { "name": "B30 Roofing", "square_footage": 25000 },
                 { "name": "C Interiors", "square_footage": 50000 },
                 { "name": "D Services", "square_footage": 50000 },

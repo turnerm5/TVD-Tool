@@ -142,14 +142,10 @@ export function createImportedDataSeries() {
 
     let costOfWork = [];
     if (originalPredesignScheme) {
-        // Calculate the shelled floor reduction specifically for the predesign scheme
+        // Calculate the shelled floor reduction based on the 'shelledFloors' property
         const totalFloors = originalPredesignScheme.floors || 0;
-        let shelledFloorsCount = 0;
-        if (totalFloors > 4) {
-            shelledFloorsCount = 4;
-        } else {
-            shelledFloorsCount = totalFloors;
-        }
+        const shelledFloorsCount = originalPredesignScheme.shelledFloors || 0;
+        
         const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
         const componentsToAdjust = ['C Interiors', 'E Equipment and Furnishings'];
 
