@@ -75,22 +75,22 @@ const sampleData = {
             ]
         },
         {
-            "name": "SxSW",
-            "description": "Massing is broken down by facade modulation that extends gathering areas to the south and west. Largest skin area.",
-            "image": "img/schemes/sxsw.jpg",
+            "name": "Big Quadrants",
+            "description": "Largest possible footprint, least amount of envelope.",
+            "image": "img/schemes/allYouCanEat.jpg",
             "grossSF": 50000,
-            "floors": 3,
+            "floors": 2,
             "shelledFloors": 0,
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 16500 },
+                { "name": "A Substructure", "square_footage": 25000 },
                 { "name": "B10 Superstructure", "square_footage": 50000 },
-                { "name": "B20 Enclosure", "square_footage": 50000 },
-                { "name": "B30 Roofing", "square_footage": 16500 },
+                { "name": "B20 Enclosure", "square_footage": 30000 },
+                { "name": "B30 Roofing", "square_footage": 25000 },
                 { "name": "C Interiors", "square_footage": 50000 },
                 { "name": "D Services", "square_footage": 50000 },
                 { "name": "E Equipment and Furnishings", "square_footage": 50000 },
-                { "name": "F Special Construction", "square_footage": 30000 },
-                { "name": "G Building Sitework", "square_footage": 42800 }
+                { "name": "F Special Construction", "square_footage": 10000 },
+                { "name": "G Building Sitework", "square_footage": 22800 }
             ]
         },
         {
@@ -113,6 +113,25 @@ const sampleData = {
             ]
         },
         {
+            "name": "SxSW",
+            "description": "Massing is broken down by facade modulation that extends gathering areas to the south and west. Largest skin area.",
+            "image": "img/schemes/sxsw.jpg",
+            "grossSF": 50000,
+            "floors": 3,
+            "shelledFloors": 0,
+            "costOfWork": [
+                { "name": "A Substructure", "square_footage": 16500 },
+                { "name": "B10 Superstructure", "square_footage": 50000 },
+                { "name": "B20 Enclosure", "square_footage": 50000 },
+                { "name": "B30 Roofing", "square_footage": 16500 },
+                { "name": "C Interiors", "square_footage": 50000 },
+                { "name": "D Services", "square_footage": 50000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
+                { "name": "F Special Construction", "square_footage": 30000 },
+                { "name": "G Building Sitework", "square_footage": 42800 }
+            ]
+        },
+        {
             "name": "Marquee",
             "description": "Connected to both Abelson and Eastlick. 4-story massing can connect to the 4th level of Abelson. N-S corridor aligns with central spine of Eastlick.",
             "image": "img/schemes/marquee.jpg",
@@ -131,25 +150,7 @@ const sampleData = {
                 { "name": "G Building Sitework", "square_footage": 35200 }
             ]
         },
-        {
-            "name": "Big Quadrants",
-            "description": "Largest possible footprint, least amount of envelope.",
-            "image": "img/schemes/allYouCanEat.jpg",
-            "grossSF": 50000,
-            "floors": 2,
-            "shelledFloors": 0,
-            "costOfWork": [
-                { "name": "A Substructure", "square_footage": 25000 },
-                { "name": "B10 Superstructure", "square_footage": 50000 },
-                { "name": "B20 Enclosure", "square_footage": 30000 },
-                { "name": "B30 Roofing", "square_footage": 25000 },
-                { "name": "C Interiors", "square_footage": 50000 },
-                { "name": "D Services", "square_footage": 50000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
-                { "name": "F Special Construction", "square_footage": 10000 },
-                { "name": "G Building Sitework", "square_footage": 22800 }
-            ]
-        },
+        
         {
             "name": "Hillclimb",
             "description": "Consolidates gathering spaces in a volume that reaches down to the SW corner of the site.",
