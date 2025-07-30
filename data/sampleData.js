@@ -442,7 +442,7 @@ const sampleData = {
                 { 
                     "name": "A Substructure", 
                     "cost": 4.87,
-                    "systemDetail": "Detail needed."
+                    "systemDetail": "Conventional spread footings."
                 },
                 { 
                     "name": "B10 Superstructure", 
