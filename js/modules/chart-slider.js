@@ -405,13 +405,24 @@ function hideBenchmarkTooltip() {
  * Renders the Y-axis labels for the main slider chart.
  */
 export function renderYAxisLabels() {
-    dom.yAxisLabelsContainer.html('');
+    dom.yAxisLabelsContainer.html(''); // Clear previous labels and line
+
+    // Add the vertical axis line
+    const yRange = yScale.range();
+    dom.yAxisLabelsContainer.append('div')
+        .style('position', 'absolute')
+        .style('right', '0')
+        .style('top', `${yRange[1]}px`)
+        .style('width', '1px')
+        .style('height', `${yRange[0] - yRange[1]}px`)
+        .style('background-color', 'currentColor'); // Use text color
+
     const ticks = yScale.ticks(10);
     ticks.forEach(tick => {
         const label = dom.yAxisLabelsContainer.append('div')
+            .attr('class', 'y-axis-label')
             .text(`$${tick}`);
         
-        // Use CSS for styling, but position requires JS
         label.style('position', 'absolute')
              .style('top', `${yScale(tick)}px`)
              .style('transform', 'translateY(-50%)');
