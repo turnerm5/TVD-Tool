@@ -19,7 +19,7 @@
 export const splashScreen = document.getElementById('splash-screen');
 export const mainContent = document.getElementById('main-content');
 export const chartContainer = d3.select("#chart-container");
-export const yAxisLabelsContainer = document.getElementById('y-axis-labels-container');
+export const yAxisLabelsContainer = d3.select('#y-axis-labels-container');
 export const lockControls = d3.select('#lock-controls');
 export const resetButton = document.getElementById('reset-button');
 export const startOverBtn = document.getElementById('start-over-btn');

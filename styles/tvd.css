@@ -17,8 +17,17 @@ body {
 
 .y-axis-labels {
     position: relative;
-    width: 50px; /* Give it a fixed width */
+    width: 60px; /* Give it a fixed width */
     flex-shrink: 0; /* Prevent it from shrinking */
+    color: #4b5563; /* gray-600 */
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.y-axis-label {
+    position: absolute;
+    right: 12px; /* Position to the right of the axis line */
+    transform: translateY(-50%);
 }
 
 .component-column {
