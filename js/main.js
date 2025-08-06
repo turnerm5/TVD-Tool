@@ -65,7 +65,7 @@ function render() {
 
     dom.chartViewBtn.classList.remove('active');
     dom.programViewBtn.classList.remove('active');
-    dom.phase1ViewBtn.classList.remove('active');
+    // dom.phase1ViewBtn.classList.remove('active');
     dom.benchmarksViewBtn.classList.remove('active');
     dom.summaryViewBtn.classList.remove('active');
 
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- View Selector Handlers ---
     dom.chartViewBtn.addEventListener('click', () => { state.currentView = 'chart'; state.currentPhase = 'phase2'; render(); });
     dom.programViewBtn.addEventListener('click', () => { state.currentView = 'program'; render(); });
-    dom.phase1ViewBtn.addEventListener('click', () => { state.currentView = 'phase1'; render(); });
+    // dom.phase1ViewBtn.addEventListener('click', () => { state.currentView = 'phase1'; render(); });
     dom.benchmarksViewBtn.addEventListener('click', () => { state.currentView = 'benchmarks'; state.selectedBenchmark = null; render(); });
     dom.summaryViewBtn.addEventListener('click', () => { state.currentView = 'summary'; state.currentPhase = 'phase2'; render(); });
 
