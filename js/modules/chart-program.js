@@ -18,24 +18,42 @@ import * as ui from './ui.js';
 export function updateSFForShelledFloors() {
     const componentsToUpdate = ['C Interiors', 'E Equipment and Furnishings'];
     const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
-    if (!originalPredesignScheme) return;
+    
+    if (!originalPredesignScheme || !state.currentScheme || !state.currentScheme.floorData) return;
 
-    const totalFloors = state.currentScheme.floors || 0;
-    const shelledFloorsCount = state.shelledFloors.filter(Boolean).length;
-    const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
+    // Calculate the total SF and shelled SF from the current scheme's floorData
+    let totalSchemeSF = 0;
+    let shelledSchemeSF = 0;
+
+    // We need to use the original scheme's floor data to get the base SF values
+    const originalScheme = state.originalData.schemes.find(s => s.name === state.currentScheme.name);
+    if (!originalScheme || !originalScheme.floorData) return;
+
+    originalScheme.floorData.forEach((floor, index) => {
+        // Use the current state of shelledFloors to determine if a floor is shelled
+        if (state.shelledFloors[index]) {
+            shelledSchemeSF += floor.sf;
+        }
+        totalSchemeSF += floor.sf;
+    });
+    
+    const shelledPercentage = totalSchemeSF > 0 ? (shelledSchemeSF / totalSchemeSF) : 0;
 
     componentsToUpdate.forEach(componentName => {
         const currentComponent = state.currentScheme.costOfWork.find(c => c.name === componentName);
-        const originalComponent = originalPredesignScheme.costOfWork.find(c => c.name === componentName);
+        const originalComponent = originalScheme.costOfWork.find(c => c.name === componentName);
 
         if (currentComponent && originalComponent) {
             if (state.previousSquareFootage[componentName] === undefined) {
                 state.previousSquareFootage[componentName] = currentComponent.square_footage;
             }
-            currentComponent.square_footage = originalComponent.square_footage * (1 - shelledPercentage);
+            // The square footage is the original total SF for that component minus the shelled portion.
+            const originalComponentSF = originalComponent.square_footage;
+            currentComponent.square_footage = originalComponentSF * (1 - shelledPercentage);
         }
     });
 }
+
 
 function updatePhase2ProgramTable(container, render, handleSquareFootageCellChange) {
     container.html('');
@@ -54,9 +72,9 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('class', 'font-semibold text-gray-700')
         .text('Shell Floors:');
 
-    const floors = state.currentScheme.floors || 0;
+    const floorCount = state.currentScheme.floors || 0;
 
-    for (let i = 0; i < floors; i++) {
+    for (let i = 0; i < floorCount; i++) {
         const checkboxWrapper = checkboxContainer.append('div')
             .attr('class', 'flex items-center');
 
@@ -67,19 +85,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
             .property('checked', state.shelledFloors[i])
             .on('change', function(event) {
                 const floorIndex = i;
-                const isChecked = event.target.checked;
-                
-                if (isChecked) {
-                    // If checking this floor, also check all floors above it
-                    for (let j = floorIndex; j < floors; j++) {
-                        state.shelledFloors[j] = true;
-                    }
-                } else {
-                    // If unchecking this floor, also uncheck all floors below it and itself
-                    for (let j = 0; j <= floorIndex; j++) {
-                        state.shelledFloors[j] = false;
-                    }
-                }
+                state.shelledFloors[floorIndex] = event.target.checked;
                 
                 updateSFForShelledFloors();
                 render();
@@ -376,16 +382,16 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             // Set the selected scheme name for visual feedback
             state.selectedSchemeName = d.name;
 
-            // Set shelled floors based on scheme's shelledFloors property
-            const shelledFloorsCount = d.shelledFloors || 0;
-            const totalFloors = d.floors || 0;
-            state.shelledFloors = new Array(totalFloors).fill(false);
-            // Mark the top N floors as shelled (checked)
-            for (let i = totalFloors - shelledFloorsCount; i < totalFloors; i++) {
-                if (i >= 0 && i < totalFloors) {
-                    state.shelledFloors[i] = true;
-                }
+            // Set shelled floors based on the new scheme's floorData
+            if (d.floorData && Array.isArray(d.floorData)) {
+                // For now, let's assume we are only concerned with phase 1 for shelled status
+                state.shelledFloors = d.floorData
+                    .filter(f => f.phase === 1)
+                    .map(f => f.shelled);
+            } else {
+                state.shelledFloors = new Array(d.floors || 0).fill(false);
             }
+
 
             // Animate Gross SF change
             const oldGrossSf = state.currentData.grossSF;
@@ -493,4 +499,4 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         .attr('class', 'program-table-container');
 
     updatePhase2ProgramTable(tableContainer, render, handleSquareFootageCellChange);
-} 
+}

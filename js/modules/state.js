@@ -100,15 +100,15 @@ export const state = {
                 }
             });
             
-            const floorCount = originalPredesignScheme.floors || 0;
-            this.shelledFloors = new Array(floorCount).fill(false);
-            if (floorCount > 4) {
-                for (let i = floorCount - 4; i < floorCount; i++) {
-                    this.shelledFloors[i] = true;
-                }
+            // Reset shelled floors from the original predesign scheme's floorData
+            if (originalPredesignScheme.floorData && Array.isArray(originalPredesignScheme.floorData)) {
+                this.shelledFloors = originalPredesignScheme.floorData
+                    .filter(f => f.phase === 1) // Assuming single phase for initial reset
+                    .map(f => f.shelled);
             } else {
-                this.shelledFloors.fill(true);
+                this.shelledFloors = []; // Clear if no floor data
             }
+
             this.selectedSchemeName = 'Predesign'; // Set default selected scheme
             
             // Initialize previous square footage tracking
@@ -190,19 +190,16 @@ export const state = {
             }
         }
 
-        // Check if shelled floors have changed
-        const originalShelledFloors = new Array(originalPredesignScheme.floors || 0).fill(false);
-        const floorCount = originalPredesignScheme.floors || 0;
-        if (floorCount > 4) {
-            for (let i = floorCount - 4; i < floorCount; i++) {
-                originalShelledFloors[i] = true;
+        // Check if shelled floors have changed using floorData
+        if (originalPredesignScheme.floorData && Array.isArray(originalPredesignScheme.floorData)) {
+            const originalShelled = originalPredesignScheme.floorData
+                .filter(f => f.phase === 1)
+                .map(f => f.shelled);
+            
+            if (this.shelledFloors.length !== originalShelled.length) return true;
+            for (let i = 0; i < this.shelledFloors.length; i++) {
+                if (this.shelledFloors[i] !== originalShelled[i]) return true;
             }
-        } else {
-            originalShelledFloors.fill(true);
-        }
-        if (this.shelledFloors.length !== originalShelledFloors.length) return true;
-        for (let i = 0; i < this.shelledFloors.length; i++) {
-            if (this.shelledFloors[i] !== originalShelledFloors[i]) return true;
         }
 
         return false;
@@ -217,4 +214,4 @@ export const state = {
             resetButton.disabled = !this.hasDataChanged();
         }
     }
-}; 
+};
