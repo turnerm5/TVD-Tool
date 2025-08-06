@@ -62,6 +62,35 @@ export function updateProgramSF() {
     });
 }
 
+/**
+ * Renders the total estimated cost display for the Program View.
+ */
+function renderProgramEstimate() {
+    const programEstimateDisplay = document.getElementById('program-estimate-display');
+    if (!programEstimateDisplay) return;
+
+    const { costOfWork } = state.currentScheme;
+    const { indirectCostPercentages } = state;
+    
+    const cowTotal = utils.calculateTotalCostOfWork(costOfWork);
+    const indirectTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
+    const totalProjectCost = cowTotal + indirectTotal;
+
+    const gmp = state.originalData.phase2.totalProjectBudget;
+    const variance = totalProjectCost - gmp;
+
+    programEstimateDisplay.innerHTML = `
+        <div class="text-sm font-semibold">
+            <span class="text-gray-600">Total Estimate: </span>
+            <span class="text-gray-900">${utils.formatCurrencyBig(totalProjectCost)}</span>
+        </div>
+        <div class="text-xs font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
+            <span>Budget &Delta;: </span>
+            <span>${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}</span>
+        </div>
+    `;
+}
+
 function updatePhase2ProgramTable(container, render, handleSquareFootageCellChange) {
     container.html('');
 
@@ -165,7 +194,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     const schemesContainer = mainContainer.append('div')
         .attr('class', 'schemes-container mb-4 pb-4 bg-gray-50 rounded-lg');
     
-    // Create header with title and button
+    // Create header with title, estimate display, and button
     const headerContainer = schemesContainer.append('div')
         .attr('class', 'flex justify-between items-center mb-3');
     
@@ -173,7 +202,15 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         .attr('class', 'text-lg font-bold text-gray-800')
         .text('Potential Opportunities');
     
-    headerContainer.append('button')
+    // Add estimate display and button container
+    const rightContainer = headerContainer.append('div')
+        .attr('class', 'flex items-center gap-4');
+    
+    rightContainer.append('div')
+        .attr('id', 'program-estimate-display')
+        .attr('class', 'text-center');
+    
+    rightContainer.append('button')
         .attr('id', 'program-take-snapshot-btn')
         .attr('class', 'bg-blue-600 text-white py-1 px-3 text-sm rounded-md font-medium hover:bg-blue-700 transition')
         .text('Take Snapshot');
@@ -209,6 +246,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             
             updateProgramSF();
             render();
+            renderProgramEstimate();
         });
 
     schemeCards.append('img')
@@ -288,6 +326,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
                         floor.shelled = !floor.shelled;
                         updateProgramSF();
                         render();
+                        renderProgramEstimate();
                     });
                 
                 floorRect.append('div')
@@ -319,6 +358,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
                     floor.shelled = !floor.shelled;
                     updateProgramSF();
                     render();
+                    renderProgramEstimate();
                 });
             
             floorRect.append('div')
@@ -369,6 +409,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
                     state.activePhases.sort();
                     updateProgramSF();
                     render();
+                    renderProgramEstimate();
                 });
             
             // Use custom phase name if available, otherwise default to "Phase X"
@@ -386,4 +427,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     const tableContainer = mainContainer.append('div')
         .attr('class', 'program-table-container');
     updatePhase2ProgramTable(tableContainer, render, handleSquareFootageCellChange);
+    
+    // Initial render of the estimate display
+    renderProgramEstimate();
 }
