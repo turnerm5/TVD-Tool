@@ -197,3 +197,47 @@ export function calculateSeriesTotal(series, indirectCostPercentages) {
         totalProjectCost
     };
 }
+
+/**
+ * Handles taking a snapshot of the current state
+ * @param {object} state - The application state
+ * @param {object} ui - The UI module for dialogs and alerts
+ * @param {function} renderCallback - Callback function to re-render after snapshot
+ */
+export async function takeSnapshot(state, ui, renderCallback) {
+    if (state.snapshots.length >= 3) {
+        ui.showAlert(
+            "Snapshot Limit Reached",
+            "You can only save up to 3 snapshots. Please delete an existing snapshot to save a new one."
+        );
+        return;
+    }
+    
+    const snapshotName = await ui.showModalDialog(
+        "Take Snapshot",
+        "Enter a name for this snapshot",
+        "Create Snapshot",
+        "Cancel"
+    );
+    
+    if (snapshotName) {
+        const phase2CostOfWork = state.currentScheme.costOfWork;
+        const snapshotCostOfWork = phase2CostOfWork.map(c => ({
+            name: c.name,
+            target_value: c.target_value,
+            square_footage: c.square_footage
+        }));
+        
+        const snapshot = {
+            name: snapshotName,
+            grossSF: state.currentData.grossSF,
+            costOfWork: snapshotCostOfWork,
+            floorData: state.currentScheme.floorData ? JSON.parse(JSON.stringify(state.currentScheme.floorData)) : undefined,
+            activePhases: [...state.activePhases]
+        };
+        
+        state.addSnapshot(snapshot);
+        console.log('All snapshots:', state.snapshots);
+        renderCallback(); // Re-render to update the summary view
+    }
+}

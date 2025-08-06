@@ -65,39 +65,6 @@ export function updateProgramSF() {
 function updatePhase2ProgramTable(container, render, handleSquareFootageCellChange) {
     container.html('');
 
-    // Simple header with just the snapshot button
-    const topControlsContainer = container.append('div')
-        .attr('class', 'flex justify-end mb-4');
-
-    const buttonContainer = topControlsContainer.append('div');
-    buttonContainer.append('button')
-        .attr('id', 'program-view-snapshot-btn')
-        .attr('class', 'bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition')
-        .text('Take Snapshot')
-        .on('click', async () => {
-            if (state.snapshots.length >= 3) {
-                ui.showAlert("Snapshot Limit Reached", "You can only save up to 3 snapshots.");
-                return;
-            }
-            const snapshotName = await ui.showModalDialog("Take Snapshot", "Enter a name for this snapshot", "Create Snapshot", "Cancel");
-            if (snapshotName) {
-                const snapshotCostOfWork = state.currentScheme.costOfWork.map(c => ({
-                    name: c.name,
-                    target_value: c.target_value,
-                    square_footage: c.square_footage
-                }));
-                const snapshot = {
-                    name: snapshotName,
-                    grossSF: state.currentData.grossSF,
-                    costOfWork: snapshotCostOfWork,
-                    floorData: JSON.parse(JSON.stringify(state.currentScheme.floorData)),
-                    activePhases: [...state.activePhases]
-                };
-                state.addSnapshot(snapshot);
-                render();
-            }
-        });
-
     const table = container.append('table')
         .attr('class', 'w-full text-base text-left text-gray-500 border border-gray-200 bg-white rounded-lg shadow-sm overflow-hidden');
 
@@ -197,9 +164,20 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
 
     const schemesContainer = mainContainer.append('div')
         .attr('class', 'schemes-container mb-4 pb-4 bg-gray-50 rounded-lg');
-    schemesContainer.append('h3')
-        .attr('class', 'text-lg font-bold text-gray-800 mb-3')
-        .text('Demonstration Schemes');
+    
+    // Create header with title and button
+    const headerContainer = schemesContainer.append('div')
+        .attr('class', 'flex justify-between items-center mb-3');
+    
+    headerContainer.append('h3')
+        .attr('class', 'text-lg font-bold text-gray-800')
+        .text('Potential Opportunities');
+    
+    headerContainer.append('button')
+        .attr('id', 'program-take-snapshot-btn')
+        .attr('class', 'bg-blue-600 text-white py-1 px-3 text-sm rounded-md font-medium hover:bg-blue-700 transition')
+        .text('Take Snapshot');
+        
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-6 gap-4')
         .style('height', '350px');

@@ -27,6 +27,7 @@ import * as summary from './modules/chart-summary.js';
 import * as sankey from './modules/chart-sankey.js';
 import * as program from './modules/chart-program.js';
 import * as benchmarks from './modules/chart-benchmarks.js';
+import * as utils from './modules/utils.js';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
@@ -157,35 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);
-    dom.takeSnapshotBtn.addEventListener('click', async () => {
-        if (state.snapshots.length >= 3) {
-            ui.showAlert(
-                "Snapshot Limit Reached",
-                "You can only save up to 3 snapshots. Please delete an existing snapshot to save a new one."
-            );
-            return;
-        }
-        const snapshotName = await ui.showModalDialog(
-            "Take Snapshot",
-            "Enter a name for this snapshot",
-            "Create Snapshot",
-            "Cancel"
-        );
-        if (snapshotName) {
-            const phase2CostOfWork = state.currentScheme.costOfWork;
-            const snapshotCostOfWork = phase2CostOfWork.map(c => ({
-                name: c.name,
-                target_value: c.target_value,
-                square_footage: c.square_footage
-            }));
-            const snapshot = {
-                name: snapshotName,
-                grossSF: state.currentData.grossSF,
-                costOfWork: snapshotCostOfWork
-            };
-            state.addSnapshot(snapshot);
-            console.log('All snapshots:', state.snapshots);
-            render(); // Re-render to update the summary view
+    // Use event delegation for take snapshot buttons (handles both static and dynamically created buttons)
+    document.addEventListener('click', async (event) => {
+        if (event.target && (event.target.id === 'take-snapshot-btn' || event.target.id === 'program-take-snapshot-btn')) {
+            await utils.takeSnapshot(state, ui, render);
         }
     });
     
