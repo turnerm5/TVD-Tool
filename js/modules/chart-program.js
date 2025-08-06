@@ -65,94 +65,9 @@ export function updateProgramSF() {
 function updatePhase2ProgramTable(container, render, handleSquareFootageCellChange) {
     container.html('');
 
+    // Simple header with just the snapshot button
     const topControlsContainer = container.append('div')
-        .attr('class', 'flex justify-between items-center mb-4');
-
-    const togglesContainer = topControlsContainer.append('div')
-        .attr('class', 'flex items-start space-x-6');
-
-    if (state.currentScheme.phases > 1) {
-        const phaseContainer = togglesContainer.append('div')
-            .attr('class', 'flex items-center space-x-4');
-        
-        phaseContainer.append('label')
-            .attr('class', 'font-semibold text-gray-700 mt-1')
-            .text('Phases:');
-
-        for (let i = 1; i <= state.currentScheme.phases; i++) {
-            const checkboxWrapper = phaseContainer.append('div')
-                .attr('class', 'flex items-center');
-
-            checkboxWrapper.append('input')
-                .attr('type', 'checkbox')
-                .attr('id', `phase-${i}`)
-                .attr('class', 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
-                .property('checked', state.activePhases.includes(i))
-                .on('change', function(event) {
-                    const phaseNum = i;
-                    const isChecked = event.target.checked;
-                    if (isChecked) {
-                        if (!state.activePhases.includes(phaseNum)) state.activePhases.push(phaseNum);
-                    } else {
-                        const phaseIndex = state.activePhases.indexOf(phaseNum);
-                        if (phaseIndex > -1) state.activePhases.splice(phaseIndex, 1);
-                    }
-                    state.activePhases.sort();
-                    updateProgramSF();
-                    render();
-                });
-            
-            // Use custom phase name if available, otherwise default to "Phase X"
-            const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[i-1] 
-                ? state.currentScheme.phaseNames[i-1] 
-                : `Phase ${i}`;
-            
-            checkboxWrapper.append('label')
-                .attr('for', `phase-${i}`)
-                .attr('class', 'ml-2 text-base text-gray-900')
-                .text(phaseName);
-        }
-    }
-
-    const shellContainer = togglesContainer.append('div')
-        .attr('class', 'flex flex-col space-y-2');
-
-    state.activePhases.forEach(phase => {
-        const phaseShellContainer = shellContainer.append('div')
-            .attr('class', 'flex items-center space-x-4');
-        
-        // Use custom phase name if available, otherwise default to "Phase X"
-        const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[phase-1] 
-            ? state.currentScheme.phaseNames[phase-1] 
-            : `Phase ${phase}`;
-        
-        phaseShellContainer.append('label')
-            .attr('class', 'font-semibold text-gray-700')
-            .text(`Shell Floors (${phaseName}):`);
-        
-        const floorsInPhase = state.currentScheme.floorData.filter(f => f.phase === phase);
-        
-        floorsInPhase.forEach(floor => {
-            const checkboxWrapper = phaseShellContainer.append('div')
-                .attr('class', 'flex items-center');
-
-            checkboxWrapper.append('input')
-                .attr('type', 'checkbox')
-                .attr('id', `shell-floor-${floor.floor}-phase-${phase}`)
-                .attr('class', 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
-                .property('checked', floor.shelled)
-                .on('change', function(event) {
-                    floor.shelled = event.target.checked;
-                    updateProgramSF();
-                    render();
-                });
-
-            checkboxWrapper.append('label')
-                .attr('for', `shell-floor-${floor.floor}-phase-${phase}`)
-                .attr('class', 'ml-2 text-base text-gray-900')
-                .text(`Floor ${floor.floor}`);
-        });
-    });
+        .attr('class', 'flex justify-end mb-4');
 
     const buttonContainer = topControlsContainer.append('div');
     buttonContainer.append('button')
@@ -336,6 +251,126 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     statsContainer.append('div')
         .attr('class', 'mb-1')
         .html(d => `<strong>Floors:</strong> ${d.floors}<br><strong>Total SF:</strong> ${d.grossSF.toLocaleString()}`);
+
+    // Add Shell Control Card (Column 5)
+    const shellCard = schemeGrid.append('div')
+        .attr('class', 'bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 h-full flex flex-col');
+    
+    shellCard.append('div')
+        .attr('class', 'bg-green-100 h-[40%] flex items-center justify-center')
+        .append('div')
+        .attr('class', 'text-green-700 font-bold text-xl')
+        .text('🏗️');
+    
+    const shellContent = shellCard.append('div')
+        .attr('class', 'p-3 flex flex-col justify-between h-[60%]');
+    
+    shellContent.append('h4')
+        .attr('class', 'font-semibold text-base text-gray-800 mb-2')
+        .text('Shell Floors');
+    
+    const shellControlsContainer = shellContent.append('div')
+        .attr('class', 'flex flex-col space-y-2 flex-grow');
+
+    // Create shell floor controls for each active phase
+    state.activePhases.forEach(phase => {
+        const phaseShellGroup = shellControlsContainer.append('div')
+            .attr('class', 'flex flex-col space-y-1');
+        
+        // Use custom phase name if available, otherwise default to "Phase X"
+        const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[phase-1] 
+            ? state.currentScheme.phaseNames[phase-1] 
+            : `Phase ${phase}`;
+        
+        // Only show phase label if there are multiple phases
+        if (state.currentScheme.phases > 1) {
+            phaseShellGroup.append('div')
+                .attr('class', 'text-xs font-medium text-gray-600 mb-1')
+                .text(`${phaseName}:`);
+        }
+        
+        const floorsInPhase = state.currentScheme.floorData.filter(f => f.phase === phase);
+        
+        const floorsContainer = phaseShellGroup.append('div')
+            .attr('class', 'flex flex-wrap gap-1');
+        
+        floorsInPhase.forEach(floor => {
+            const checkboxWrapper = floorsContainer.append('div')
+                .attr('class', 'flex items-center');
+
+            checkboxWrapper.append('input')
+                .attr('type', 'checkbox')
+                .attr('id', `shell-floor-${floor.floor}-phase-${phase}`)
+                .attr('class', 'h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
+                .property('checked', floor.shelled)
+                .on('change', function(event) {
+                    floor.shelled = event.target.checked;
+                    updateProgramSF();
+                    render();
+                });
+
+            checkboxWrapper.append('label')
+                .attr('for', `shell-floor-${floor.floor}-phase-${phase}`)
+                .attr('class', 'ml-1 text-xs text-gray-900')
+                .text(`Floor ${floor.floor}`);
+        });
+    });
+
+    // Add Phase Control Card (Column 6) - only if multi-phase
+    if (state.currentScheme.phases > 1) {
+        const phaseCard = schemeGrid.append('div')
+            .attr('class', 'bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 h-full flex flex-col');
+        
+        phaseCard.append('div')
+            .attr('class', 'bg-blue-100 h-[40%] flex items-center justify-center')
+            .append('div')
+            .attr('class', 'text-blue-700 font-bold text-xl')
+            .text('📋');
+        
+        const phaseContent = phaseCard.append('div')
+            .attr('class', 'p-3 flex flex-col justify-between h-[60%]');
+        
+        phaseContent.append('h4')
+            .attr('class', 'font-semibold text-base text-gray-800 mb-2')
+            .text('Active Phases');
+        
+        const phasesContainer = phaseContent.append('div')
+            .attr('class', 'flex flex-col space-y-2 flex-grow');
+
+        for (let i = 1; i <= state.currentScheme.phases; i++) {
+            const checkboxWrapper = phasesContainer.append('div')
+                .attr('class', 'flex items-center');
+
+            checkboxWrapper.append('input')
+                .attr('type', 'checkbox')
+                .attr('id', `phase-${i}`)
+                .attr('class', 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
+                .property('checked', state.activePhases.includes(i))
+                .on('change', function(event) {
+                    const phaseNum = i;
+                    const isChecked = event.target.checked;
+                    if (isChecked) {
+                        if (!state.activePhases.includes(phaseNum)) state.activePhases.push(phaseNum);
+                    } else {
+                        const phaseIndex = state.activePhases.indexOf(phaseNum);
+                        if (phaseIndex > -1) state.activePhases.splice(phaseIndex, 1);
+                    }
+                    state.activePhases.sort();
+                    updateProgramSF();
+                    render();
+                });
+            
+            // Use custom phase name if available, otherwise default to "Phase X"
+            const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[i-1] 
+                ? state.currentScheme.phaseNames[i-1] 
+                : `Phase ${i}`;
+            
+            checkboxWrapper.append('label')
+                .attr('for', `phase-${i}`)
+                .attr('class', 'ml-2 text-sm text-gray-900')
+                .text(phaseName);
+        }
+    }
 
     const tableContainer = mainContainer.append('div')
         .attr('class', 'program-table-container');
