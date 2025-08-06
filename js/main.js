@@ -59,6 +59,9 @@ function render() {
     dom.summaryLegend.classList.add('hidden');
     dom.maximizeBtn.classList.add('hidden');
     dom.takeSnapshotBtn.classList.add('hidden');
+    if (dom.totalEstimateDisplay) {
+        dom.totalEstimateDisplay.classList.add('hidden');
+    }
 
     dom.chartViewBtn.classList.remove('active');
     dom.programViewBtn.classList.remove('active');
@@ -73,6 +76,9 @@ function render() {
         dom.legend.classList.remove('hidden');
         dom.maximizeBtn.classList.remove('hidden');
         dom.takeSnapshotBtn.classList.remove('hidden');
+        if (dom.totalEstimateDisplay) {
+            dom.totalEstimateDisplay.classList.remove('hidden');
+        }
         dom.chartViewBtn.classList.add('active');
         slider.renderChart();
         slider.renderYAxisLabels();
@@ -108,7 +114,7 @@ function render() {
 ui.setRender(render);
 fileHandlers.setRender(render);
 fileHandlers.setYScale(yScale);
-fileHandlers.setUpdateSFForShelledFloors(program.updateSFForShelledFloors);
+fileHandlers.setUpdateProgramSF(program.updateProgramSF);
 slider.setDependencies({
     render: render,
     yScale: yScale
@@ -202,4 +208,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial load
     ui.initializeHelpModal();
-}); 
+});

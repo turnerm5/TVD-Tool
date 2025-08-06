@@ -48,6 +48,7 @@ export const legend = document.getElementById('legend');
 export const summaryLegend = document.getElementById('summary-legend');
 export const maximizeBtn = document.getElementById('maximize-gmp-btn');
 export const takeSnapshotBtn = document.getElementById('take-snapshot-btn'); 
+export const totalEstimateDisplay = document.getElementById('total-estimate-display');
 
 // Help Modal Elements
 export const helpButton = document.getElementById('help-button');

@@ -32,9 +32,9 @@ export function setYScale(scale) {
 }
 
 // Forward-declare the updateSFForShelledFloors to be injected later.
-let updateSFForShelledFloors;
-export function setUpdateSFForShelledFloors(fn) {
-    updateSFForShelledFloors = fn;
+let updateProgramSF;
+export function setUpdateProgramSF(fn) {
+    updateProgramSF = fn;
 }
 
 /**
@@ -109,7 +109,8 @@ export function loadData(data, fileName = 'Sample Data') {
     const processedPredesignScheme = processedData.schemes && processedData.schemes.find(s => s.name === 'Predesign');
     if (processedPredesignScheme && processedPredesignScheme.costOfWork) {
         processedPredesignScheme.costOfWork.forEach(component => {
-            if (component.target_value === 0 || component.square_footage === 0) {
+            const sf = Array.isArray(component.square_footage) ? component.square_footage.reduce((a, b) => a + b, 0) : component.square_footage;
+            if (component.target_value === 0 || sf === 0) {
                 const lockKey = `phase2-${component.name}`;
                 state.lockedCostOfWork.add(lockKey);
             }
@@ -136,28 +137,43 @@ export function loadData(data, fileName = 'Sample Data') {
             component.benchmark_low = 0;
             component.benchmark_high = 0;
         }
+
+        // If square_footage is an array, sum it for the initial value.
+        if (Array.isArray(component.square_footage)) {
+            component.square_footage = component.square_footage.reduce((a, b) => a + b, 0);
+        }
     });
     
     // Calculate indirect cost percentages now that originalData is set
     state.calculateIndirectCostPercentages();
     
-    // Set shelled floors based on the predesign scheme's setting
-    const floorCount = predesignScheme.floors || 0;
-    const shelledFloorsCount = predesignScheme.shelledFloors || 0;
-    state.shelledFloors = new Array(floorCount).fill(false);
-    // Mark the top N floors as shelled (checked)
-    for (let i = floorCount - shelledFloorsCount; i < floorCount; i++) {
-        if (i >= 0 && i < floorCount) {
-            state.shelledFloors[i] = true;
+    // Set shelled floors based on the predesign scheme's floorData
+    if (predesignScheme.floorData && Array.isArray(predesignScheme.floorData)) {
+        // Assuming single phase for initial setup. Phased logic will be handled elsewhere.
+        state.shelledFloors = predesignScheme.floorData
+            .filter(f => f.phase === 1)
+            .map(f => f.shelled);
+    } else {
+        // Fallback for old format
+        const floorCount = predesignScheme.floors || 0;
+        const shelledFloorsCount = predesignScheme.shelledFloors || 0; // Legacy property
+        state.shelledFloors = new Array(floorCount).fill(false);
+        for (let i = floorCount - shelledFloorsCount; i < floorCount; i++) {
+            if (i >= 0 && i < floorCount) {
+                state.shelledFloors[i] = true;
+            }
         }
     }
+
+    // Initialize active phases
+    state.activePhases = [1];
     
     // Initialize previous square footage tracking
     state.previousSquareFootage = {};
     
-    // Update C Interiors SF based on initial shelled floors
-    if (updateSFForShelledFloors) {
-        updateSFForShelledFloors();
+    // Update component SF based on initial shelled floors and active phases
+    if (updateProgramSF) {
+        updateProgramSF();
     }
 
     // Now that C Interiors is adjusted, set the initial baseline for all components
@@ -270,4 +286,4 @@ export function exportJSON() {
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
-} 
+}

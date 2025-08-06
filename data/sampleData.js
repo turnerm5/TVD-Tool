@@ -61,7 +61,12 @@ const sampleData = {
             "image": "img/schemes/predesign.jpg",
             "grossSF": 58000,
             "floors": 3,
-            "shelledFloors": 2,
+            "floorData": [
+                { "floor": 1, "sf": 19333, "shelled": false, "phase": 1 },
+                { "floor": 2, "sf": 19333, "shelled": true, "phase": 1 },
+                { "floor": 3, "sf": 19333, "shelled": true, "phase": 1 }
+            ],
+            "phases": 1,
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 20000 },
                 { "name": "B10 Superstructure", "square_footage": 58000 },
@@ -75,99 +80,76 @@ const sampleData = {
             ]
         },
         {
-            "name": "Big Quadrants",
-            "description": "Largest possible footprint, least amount of envelope.",
-            "image": "img/schemes/allYouCanEat.jpg",
-            "grossSF": 50000,
-            "floors": 2,
-            "shelledFloors": 0,
+            "name": "Student Porch",
+            "description": "A student-focused entry and gathering space along College, teaching labs abutting Eastlick.",
+            "image": "img/schemes/studentPorch.jpg",
+            "grossSF": 58000,
+            "floors": 3,
+            "phases": 1,
+            "floorData": [
+                { "floor": 1, "sf": 25000, "shelled": false, "phase": 1 },
+                { "floor": 2, "sf": 20000, "shelled": false, "phase": 1 },
+                { "floor": 3, "sf": 13000, "shelled": false, "phase": 1 }
+            ],
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 25000 },
-                { "name": "B10 Superstructure", "square_footage": 50000 },
+                { "name": "B10 Superstructure", "square_footage": 58000 },
                 { "name": "B20 Enclosure", "square_footage": 30000 },
                 { "name": "B30 Roofing", "square_footage": 25000 },
-                { "name": "C Interiors", "square_footage": 50000 },
-                { "name": "D Services", "square_footage": 50000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
+                { "name": "C Interiors", "square_footage": 58000 },
+                { "name": "D Services", "square_footage": 58000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 58000 },
                 { "name": "F Special Construction", "square_footage": 10000 },
                 { "name": "G Building Sitework", "square_footage": 22800 }
             ]
         },
         {
-            "name": "The Sciences Court",
-            "description": "Creates and inviting courtyard between Abelson and Eastlick by extending a plaza north of ISB and creating a pedestrian connection to college over existing Abelson loading dock.",
-            "image": "img/schemes/sciencesCourt.jpg",
-            "grossSF": 50000,
-            "floors": 3,
-            "shelledFloors": 0,
-            "costOfWork": [
-                { "name": "A Substructure", "square_footage": 16000 },
-                { "name": "B10 Superstructure", "square_footage": 50000 },
-                { "name": "B20 Enclosure", "square_footage": 30000 },
-                { "name": "B30 Roofing", "square_footage": 16000 },
-                { "name": "C Interiors", "square_footage": 40000 },
-                { "name": "D Services", "square_footage": 50000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 40000 },
-                { "name": "F Special Construction", "square_footage": 10000 },
-                { "name": "G Building Sitework", "square_footage": 54000 }
-            ]
-        },
-        {
-            "name": "SxSW",
-            "description": "Massing is broken down by facade modulation that extends gathering areas to the south and west. Largest skin area.",
-            "image": "img/schemes/sxsw.jpg",
-            "grossSF": 50000,
-            "floors": 3,
-            "shelledFloors": 0,
-            "costOfWork": [
-                { "name": "A Substructure", "square_footage": 16500 },
-                { "name": "B10 Superstructure", "square_footage": 50000 },
-                { "name": "B20 Enclosure", "square_footage": 50000 },
-                { "name": "B30 Roofing", "square_footage": 16500 },
-                { "name": "C Interiors", "square_footage": 50000 },
-                { "name": "D Services", "square_footage": 50000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
-                { "name": "F Special Construction", "square_footage": 30000 },
-                { "name": "G Building Sitework", "square_footage": 42800 }
-            ]
-        },
-        {
-            "name": "Marquee",
-            "description": "Connected to both Abelson and Eastlick. 4-story massing can connect to the 4th level of Abelson. N-S corridor aligns with central spine of Eastlick.",
-            "image": "img/schemes/marquee.jpg",
-            "grossSF": 64000,
+            "name": "Marquee Mix",
+            "description": "Direct frontage connection to College. Lecture hall on the ground floor, with teaching labs on the upper floors.",
+            "image": "img/schemes/marqueeMix.jpg",
+            "grossSF": 66000,
             "floors": 4,
-            "shelledFloors": 1,
+            "phases": 1,
+            "floorData": [
+                { "floor": 1, "sf": 16500, "shelled": false, "phase": 1 },
+                { "floor": 2, "sf": 16500, "shelled": false, "phase": 1 },
+                { "floor": 3, "sf": 16500, "shelled": false, "phase": 1 },
+                { "floor": 4, "sf": 16500, "shelled": true, "phase": 1 }
+            ],
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 16000 },
-                { "name": "B10 Superstructure", "square_footage": 64000 },
+                { "name": "A Substructure", "square_footage": 17000 },
+                { "name": "B10 Superstructure", "square_footage": 66000 },
                 { "name": "B20 Enclosure", "square_footage": 40000 },
-                { "name": "B30 Roofing", "square_footage": 16000 },
-                { "name": "C Interiors", "square_footage": 64000 },
-                { "name": "D Services", "square_footage": 64000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 64000 },
-                { "name": "F Special Construction", "square_footage": 30000 },
-                { "name": "G Building Sitework", "square_footage": 35200 }
+                { "name": "B30 Roofing", "square_footage": 16500 },
+                { "name": "C Interiors", "square_footage": 66000 },
+                { "name": "D Services", "square_footage": 66000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 66000 },
+                { "name": "F Special Construction", "square_footage": 10000 },
+                { "name": "G Building Sitework", "square_footage": 35000 }
             ]
         },
-        
         {
-            "name": "Hillclimb",
-            "description": "Consolidates gathering spaces in a volume that reaches down to the SW corner of the site.",
-            "image": "img/schemes/hillclimb.jpg",
-            "grossSF": 58000,
+            "name": "Base + Donor",
+            "description": "Breaks up the building into two phases, with a base program of teaching labs and a donor program of the lecture hall.",
+            "image": "img/schemes/baseAndDonor.jpg",
+            "grossSF": 68000,
             "floors": 3,
-            "shelledFloors": 0,
+            "phases": 2,
+            "floorData": [
+                { "floor": 1, "sf": 13333, "shelled": false, "phase": 1 }, { "floor": 1, "sf": 9333, "shelled": false, "phase": 2 },
+                { "floor": 2, "sf": 13333, "shelled": false, "phase": 1 }, { "floor": 2, "sf": 9333, "shelled": false, "phase": 2 },
+                { "floor": 3, "sf": 13333, "shelled": false, "phase": 1 }, { "floor": 3, "sf": 9333, "shelled": false, "phase": 2 }
+            ],
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 20000 },
-                { "name": "B10 Superstructure", "square_footage": 58000 },
-                { "name": "B20 Enclosure", "square_footage": 40000 },
-                { "name": "B30 Roofing", "square_footage": 20000 },
-                { "name": "C Interiors", "square_footage": 58000 },
-                { "name": "D Services", "square_footage": 58000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 58000 },
-                { "name": "F Special Construction", "square_footage": 10000 },
-                { "name": "G Building Sitework", "square_footage": 42495 }
+                { "name": "A Substructure", "square_footage": [13333, 9333] },
+                { "name": "B10 Superstructure", "square_footage": [40000, 28000] },
+                { "name": "B20 Enclosure", "square_footage": [30000, 20000] },
+                { "name": "B30 Roofing", "square_footage": [13333, 9333] },
+                { "name": "C Interiors", "square_footage": [40000, 28000] },
+                { "name": "D Services", "square_footage": [40000, 28000] },
+                { "name": "E Equipment and Furnishings", "square_footage": [40000, 28000] },
+                { "name": "F Special Construction", "square_footage": [10000, 5000] },
+                { "name": "G Building Sitework", "square_footage": [22800, 5000] }
             ]
         }
     ],
@@ -475,4 +457,4 @@ const sampleData = {
             ]
         }
     ]
-}; 
+};

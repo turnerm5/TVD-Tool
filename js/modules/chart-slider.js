@@ -263,6 +263,7 @@ export function renderChart() {
 
     updateGroup.select(".component-label").text(d => d.name);
 
+    renderTotalEstimate();
     renderLockControls();
 
     // --- Render the benchmark indicators (A, B, C, D) within each column's SVG ---
@@ -492,6 +493,35 @@ function dragStarted(event, d) {
 }
 
 /**
+ * Renders the total estimated cost display.
+ */
+function renderTotalEstimate() {
+    if (!dom.totalEstimateDisplay) return;
+
+    const { costOfWork } = state.currentScheme;
+    const { indirectCostPercentages } = state;
+    
+    const cowTotal = utils.calculateTotalCostOfWork(costOfWork);
+    const indirectTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
+    const totalProjectCost = cowTotal + indirectTotal;
+
+    const gmp = state.originalData.phase2.totalProjectBudget;
+    const variance = totalProjectCost - gmp;
+
+    dom.totalEstimateDisplay.innerHTML = `
+        <div class="text-lg font-semibold">
+            <span class="text-gray-600">Total Estimate: </span>
+            <span class="text-gray-900">${utils.formatCurrencyBig(totalProjectCost)}</span>
+        </div>
+        <div class="text-sm font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
+            <span>Budget &Delta;: </span>
+            <span>${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}</span>
+        </div>
+    `;
+}
+
+
+/**
  * d3.drag 'drag' event handler.
  * As the user drags, it converts the mouse's Y position to a new ROM value and applies the change.
  * @param {Event} event - The d3 drag event.
@@ -500,6 +530,7 @@ function dragStarted(event, d) {
 function dragged(event, d) {
     const newRom = yScale.invert(event.y);
     applyChangeAndBalance(d, newRom, 'phase2');
+    renderTotalEstimate();
 }
 
 /**
