@@ -81,7 +81,7 @@ const sampleData = {
         },
         {
             "name": "Student Porch",
-            "description": ".",
+            "description": "A student-focused entry and gathering space along College, teaching labs abutting Eastlick.",
             "image": "img/schemes/studentPorch.jpg",
             "grossSF": 58000,
             "floors": 3,
@@ -93,19 +93,19 @@ const sampleData = {
             ],
             "costOfWork": [
                 { "name": "A Substructure", "square_footage": 25000 },
-                { "name": "B10 Superstructure", "square_footage": 50000 },
+                { "name": "B10 Superstructure", "square_footage": 58000 },
                 { "name": "B20 Enclosure", "square_footage": 30000 },
                 { "name": "B30 Roofing", "square_footage": 25000 },
-                { "name": "C Interiors", "square_footage": 50000 },
-                { "name": "D Services", "square_footage": 50000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
+                { "name": "C Interiors", "square_footage": 58000 },
+                { "name": "D Services", "square_footage": 58000 },
+                { "name": "E Equipment and Furnishings", "square_footage": 58000 },
                 { "name": "F Special Construction", "square_footage": 10000 },
                 { "name": "G Building Sitework", "square_footage": 22800 }
             ]
         },
         {
             "name": "Marquee Mix",
-            "description": "Direct frontage connection to College, link to Eastlick.",
+            "description": "Direct frontage connection to College. Lecture hall on the ground floor, with teaching labs on the upper floors.",
             "image": "img/schemes/marqueeMix.jpg",
             "grossSF": 66000,
             "floors": 4,
@@ -120,7 +120,7 @@ const sampleData = {
                 { "name": "A Substructure", "square_footage": 17000 },
                 { "name": "B10 Superstructure", "square_footage": 66000 },
                 { "name": "B20 Enclosure", "square_footage": 40000 },
-                { "name": "B30 Roofing", "square_footage": 17000 },
+                { "name": "B30 Roofing", "square_footage": 16500 },
                 { "name": "C Interiors", "square_footage": 66000 },
                 { "name": "D Services", "square_footage": 66000 },
                 { "name": "E Equipment and Furnishings", "square_footage": 66000 },
@@ -130,7 +130,7 @@ const sampleData = {
         },
         {
             "name": "Base + Donor",
-            "description": "Massing is broken down by facade modulation that extends gathering areas to the south and west. Largest skin area.",
+            "description": "Breaks up the building into two phases, with a base program of teaching labs and a donor program of the lecture hall.",
             "image": "img/schemes/baseAndDonor.jpg",
             "grossSF": 68000,
             "floors": 3,
@@ -141,15 +141,15 @@ const sampleData = {
                 { "floor": 3, "sf": 13333, "shelled": false, "phase": 1 }, { "floor": 3, "sf": 9333, "shelled": false, "phase": 2 }
             ],
             "costOfWork": [
-                { "name": "A Substructure", "square_footage": 16500 },
-                { "name": "B10 Superstructure", "square_footage": 50000 },
-                { "name": "B20 Enclosure", "square_footage": 50000 },
-                { "name": "B30 Roofing", "square_footage": 16500 },
-                { "name": "C Interiors", "square_footage": 50000 },
-                { "name": "D Services", "square_footage": 50000 },
-                { "name": "E Equipment and Furnishings", "square_footage": 50000 },
-                { "name": "F Special Construction", "square_footage": 30000 },
-                { "name": "G Building Sitework", "square_footage": 42800 }
+                { "name": "A Substructure", "square_footage": [13333, 9333] },
+                { "name": "B10 Superstructure", "square_footage": [40000, 28000] },
+                { "name": "B20 Enclosure", "square_footage": [30000, 20000] },
+                { "name": "B30 Roofing", "square_footage": [13333, 9333] },
+                { "name": "C Interiors", "square_footage": [40000, 28000] },
+                { "name": "D Services", "square_footage": [40000, 28000] },
+                { "name": "E Equipment and Furnishings", "square_footage": [40000, 28000] },
+                { "name": "F Special Construction", "square_footage": [10000, 5000] },
+                { "name": "G Building Sitework", "square_footage": [22800, 5000] }
             ]
         }
     ],

@@ -108,7 +108,7 @@ function render() {
 ui.setRender(render);
 fileHandlers.setRender(render);
 fileHandlers.setYScale(yScale);
-fileHandlers.setUpdateSFForShelledFloors(program.updateSFForShelledFloors);
+fileHandlers.setUpdateProgramSF(program.updateProgramSF);
 slider.setDependencies({
     render: render,
     yScale: yScale
@@ -202,4 +202,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial load
     ui.initializeHelpModal();
-}); 
+});

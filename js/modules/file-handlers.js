@@ -32,9 +32,9 @@ export function setYScale(scale) {
 }
 
 // Forward-declare the updateSFForShelledFloors to be injected later.
-let updateSFForShelledFloors;
-export function setUpdateSFForShelledFloors(fn) {
-    updateSFForShelledFloors = fn;
+let updateProgramSF;
+export function setUpdateProgramSF(fn) {
+    updateProgramSF = fn;
 }
 
 /**
@@ -109,7 +109,8 @@ export function loadData(data, fileName = 'Sample Data') {
     const processedPredesignScheme = processedData.schemes && processedData.schemes.find(s => s.name === 'Predesign');
     if (processedPredesignScheme && processedPredesignScheme.costOfWork) {
         processedPredesignScheme.costOfWork.forEach(component => {
-            if (component.target_value === 0 || component.square_footage === 0) {
+            const sf = Array.isArray(component.square_footage) ? component.square_footage.reduce((a, b) => a + b, 0) : component.square_footage;
+            if (component.target_value === 0 || sf === 0) {
                 const lockKey = `phase2-${component.name}`;
                 state.lockedCostOfWork.add(lockKey);
             }
@@ -136,6 +137,11 @@ export function loadData(data, fileName = 'Sample Data') {
             component.benchmark_low = 0;
             component.benchmark_high = 0;
         }
+
+        // If square_footage is an array, sum it for the initial value.
+        if (Array.isArray(component.square_footage)) {
+            component.square_footage = component.square_footage.reduce((a, b) => a + b, 0);
+        }
     });
     
     // Calculate indirect cost percentages now that originalData is set
@@ -158,13 +164,16 @@ export function loadData(data, fileName = 'Sample Data') {
             }
         }
     }
+
+    // Initialize active phases
+    state.activePhases = [1];
     
     // Initialize previous square footage tracking
     state.previousSquareFootage = {};
     
-    // Update C Interiors SF based on initial shelled floors
-    if (updateSFForShelledFloors) {
-        updateSFForShelledFloors();
+    // Update component SF based on initial shelled floors and active phases
+    if (updateProgramSF) {
+        updateProgramSF();
     }
 
     // Now that C Interiors is adjusted, set the initial baseline for all components

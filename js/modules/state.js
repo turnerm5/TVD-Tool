@@ -24,6 +24,7 @@ export const state = {
     snapshots: [],
     indirectCostPercentages: [],
     shelledFloors: [],
+    activePhases: [1],
     currentScheme: null, // The currently active scheme (starts with Predesign)
     selectedSchemeName: 'Predesign', // The name of the scheme card that should be highlighted
     previousSquareFootage: {}, // Track previous square footage values for showing changes
@@ -110,6 +111,7 @@ export const state = {
             }
 
             this.selectedSchemeName = 'Predesign'; // Set default selected scheme
+            this.activePhases = [1];
             
             // Initialize previous square footage tracking
             this.previousSquareFootage = {};
