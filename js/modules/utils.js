@@ -142,11 +142,14 @@ export function createImportedDataSeries() {
 
     let costOfWork = [];
     if (originalPredesignScheme) {
-        // Calculate the shelled floor reduction based on the 'shelledFloors' property
-        const totalFloors = originalPredesignScheme.floors || 0;
-        const shelledFloorsCount = originalPredesignScheme.shelledFloors || 0;
-        
-        const shelledPercentage = totalFloors > 0 ? (shelledFloorsCount / totalFloors) : 0;
+        // Calculate the finished square footage for cost calculation, accounting for shelled floors
+        let finishedSF = originalPredesignScheme.grossSF; // Default to full GSF if no floor data
+        if (originalPredesignScheme.floorData && originalPredesignScheme.floorData.length > 0) {
+            finishedSF = originalPredesignScheme.floorData
+                .filter(f => !f.shelled)
+                .reduce((sum, f) => sum + f.sf, 0);
+        }
+
         const componentsToAdjust = ['C Interiors', 'E Equipment and Furnishings'];
 
         // Merge square_footage from Predesign scheme with target_value from initialTargetValues
@@ -154,11 +157,9 @@ export function createImportedDataSeries() {
             const targetValueData = initialTargetValues.find(tv => tv.name === component.name);
             let sf = Number(component.square_footage) || 0;
 
-            // If this is a component that needs adjustment, calculate its shelled value
+            // Adjust SF for components affected by shelled areas
             if (componentsToAdjust.includes(component.name)) {
-                const originalComponentData = originalPredesignScheme.costOfWork.find(c => c.name === component.name);
-                const originalSF = originalComponentData ? originalComponentData.square_footage : 0;
-                sf = originalSF * (1 - shelledPercentage);
+                sf = finishedSF;
             }
 
             return {
