@@ -60,7 +60,14 @@ export function renderSummaryCharts() {
     // --- 1. Data Preparation ---
     // Create stable "Predesign" series using pure original data (never changes)
     const importedSeries = utils.createImportedDataSeries();
-    const allSeriesData = [importedSeries, ...state.snapshots];
+    const allSeriesData = state.predesignDeleted ? [...state.snapshots] : [importedSeries, ...state.snapshots];
+    
+    // Check if no schemes are present (empty state)
+    if (allSeriesData.length === 0 || (state.snapshots.length === 0 && state.predesignDeleted)) {
+        renderEmptyState();
+        return;
+    }
+    
     const seriesNames = allSeriesData.map(d => d.name);
             const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
             const costOfWorkNames = originalPredesignScheme ? originalPredesignScheme.costOfWork.map(c => c.name) : [];
@@ -71,6 +78,35 @@ export function renderSummaryCharts() {
 
     // --- Render Right Chart (will be implemented next) ---
     renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpValue);
+}
+
+/**
+ * Renders an empty state message when no schemes are present.
+ */
+function renderEmptyState() {
+    // Clear both chart containers
+    d3.select("#summary-bar-chart-container").html("");
+    d3.select("#summary-stacked-chart-container").html("");
+    
+    // Clear legend
+    const legendContainer = d3.select(dom.summaryLegend);
+    legendContainer.html("");
+    
+    // Render empty state message in the left chart container
+    const container = d3.select("#summary-chart-container");
+    container.append("div")
+        .attr("class", "w-full flex col-span-5 items-center justify-center h-96 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg")
+        .append("div")
+        .attr("class", "text-center w-full")
+        .html(`
+            <div class="text-gray-400 mb-4">
+                <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No Snapshots Available</h3>
+            <p class="text-gray-500">Please take a snapshot to begin.</p>
+        `);
 }
 
 /**
@@ -169,31 +205,25 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .append("div")
         .attr("class", "legend-item flex items-center gap-2 relative p-1 rounded")
         .on('mouseenter', function(event, d) {
-            if (d !== 'Predesign') {
-                d3.select(this).classed('hover-delete', true);
-            }
+            d3.select(this).classed('hover-delete', true);
         })
         .on('mouseleave', function(event, d) {
-             if (d !== 'Predesign') {
-                d3.select(this).classed('hover-delete', false);
-            }
+            d3.select(this).classed('hover-delete', false);
         })
         .on('click', async (event, d) => {
-            if (d !== 'Predesign') {
-                const confirmed = await ui.showConfirmDialog(
-                    "Delete Snapshot",
-                    `Are you sure you want to delete the "${d}" snapshot?`,
-                    "Delete",
-                    "Cancel"
-                );
-                if (confirmed) {
-                    state.deleteSnapshot(d);
-                    render();
-                }
+            const confirmed = await ui.showConfirmDialog(
+                "Delete Snapshot",
+                `Are you sure you want to delete the "${d}" snapshot?`,
+                "Delete",
+                "Cancel"
+            );
+            if (confirmed) {
+                state.deleteSnapshot(d);
+                render();
             }
         });
     
-    legendItems.filter(d => d !== 'Predesign').classed('cursor-pointer', true);
+    legendItems.classed('cursor-pointer', true);
 
     const legendContent = legendItems.append('div')
         .attr('class', 'legend-content flex items-center gap-2');
@@ -206,7 +236,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .attr("class", "font-medium")
         .text(d => d);
 
-    legendItems.filter(d => d !== 'Predesign')
+    legendItems
         .append('div')
         .attr('class', 'delete-overlay absolute inset-0 flex items-center justify-center font-bold text-white')
         .text('DELETE');
@@ -329,7 +359,7 @@ export function updateSummary() {
     const summaryPanel = dom.summaryPanel;
     summaryPanel.innerHTML = ''; // Clear previous content
 
-            const gmp = state.originalData.phase2.totalProjectBudget;
+    const gmp = state.originalData.phase2.totalProjectBudget;
 
     // --- Header ---
     const header = document.createElement('div');
@@ -342,7 +372,26 @@ export function updateSummary() {
     // --- Data Series Table ---
     // Create stable "Predesign" series using pure original data (never changes)
     const importedSeries = utils.createImportedDataSeries();
-    const allSeries = [importedSeries, ...state.snapshots];
+    const allSeries = state.predesignDeleted ? [...state.snapshots] : [importedSeries, ...state.snapshots];
+
+    // Check if no schemes are present (empty state)
+    if (allSeries.length === 0 || (state.snapshots.length === 0 && state.predesignDeleted)) {
+        const emptyStateDiv = document.createElement('div');
+        emptyStateDiv.className = 'flex items-center justify-center py-12';
+        emptyStateDiv.innerHTML = `
+            <div class="text-center">
+                <div class="text-gray-400 mb-4">
+                    <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Snapshots Available</h3>
+                <p class="text-gray-500">Please take a snapshot to begin.</p>
+            </div>
+        `;
+        summaryPanel.appendChild(emptyStateDiv);
+        return;
+    }
 
     console.log('Rendering summary table. All series data:', allSeries);
 

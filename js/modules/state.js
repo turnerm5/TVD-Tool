@@ -28,6 +28,7 @@ export const state = {
     currentScheme: null, // The currently active scheme (starts with Predesign)
     selectedSchemeName: 'Predesign', // The name of the scheme card that should be highlighted
     previousSquareFootage: {}, // Track previous square footage values for showing changes
+    predesignDeleted: false, // Track if the Predesign scheme has been deleted
 
     /**
      * Stores current square footage values as the new "previous" values for change tracking.
@@ -77,6 +78,7 @@ export const state = {
         this.currentData = JSON.parse(JSON.stringify(this.originalData));
         this.snapshots = [];
         this.lockedCostOfWork.clear();
+        this.predesignDeleted = false;
         this.calculateIndirectCostPercentages();
         
         // Set default view to Phase 2 Program
@@ -151,7 +153,19 @@ export const state = {
      * @param {string} snapshotName - The name of the snapshot to delete.
      */
     deleteSnapshot(snapshotName) {
-        this.snapshots = this.snapshots.filter(s => s.name !== snapshotName);
+        if (snapshotName === 'Predesign') {
+            // Check if there's a user-created snapshot named "Predesign"
+            const predesignSnapshot = this.snapshots.find(s => s.name === 'Predesign');
+            if (predesignSnapshot) {
+                // Delete the user-created Predesign snapshot
+                this.snapshots = this.snapshots.filter(s => s.name !== snapshotName);
+            } else {
+                // Delete the original imported Predesign series
+                this.predesignDeleted = true;
+            }
+        } else {
+            this.snapshots = this.snapshots.filter(s => s.name !== snapshotName);
+        }
     },
 
     /**

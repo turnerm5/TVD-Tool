@@ -65,114 +65,6 @@ export function updateProgramSF() {
 function updatePhase2ProgramTable(container, render, handleSquareFootageCellChange) {
     container.html('');
 
-    const topControlsContainer = container.append('div')
-        .attr('class', 'flex justify-between items-center mb-4');
-
-    const togglesContainer = topControlsContainer.append('div')
-        .attr('class', 'flex items-start space-x-6');
-
-    if (state.currentScheme.phases > 1) {
-        const phaseContainer = togglesContainer.append('div')
-            .attr('class', 'flex items-center space-x-4');
-        
-        phaseContainer.append('label')
-            .attr('class', 'font-semibold text-gray-700 mt-1')
-            .text('Phases:');
-
-        for (let i = 1; i <= state.currentScheme.phases; i++) {
-            const checkboxWrapper = phaseContainer.append('div')
-                .attr('class', 'flex items-center');
-
-            checkboxWrapper.append('input')
-                .attr('type', 'checkbox')
-                .attr('id', `phase-${i}`)
-                .attr('class', 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
-                .property('checked', state.activePhases.includes(i))
-                .on('change', function(event) {
-                    const phaseNum = i;
-                    const isChecked = event.target.checked;
-                    if (isChecked) {
-                        if (!state.activePhases.includes(phaseNum)) state.activePhases.push(phaseNum);
-                    } else {
-                        const phaseIndex = state.activePhases.indexOf(phaseNum);
-                        if (phaseIndex > -1) state.activePhases.splice(phaseIndex, 1);
-                    }
-                    state.activePhases.sort();
-                    updateProgramSF();
-                    render();
-                });
-            
-            checkboxWrapper.append('label')
-                .attr('for', `phase-${i}`)
-                .attr('class', 'ml-2 text-base text-gray-900')
-                .text(`Phase ${i}`);
-        }
-    }
-
-    const shellContainer = togglesContainer.append('div')
-        .attr('class', 'flex flex-col space-y-2');
-
-    state.activePhases.forEach(phase => {
-        const phaseShellContainer = shellContainer.append('div')
-            .attr('class', 'flex items-center space-x-4');
-        
-        phaseShellContainer.append('label')
-            .attr('class', 'font-semibold text-gray-700')
-            .text(`Shell Floors (Phase ${phase}):`);
-        
-        const floorsInPhase = state.currentScheme.floorData.filter(f => f.phase === phase);
-        
-        floorsInPhase.forEach(floor => {
-            const checkboxWrapper = phaseShellContainer.append('div')
-                .attr('class', 'flex items-center');
-
-            checkboxWrapper.append('input')
-                .attr('type', 'checkbox')
-                .attr('id', `shell-floor-${floor.floor}-phase-${phase}`)
-                .attr('class', 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
-                .property('checked', floor.shelled)
-                .on('change', function(event) {
-                    floor.shelled = event.target.checked;
-                    updateProgramSF();
-                    render();
-                });
-
-            checkboxWrapper.append('label')
-                .attr('for', `shell-floor-${floor.floor}-phase-${phase}`)
-                .attr('class', 'ml-2 text-base text-gray-900')
-                .text(`Floor ${floor.floor}`);
-        });
-    });
-
-    const buttonContainer = topControlsContainer.append('div');
-    buttonContainer.append('button')
-        .attr('id', 'program-view-snapshot-btn')
-        .attr('class', 'bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition')
-        .text('Take Snapshot')
-        .on('click', async () => {
-            if (state.snapshots.length >= 3) {
-                ui.showAlert("Snapshot Limit Reached", "You can only save up to 3 snapshots.");
-                return;
-            }
-            const snapshotName = await ui.showModalDialog("Take Snapshot", "Enter a name for this snapshot", "Create Snapshot", "Cancel");
-            if (snapshotName) {
-                const snapshotCostOfWork = state.currentScheme.costOfWork.map(c => ({
-                    name: c.name,
-                    target_value: c.target_value,
-                    square_footage: c.square_footage
-                }));
-                const snapshot = {
-                    name: snapshotName,
-                    grossSF: state.currentData.grossSF,
-                    costOfWork: snapshotCostOfWork,
-                    floorData: JSON.parse(JSON.stringify(state.currentScheme.floorData)),
-                    activePhases: [...state.activePhases]
-                };
-                state.addSnapshot(snapshot);
-                render();
-            }
-        });
-
     const table = container.append('table')
         .attr('class', 'w-full text-base text-left text-gray-500 border border-gray-200 bg-white rounded-lg shadow-sm overflow-hidden');
 
@@ -272,9 +164,20 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
 
     const schemesContainer = mainContainer.append('div')
         .attr('class', 'schemes-container mb-4 pb-4 bg-gray-50 rounded-lg');
-    schemesContainer.append('h3')
-        .attr('class', 'text-lg font-bold text-gray-800 mb-3')
-        .text('Demonstration Schemes');
+    
+    // Create header with title and button
+    const headerContainer = schemesContainer.append('div')
+        .attr('class', 'flex justify-between items-center mb-3');
+    
+    headerContainer.append('h3')
+        .attr('class', 'text-lg font-bold text-gray-800')
+        .text('Potential Opportunities');
+    
+    headerContainer.append('button')
+        .attr('id', 'program-take-snapshot-btn')
+        .attr('class', 'bg-blue-600 text-white py-1 px-3 text-sm rounded-md font-medium hover:bg-blue-700 transition')
+        .text('Take Snapshot');
+        
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-6 gap-4')
         .style('height', '350px');
@@ -326,6 +229,159 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     statsContainer.append('div')
         .attr('class', 'mb-1')
         .html(d => `<strong>Floors:</strong> ${d.floors}<br><strong>Total SF:</strong> ${d.grossSF.toLocaleString()}`);
+
+    // Add Shell Control Card (Column 5)
+    const shellCard = schemeGrid.append('div')
+        .attr('class', 'bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 h-full flex flex-col');
+    
+    // Header with title
+    const shellHeader = shellCard.append('div')
+        .attr('class', 'bg-gray-100 p-2 flex items-center justify-center border-b border-gray-200')
+        .style('height', '50px');
+    
+    shellHeader.append('h4')
+        .attr('class', 'font-semibold text-sm text-gray-800 text-center')
+        .text('Shell a Floor?');
+    
+    // Building visualization container
+    const buildingContainer = shellCard.append('div')
+        .attr('class', 'flex-grow flex')
+        .style('height', '300px');
+
+    if (state.currentScheme.phases > 1) {
+        // Multi-phase layout: side-by-side columns
+        state.activePhases.forEach((phase, phaseIndex) => {
+            // Use custom phase name if available, otherwise default to "Phase X"
+            const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[phase-1] 
+                ? state.currentScheme.phaseNames[phase-1] 
+                : `Phase ${phase}`;
+            
+            const phaseColumn = buildingContainer.append('div')
+                .attr('class', 'flex-1 flex flex-col border-r border-gray-300')
+                .style('border-right', phaseIndex === state.activePhases.length - 1 ? 'none' : '1px solid #d1d5db');
+            
+            // Phase header
+            phaseColumn.append('div')
+                .attr('class', 'bg-gray-50 border-b border-gray-300 p-1 text-center')
+                .style('height', '30px')
+                .append('div')
+                .attr('class', 'text-xs font-semibold text-gray-700')
+                .text(phaseName);
+            
+            // Get floors for this phase and sort them (top floor first)
+            const floorsInPhase = state.currentScheme.floorData
+                .filter(f => f.phase === phase)
+                .sort((a, b) => b.floor - a.floor);
+            
+            // Calculate height for each floor rectangle (subtract header height)
+            const availableHeight = 270; // 300px - 30px header
+            const floorHeight = floorsInPhase.length > 0 ? availableHeight / floorsInPhase.length : availableHeight;
+            
+            // Create floor rectangles for this phase
+            floorsInPhase.forEach((floor, floorIndex) => {
+                const floorRect = phaseColumn.append('div')
+                    .attr('class', 'border-b border-gray-300 flex items-center justify-center cursor-pointer transition-colors duration-200 hover:opacity-80')
+                    .style('height', `${floorHeight}px`)
+                    .style('background-color', floor.shelled ? '#ef4444' : '#22c55e') // Red for shelled, green for non-shelled
+                    .style('border-bottom', floorIndex === floorsInPhase.length - 1 ? 'none' : '1px solid #d1d5db')
+                    .on('click', function() {
+                        floor.shelled = !floor.shelled;
+                        updateProgramSF();
+                        render();
+                    });
+                
+                floorRect.append('div')
+                    .attr('class', 'text-white font-semibold text-xs text-center drop-shadow-sm')
+                    .text(`Floor ${floor.floor}`);
+            });
+        });
+    } else {
+        // Single phase layout: single column (original behavior)
+        const singleColumn = buildingContainer.append('div')
+            .attr('class', 'flex-1 flex flex-col');
+        
+        // Get all floors and sort them (top floor first)
+        const allFloors = state.currentScheme.floorData
+            .filter(f => state.activePhases.includes(f.phase))
+            .sort((a, b) => b.floor - a.floor);
+        
+        // Calculate height for each floor rectangle
+        const floorHeight = allFloors.length > 0 ? 300 / allFloors.length : 300;
+        
+        // Create floor rectangles
+        allFloors.forEach((floor, floorIndex) => {
+            const floorRect = singleColumn.append('div')
+                .attr('class', 'border-b border-gray-300 flex items-center justify-center cursor-pointer transition-colors duration-200 hover:opacity-80')
+                .style('height', `${floorHeight}px`)
+                .style('background-color', floor.shelled ? '#ef4444' : '#22c55e') // Red for shelled, green for non-shelled
+                .style('border-bottom', floorIndex === allFloors.length - 1 ? 'none' : '1px solid #d1d5db')
+                .on('click', function() {
+                    floor.shelled = !floor.shelled;
+                    updateProgramSF();
+                    render();
+                });
+            
+            floorRect.append('div')
+                .attr('class', 'text-white font-semibold text-xs text-center drop-shadow-sm')
+                .text(`Floor ${floor.floor}`);
+        });
+    }
+
+    // Add Phase Control Card (Column 6) - only if multi-phase
+    if (state.currentScheme.phases > 1) {
+        const phaseCard = schemeGrid.append('div')
+            .attr('class', 'bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 h-full flex flex-col');
+        
+        phaseCard.append('div')
+            .attr('class', 'bg-blue-100 h-[40%] flex items-center justify-center')
+            .append('div')
+            .attr('class', 'text-blue-700 font-bold text-xl')
+            .text('📋');
+        
+        const phaseContent = phaseCard.append('div')
+            .attr('class', 'p-3 flex flex-col justify-between h-[60%]');
+        
+        phaseContent.append('h4')
+            .attr('class', 'font-semibold text-base text-gray-800 mb-2')
+            .text('Active Phases');
+        
+        const phasesContainer = phaseContent.append('div')
+            .attr('class', 'flex flex-col space-y-2 flex-grow');
+
+        for (let i = 1; i <= state.currentScheme.phases; i++) {
+            const checkboxWrapper = phasesContainer.append('div')
+                .attr('class', 'flex items-center');
+
+            checkboxWrapper.append('input')
+                .attr('type', 'checkbox')
+                .attr('id', `phase-${i}`)
+                .attr('class', 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
+                .property('checked', state.activePhases.includes(i))
+                .on('change', function(event) {
+                    const phaseNum = i;
+                    const isChecked = event.target.checked;
+                    if (isChecked) {
+                        if (!state.activePhases.includes(phaseNum)) state.activePhases.push(phaseNum);
+                    } else {
+                        const phaseIndex = state.activePhases.indexOf(phaseNum);
+                        if (phaseIndex > -1) state.activePhases.splice(phaseIndex, 1);
+                    }
+                    state.activePhases.sort();
+                    updateProgramSF();
+                    render();
+                });
+            
+            // Use custom phase name if available, otherwise default to "Phase X"
+            const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[i-1] 
+                ? state.currentScheme.phaseNames[i-1] 
+                : `Phase ${i}`;
+            
+            checkboxWrapper.append('label')
+                .attr('for', `phase-${i}`)
+                .attr('class', 'ml-2 text-sm text-gray-900')
+                .text(phaseName);
+        }
+    }
 
     const tableContainer = mainContainer.append('div')
         .attr('class', 'program-table-container');
