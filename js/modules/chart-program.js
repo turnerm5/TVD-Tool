@@ -256,65 +256,98 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     const shellCard = schemeGrid.append('div')
         .attr('class', 'bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 h-full flex flex-col');
     
-    shellCard.append('div')
-        .attr('class', 'bg-green-100 h-[40%] flex items-center justify-center')
-        .append('div')
-        .attr('class', 'text-green-700 font-bold text-xl')
-        .text('🏗️');
+    // Header with title
+    const shellHeader = shellCard.append('div')
+        .attr('class', 'bg-gray-100 p-2 flex items-center justify-center border-b border-gray-200')
+        .style('height', '50px');
     
-    const shellContent = shellCard.append('div')
-        .attr('class', 'p-3 flex flex-col justify-between h-[60%]');
+    shellHeader.append('h4')
+        .attr('class', 'font-semibold text-sm text-gray-800 text-center')
+        .text('Shell a Floor?');
     
-    shellContent.append('h4')
-        .attr('class', 'font-semibold text-base text-gray-800 mb-2')
-        .text('Shell Floors');
-    
-    const shellControlsContainer = shellContent.append('div')
-        .attr('class', 'flex flex-col space-y-2 flex-grow');
+    // Building visualization container
+    const buildingContainer = shellCard.append('div')
+        .attr('class', 'flex-grow flex')
+        .style('height', '300px');
 
-    // Create shell floor controls for each active phase
-    state.activePhases.forEach(phase => {
-        const phaseShellGroup = shellControlsContainer.append('div')
-            .attr('class', 'flex flex-col space-y-1');
+    if (state.currentScheme.phases > 1) {
+        // Multi-phase layout: side-by-side columns
+        state.activePhases.forEach((phase, phaseIndex) => {
+            // Use custom phase name if available, otherwise default to "Phase X"
+            const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[phase-1] 
+                ? state.currentScheme.phaseNames[phase-1] 
+                : `Phase ${phase}`;
+            
+            const phaseColumn = buildingContainer.append('div')
+                .attr('class', 'flex-1 flex flex-col border-r border-gray-300')
+                .style('border-right', phaseIndex === state.activePhases.length - 1 ? 'none' : '1px solid #d1d5db');
+            
+            // Phase header
+            phaseColumn.append('div')
+                .attr('class', 'bg-gray-50 border-b border-gray-300 p-1 text-center')
+                .style('height', '30px')
+                .append('div')
+                .attr('class', 'text-xs font-semibold text-gray-700')
+                .text(phaseName);
+            
+            // Get floors for this phase and sort them (top floor first)
+            const floorsInPhase = state.currentScheme.floorData
+                .filter(f => f.phase === phase)
+                .sort((a, b) => b.floor - a.floor);
+            
+            // Calculate height for each floor rectangle (subtract header height)
+            const availableHeight = 270; // 300px - 30px header
+            const floorHeight = floorsInPhase.length > 0 ? availableHeight / floorsInPhase.length : availableHeight;
+            
+            // Create floor rectangles for this phase
+            floorsInPhase.forEach((floor, floorIndex) => {
+                const floorRect = phaseColumn.append('div')
+                    .attr('class', 'border-b border-gray-300 flex items-center justify-center cursor-pointer transition-colors duration-200 hover:opacity-80')
+                    .style('height', `${floorHeight}px`)
+                    .style('background-color', floor.shelled ? '#ef4444' : '#22c55e') // Red for shelled, green for non-shelled
+                    .style('border-bottom', floorIndex === floorsInPhase.length - 1 ? 'none' : '1px solid #d1d5db')
+                    .on('click', function() {
+                        floor.shelled = !floor.shelled;
+                        updateProgramSF();
+                        render();
+                    });
+                
+                floorRect.append('div')
+                    .attr('class', 'text-white font-semibold text-xs text-center drop-shadow-sm')
+                    .text(`Floor ${floor.floor}`);
+            });
+        });
+    } else {
+        // Single phase layout: single column (original behavior)
+        const singleColumn = buildingContainer.append('div')
+            .attr('class', 'flex-1 flex flex-col');
         
-        // Use custom phase name if available, otherwise default to "Phase X"
-        const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[phase-1] 
-            ? state.currentScheme.phaseNames[phase-1] 
-            : `Phase ${phase}`;
+        // Get all floors and sort them (top floor first)
+        const allFloors = state.currentScheme.floorData
+            .filter(f => state.activePhases.includes(f.phase))
+            .sort((a, b) => b.floor - a.floor);
         
-        // Only show phase label if there are multiple phases
-        if (state.currentScheme.phases > 1) {
-            phaseShellGroup.append('div')
-                .attr('class', 'text-xs font-medium text-gray-600 mb-1')
-                .text(`${phaseName}:`);
-        }
+        // Calculate height for each floor rectangle
+        const floorHeight = allFloors.length > 0 ? 300 / allFloors.length : 300;
         
-        const floorsInPhase = state.currentScheme.floorData.filter(f => f.phase === phase);
-        
-        const floorsContainer = phaseShellGroup.append('div')
-            .attr('class', 'flex flex-wrap gap-1');
-        
-        floorsInPhase.forEach(floor => {
-            const checkboxWrapper = floorsContainer.append('div')
-                .attr('class', 'flex items-center');
-
-            checkboxWrapper.append('input')
-                .attr('type', 'checkbox')
-                .attr('id', `shell-floor-${floor.floor}-phase-${phase}`)
-                .attr('class', 'h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
-                .property('checked', floor.shelled)
-                .on('change', function(event) {
-                    floor.shelled = event.target.checked;
+        // Create floor rectangles
+        allFloors.forEach((floor, floorIndex) => {
+            const floorRect = singleColumn.append('div')
+                .attr('class', 'border-b border-gray-300 flex items-center justify-center cursor-pointer transition-colors duration-200 hover:opacity-80')
+                .style('height', `${floorHeight}px`)
+                .style('background-color', floor.shelled ? '#ef4444' : '#22c55e') // Red for shelled, green for non-shelled
+                .style('border-bottom', floorIndex === allFloors.length - 1 ? 'none' : '1px solid #d1d5db')
+                .on('click', function() {
+                    floor.shelled = !floor.shelled;
                     updateProgramSF();
                     render();
                 });
-
-            checkboxWrapper.append('label')
-                .attr('for', `shell-floor-${floor.floor}-phase-${phase}`)
-                .attr('class', 'ml-1 text-xs text-gray-900')
+            
+            floorRect.append('div')
+                .attr('class', 'text-white font-semibold text-xs text-center drop-shadow-sm')
                 .text(`Floor ${floor.floor}`);
         });
-    });
+    }
 
     // Add Phase Control Card (Column 6) - only if multi-phase
     if (state.currentScheme.phases > 1) {
