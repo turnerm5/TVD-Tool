@@ -93,11 +93,11 @@ function renderEmptyState() {
     legendContainer.html("");
     
     // Render empty state message in the left chart container
-    const container = d3.select("#summary-bar-chart-container");
+    const container = d3.select("#summary-chart-container");
     container.append("div")
-        .attr("class", "flex items-center justify-center h-96 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg")
+        .attr("class", "w-full flex col-span-5 items-center justify-center h-96 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg")
         .append("div")
-        .attr("class", "text-center")
+        .attr("class", "text-center w-full")
         .html(`
             <div class="text-gray-400 mb-4">
                 <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
