@@ -135,6 +135,7 @@ const sampleData = {
             "grossSF": 68000,
             "floors": 3,
             "phases": 2,
+            "phaseNames": ["Base", "Donor"],
             "floorData": [
                 { "floor": 1, "sf": 13333, "shelled": false, "phase": 1 }, { "floor": 1, "sf": 9333, "shelled": false, "phase": 2 },
                 { "floor": 2, "sf": 13333, "shelled": false, "phase": 1 }, { "floor": 2, "sf": 9333, "shelled": false, "phase": 2 },

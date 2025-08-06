@@ -102,10 +102,15 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
                     render();
                 });
             
+            // Use custom phase name if available, otherwise default to "Phase X"
+            const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[i-1] 
+                ? state.currentScheme.phaseNames[i-1] 
+                : `Phase ${i}`;
+            
             checkboxWrapper.append('label')
                 .attr('for', `phase-${i}`)
                 .attr('class', 'ml-2 text-base text-gray-900')
-                .text(`Phase ${i}`);
+                .text(phaseName);
         }
     }
 
@@ -116,9 +121,14 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         const phaseShellContainer = shellContainer.append('div')
             .attr('class', 'flex items-center space-x-4');
         
+        // Use custom phase name if available, otherwise default to "Phase X"
+        const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[phase-1] 
+            ? state.currentScheme.phaseNames[phase-1] 
+            : `Phase ${phase}`;
+        
         phaseShellContainer.append('label')
             .attr('class', 'font-semibold text-gray-700')
-            .text(`Shell Floors (Phase ${phase}):`);
+            .text(`Shell Floors (${phaseName}):`);
         
         const floorsInPhase = state.currentScheme.floorData.filter(f => f.phase === phase);
         
