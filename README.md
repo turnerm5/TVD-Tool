@@ -1,5 +1,9 @@
 # Interactive Target Value Design (TVD) Tool
 
+**September 5, 2025**  
+This is the version of the Interactive Target Value Design (TVD) Tool presented at the interactive meeting.
+
+
 An interactive web-based tool for visualizing, adjusting, and analyzing project budgets using Target Value Design (TVD) principles. This tool allows teams to collaboratively explore cost scenarios, compare against benchmark data, and maintain alignment with the project's target value.
 
 ## Key Features
