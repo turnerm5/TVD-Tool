@@ -94,6 +94,7 @@ function render() {
         interiors.renderPlaceholder();
         interiors.renderValuesTable();
         interiors.renderClassroomMix();
+        interiors.renderInteriorsGraph();
     } else if (state.currentView === 'benchmarks') {
         dom.benchmarksView.classList.remove('hidden');
         dom.benchmarksViewBtn.classList.add('active');

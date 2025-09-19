@@ -18,6 +18,7 @@
 import * as dom from './dom.js';
 import { state } from './state.js';
 import * as utils from './utils.js';
+import * as ui from './ui.js';
 
 /**
  * Renders a simple placeholder inside the Interiors view.
@@ -193,6 +194,7 @@ export function renderClassroomMix() {
             state.currentData.grossSF = numeric;
             this.value = utils.formatNumber(numeric);
             renderMixTable();
+            renderInteriorsGraph();
         })
         .on('blur', function() {
             const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
@@ -243,6 +245,7 @@ export function renderClassroomMix() {
             const numeric = Number(cleaned) || 0;
             state.interiors.mixSF[d.name] = numeric;
             renderMixTable();
+            renderInteriorsGraph();
         })
         .on('blur', function(event, d) {
             const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
@@ -327,7 +330,7 @@ export function renderClassroomMix() {
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => utils.formatCurrencySmall(d.equipmentCost));
         tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => utils.formatCurrencySmall(d.totalCost));
 
-        // Totals row
+        // Totals row with coverage highlighting
         const tfoot = table.append('tfoot');
 
         const coverage = totalGSF > 0 ? (totals.sf / totalGSF) : 0;
@@ -358,7 +361,7 @@ export function renderClassroomMix() {
         totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.equipmentCost));
         totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.totalCost));
 
-        // Over-coverage message
+        // Over-coverage or warning messages
         if (coverage > 1.0) {
             const overBy = totals.sf - totalGSF;
             const overPct = (coverage - 1.0) * 100;
@@ -376,4 +379,239 @@ export function renderClassroomMix() {
     }
 
     renderMixTable();
+}
+
+/**
+ * Renders a read-only slider-like graph for Interiors, Services, Equipment
+ * showing current target vs. classroom mix blended targets with benchmark indicators.
+ */
+export function renderInteriorsGraph() {
+    if (!dom.interiorsGraph) return;
+
+    // Ensure a wrapper exists so we can place the action button directly under the white box
+    const graphNode = dom.interiorsGraph;
+    let wrapperNode = graphNode.parentNode;
+    if (!(wrapperNode && wrapperNode.id === 'interiors-graph-wrapper')) {
+        const parentNode = wrapperNode; // original parent
+        const newWrapper = document.createElement('div');
+        newWrapper.id = 'interiors-graph-wrapper';
+        parentNode.insertBefore(newWrapper, graphNode);
+        newWrapper.appendChild(graphNode);
+        wrapperNode = newWrapper;
+    }
+    const wrapperSel = d3.select(wrapperNode);
+
+    const container = d3.select(dom.interiorsGraph);
+    container.html('');
+
+    const categories = ['C Interiors', 'D Services', 'E Equipment and Furnishings'];
+
+    // Prepare data for the three categories
+    const currentComponents = (state.currentScheme?.costOfWork || []).filter(c => categories.includes(c.name));
+
+    const roomTypes = state.interiors?.targetValues || [];
+    const totalMixSf = roomTypes.reduce((sum, rt) => sum + (Number(state.interiors.mixSF[rt.name]) || 0), 0);
+
+    const blendedByCategory = {};
+    categories.forEach(cat => {
+        if (totalMixSf > 0) {
+            const weighted = roomTypes.reduce((sum, rt) => sum + ((Number(state.interiors.mixSF[rt.name]) || 0) * (Number(rt[cat]) || 0)), 0);
+            blendedByCategory[cat] = weighted / totalMixSf;
+        } else {
+            blendedByCategory[cat] = 0;
+        }
+    });
+
+    const data = currentComponents.map(c => ({
+        name: c.name,
+        currentTarget: Number(c.target_value) || 0,
+        blendedTarget: blendedByCategory[c.name] || 0,
+        benchmark_low: Number(c.benchmark_low) || 0,
+        benchmark_high: Number(c.benchmark_high) || 0
+    }));
+
+    // Determine layout, paddings, and y-scale domain
+    const graphHeight = 700;
+    const paddingTop = 20;
+    const paddingBottom = 125; // leave room for labels
+    container
+        .style('position', 'relative')
+        .style('height', graphHeight + 'px')
+        .style('padding-top', paddingTop + 'px')
+        .style('padding-bottom', paddingBottom + 'px');
+
+    const chartHeight = container.node().clientHeight;
+
+    const yDomainMax = state.yDomainMax || d3.max([
+        d3.max(data, d => Math.max(d.currentTarget, d.blendedTarget, d.benchmark_high)),
+        0
+    ]) || 100;
+
+    const yScale = d3.scaleLinear().domain([0, yDomainMax]).range([chartHeight - paddingBottom, paddingTop]);
+
+    // Optional header/legend
+    const legend = container.append('div').attr('class', 'flex items-center gap-4 mb-2');
+    legend.append('div').attr('class', 'flex items-center gap-2')
+        .html('<span style="display:inline-block;width:16px;height:6px;background:#d1d5db;border-radius:2px"></span><span class="text-xs text-gray-700">Current Target</span>');
+    legend.append('div').attr('class', 'flex items-center gap-2')
+        .html('<span style="display:inline-block;width:16px;height:6px;background:#1f2937;border-radius:2px"></span><span class="text-xs text-gray-700">Classroom Mix</span>');
+
+    const grid = container.append('div')
+        .attr('class', 'grid')
+        .style('grid-template-columns', `repeat(${data.length}, 1fr)`)
+        .style('height', (chartHeight - paddingTop - paddingBottom) + 'px');
+
+    const cols = grid.selectAll('.component-column')
+        .data(data, d => d.name)
+        .enter()
+        .append('div')
+        .attr('class', 'component-column')
+        .style('position', 'relative');
+
+    // Y-axis line per column
+    cols.append('div').attr('class', 'y-axis');
+
+    // Benchmark range and caps
+    cols.append('div').attr('class', 'benchmark-range')
+        .style('top', d => Math.min(yScale(d.benchmark_low), yScale(d.benchmark_high)) + 'px')
+        .style('height', d => Math.abs(yScale(d.benchmark_low) - yScale(d.benchmark_high)) + 'px');
+    cols.append('div').attr('class', 'benchmark-cap benchmark-cap-low')
+        .style('top', d => yScale(d.benchmark_low) + 'px');
+    cols.append('div').attr('class', 'benchmark-cap benchmark-cap-high')
+        .style('top', d => yScale(d.benchmark_high) + 'px');
+
+    // Current target (light gray) - using ghost-rom visuals
+    cols.append('div').attr('class', 'ghost-rom')
+        .style('top', d => (yScale(d.currentTarget) - 3) + 'px');
+
+    // Blended target (dark bar) - read only
+    cols.append('div')
+        .attr('class', 'current-rom')
+        .style('top', d => (yScale(d.blendedTarget) - 3) + 'px');
+
+    // Labels
+    cols.append('div')
+        .attr('class', 'component-label')
+        .text(d => d.name);
+
+    // Benchmark indicators (blue circles + short line) with hover tooltip
+    const svg = cols.append('svg').attr('class', 'benchmark-indicator-svg');
+
+    const benchProjects = state.currentData?.benchmarks || [];
+
+    svg.each(function(componentData) {
+        const s = d3.select(this);
+        const indicators = s.selectAll('.benchmark-indicator-group')
+            .data(benchProjects.filter(p => p.costOfWork.some(c => c.name === componentData.name)));
+
+        const enterIndicators = indicators.enter().append('g')
+            .attr('class', 'benchmark-indicator-group');
+
+        enterIndicators.append('line').attr('class', 'benchmark-indicator-line');
+        enterIndicators.append('circle').attr('class', 'benchmark-indicator-circle');
+        enterIndicators.append('text').attr('class', 'benchmark-indicator-label');
+
+        const merged = enterIndicators.merge(indicators);
+
+        merged.each(function(d) {
+            const benchmarkComp = d.costOfWork.find(c => c.name === componentData.name);
+            if (!benchmarkComp) return;
+            const yPos = yScale(benchmarkComp.cost);
+            d3.select(this).select('.benchmark-indicator-line').attr('x1', '20%').attr('x2', '10%').attr('y1', yPos).attr('y2', yPos);
+            d3.select(this).select('.benchmark-indicator-circle').attr('cx', '10%').attr('cy', yPos).attr('r', 8);
+            d3.select(this).select('.benchmark-indicator-label').attr('x', '10%').attr('y', yPos).attr('dy', '0.35em').text(d.id);
+        });
+
+        let hoverTimeout;
+        merged
+            .on('mouseenter', function(event, d) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = setTimeout(() => {
+                    showBenchmarkTooltipForInteriors(event, d, componentData);
+                }, 200);
+            })
+            .on('mouseleave', function() {
+                clearTimeout(hoverTimeout);
+                hideBenchmarkTooltipForInteriors();
+            });
+    });
+
+    let actions = wrapperSel.select('#interiors-graph-actions');
+    if (actions.empty()) {
+        actions = wrapperSel.append('div').attr('id', 'interiors-graph-actions');
+    }
+    actions
+        .attr('class', 'mt-2');
+
+    const disabled = totalMixSf === 0;
+    actions.html('');
+    actions.append('button')
+        .attr('class', `w-full px-3 py-2 text-sm rounded-md font-medium ${disabled ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 transition'}`)
+        .attr('id', 'update-targets-btn')
+        .property('disabled', disabled)
+        .text('Update Target Values')
+        .on('click', async function() {
+            if (totalMixSf === 0) return;
+            const confirmed = await ui.showConfirmDialog(
+                'Update Target Values',
+                'Would you like to update the overall target values to match this new room type mix?',
+                'Yes, Update',
+                'Cancel'
+            );
+            if (!confirmed) return;
+
+            const toUpdate = ['C Interiors', 'D Services', 'E Equipment and Furnishings'];
+            const components = state.currentScheme?.costOfWork || [];
+            components.forEach(c => {
+                if (toUpdate.includes(c.name)) {
+                    c.target_value = Math.max(0, Number(blendedByCategory[c.name]) || 0);
+                }
+            });
+
+            // Trigger render via UI helper without changing view
+            ui.setCurrentPhase(state.currentPhase || 'phase2');
+            await ui.showAlert('Target Values Updated', 'The overall target values now match the current classroom mix.');
+        });
+
+    function showBenchmarkTooltipForInteriors(event, benchmarkData, componentData) {
+        hideBenchmarkTooltipForInteriors();
+        const benchmarkComponent = benchmarkData.costOfWork.find(c => c.name === componentData.name);
+        const tooltip = d3.select('body').append('div').attr('class', 'benchmark-tooltip');
+        const imageSource = (benchmarkComponent && benchmarkComponent.image) ? benchmarkComponent.image : benchmarkData.image;
+        tooltip.append('img').attr('src', imageSource);
+        const content = tooltip.append('div').attr('class', 'benchmark-tooltip-content');
+        content.append('div').attr('class', 'benchmark-tooltip-name').text(benchmarkData.name);
+        if (benchmarkComponent) {
+            if (typeof benchmarkComponent.cost === 'number') {
+                content.append('div').attr('class', 'text-base benchmark-tooltip-cost').style('margin-top', '8px').text(`Cost: $${benchmarkComponent.cost.toFixed(2)}/SF`);
+            }
+            if (benchmarkComponent.systemDetail && benchmarkComponent.systemDetail !== 'Detail needed.') {
+                content.append('div').attr('class', 'benchmark-tooltip-detail').style('margin-top', '8px').text(benchmarkComponent.systemDetail);
+            }
+            if (benchmarkComponent.pros) {
+                const prosDiv = content.append('div').attr('class', 'benchmark-tooltip-pros').style('margin-top', '8px');
+                prosDiv.append('span').style('font-weight', 'bold').text('✅ Pros: ');
+                prosDiv.append('span').text(benchmarkComponent.pros);
+            }
+            if (benchmarkComponent.cons) {
+                const consDiv = content.append('div').attr('class', 'benchmark-tooltip-cons').style('margin-top', '4px');
+                consDiv.append('span').style('font-weight', 'bold').text('❌ Cons: ');
+                consDiv.append('span').text(benchmarkComponent.cons);
+            }
+        }
+        const tooltipNode = tooltip.node();
+        const tooltipWidth = tooltipNode.offsetWidth;
+        const tooltipHeight = tooltipNode.offsetHeight;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        let left = event.pageX + 15;
+        let top = event.pageY + 15;
+        if (left + tooltipWidth > viewportWidth) left = event.pageX - tooltipWidth - 15;
+        if (top + tooltipHeight > viewportHeight) top = event.pageY - tooltipHeight - 15;
+        tooltip.style('left', left + 'px').style('top', top + 'px');
+    }
+
+    function hideBenchmarkTooltipForInteriors() {
+        d3.select('.benchmark-tooltip').remove();
+    }
 }
