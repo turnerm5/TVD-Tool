@@ -379,6 +379,9 @@ export function renderClassroomMix() {
     }
 
     renderMixTable();
+
+    // Keep breakouts height in sync with the graph card
+    syncBreakoutsHeightWithGraph();
 }
 
 /**
@@ -607,6 +610,9 @@ export function renderInteriorsGraph() {
                 : 'Updated three categories. Overall estimate may have changed.');
         });
 
+    // After laying out the graph, sync breakouts height to match this card
+    syncBreakoutsHeightWithGraph();
+
     function showBenchmarkTooltipForInteriors(event, benchmarkData, componentData) {
         hideBenchmarkTooltipForInteriors();
         const benchmarkComponent = benchmarkData.costOfWork.find(c => c.name === componentData.name);
@@ -647,5 +653,16 @@ export function renderInteriorsGraph() {
 
     function hideBenchmarkTooltipForInteriors() {
         d3.select('.benchmark-tooltip').remove();
+    }
+}
+
+// Ensure the middle column (interiors-breakouts) matches the graph card height
+function syncBreakoutsHeightWithGraph() {
+    const breakoutsNode = dom.interiorsBreakouts;
+    const graphNode = dom.interiorsGraph;
+    if (!breakoutsNode || !graphNode) return;
+    const graphHeightPx = graphNode.offsetHeight;
+    if (graphHeightPx && isFinite(graphHeightPx)) {
+        breakoutsNode.style.height = graphHeightPx + 'px';
     }
 }
