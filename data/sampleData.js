@@ -35,39 +35,39 @@ const sampleData = {
     "interiorTargetValues": [
         {
             "name": "Classrooms",
-            "C Interiors": 70,
-            "D Services": 282,
-            "E Equipment and Furnishings": 37
+            "C Interiors": 63,
+            "D Services": 200,
+            "E Equipment and Furnishings": 25
         },
         {
             "name": "Curricular Space",
-            "C Interiors": 67,
-            "D Services": 276,
-            "E Equipment and Furnishings": 38
+            "C Interiors": 62,
+            "D Services": 190,
+            "E Equipment and Furnishings": 30
         },
         {
             "name": "Offices",
-            "C Interiors": 66,
-            "D Services": 267,
-            "E Equipment and Furnishings": 35
+            "C Interiors": 70,
+            "D Services": 210,
+            "E Equipment and Furnishings": 20
         },
         {
             "name": "Project",
-            "C Interiors": 69,
-            "D Services": 289,
+            "C Interiors": 65,
+            "D Services": 200,
             "E Equipment and Furnishings": 39
         },
         {
             "name": "Research",
-            "C Interiors": 77,
+            "C Interiors": 80,
             "D Services": 370,
             "E Equipment and Furnishings": 51
         },
         {
             "name": "Student Space",
             "C Interiors": 55,
-            "D Services": 204,
-            "E Equipment and Furnishings": 25
+            "D Services": 180,
+            "E Equipment and Furnishings": 15
         }
     ],
     "schemes": [

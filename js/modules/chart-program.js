@@ -447,12 +447,15 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     const overallSFContainer = mainContainer.append('div')
         .attr('class', 'mb-3 flex items-center gap-3');
 
-    overallSFContainer.append('label')
+    const overallSFInputGroup = overallSFContainer.append('div')
+        .attr('class', 'flex flex-col');
+
+    overallSFInputGroup.append('label')
         .attr('for', 'overall-sf-input')
-        .attr('class', 'text-sm font-medium text-gray-700')
+        .attr('class', 'text-xs font-semibold text-gray-700 mb-1')
         .text('Overall Square Footage');
 
-    overallSFContainer.append('input')
+    overallSFInputGroup.append('input')
         .attr('id', 'overall-sf-input')
         .attr('type', 'text')
         .attr('inputmode', 'numeric')

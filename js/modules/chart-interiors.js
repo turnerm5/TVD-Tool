@@ -145,3 +145,235 @@ function parseNumberFromInput(value) {
     const num = Number(cleaned);
     return isNaN(num) ? 0 : num;
 }
+
+/**
+ * Renders the Classroom Mix inputs and calculations in the middle panel.
+ * - Inputs: per classroom type SF
+ * - Table: costs and % of GSF/NSF per type, plus totals
+ */
+export function renderClassroomMix() {
+    if (!dom.interiorsBreakouts) return;
+    const container = d3.select(dom.interiorsBreakouts);
+    container.html('');
+
+    // Ensure we have a container for the Overall SF input
+    const overallSFContainer = container.append('div')
+        .attr('class', 'mb-3');
+
+    const overallSFInputGroup = overallSFContainer.append('div')
+        .attr('class', 'flex flex-col');
+
+    overallSFInputGroup.append('label')
+        .attr('for', 'overall-sf-input')
+        .attr('class', 'text-xs font-semibold text-gray-700 mb-1')
+        .text('Overall Square Footage');
+
+    overallSFInputGroup.append('input')
+        .attr('id', 'overall-sf-input')
+        .attr('type', 'text')
+        .attr('inputmode', 'numeric')
+        .attr('pattern', '[0-9,]*')
+        .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500')
+        .attr('value', utils.formatNumber(state.currentData?.grossSF || 0))
+        .on('focus', function() {
+            const current = Number(state.currentData?.grossSF || 0);
+            this.value = current.toString();
+            this.select();
+        })
+        .on('input', function() {
+            const cleaned = this.value.replace(/[^0-9]/g, '');
+            const isValid = cleaned === '' || !isNaN(Number(cleaned));
+            this.classList.toggle('border-red-500', !isValid);
+            this.classList.toggle('ring-red-500', !isValid);
+        })
+        .on('change', function() {
+            const cleaned = this.value.replace(/[^0-9]/g, '');
+            const numeric = Number(cleaned) || 0;
+            if (!state.currentData) return;
+            state.currentData.grossSF = numeric;
+            this.value = utils.formatNumber(numeric);
+            renderMixTable();
+        })
+        .on('blur', function() {
+            const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
+            this.value = utils.formatNumber(numeric);
+            this.classList.remove('border-red-500');
+            this.classList.remove('ring-red-500');
+        });
+
+    const roomTypes = state.interiors?.targetValues || [];
+    if (!Array.isArray(roomTypes) || roomTypes.length === 0) return;
+
+    // Inputs for SF per classroom type
+    const inputsWrapper = container.append('div')
+        .attr('class', 'grid grid-cols-2 gap-3 mb-4');
+
+    const inputCards = inputsWrapper.selectAll('.mix-input')
+        .data(roomTypes, d => d.name)
+        .enter()
+        .append('div')
+        .attr('class', 'mix-input');
+
+    inputCards.append('div')
+        .attr('class', 'text-xs font-semibold text-gray-700 mb-1')
+        .text(d => d.name);
+
+    inputCards.append('input')
+        .attr('type', 'text')
+        .attr('inputmode', 'numeric')
+        .attr('pattern', '[0-9,]*')
+        .attr('class', 'w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
+        .attr('value', d => {
+            const v = state.interiors.mixSF[d.name] || 0;
+            return Number(v).toLocaleString('en-US');
+        })
+        .on('focus', function(event, d) {
+            const current = Number(state.interiors.mixSF[d.name] || 0) || 0;
+            this.value = current.toString();
+            this.select();
+        })
+        .on('input', function() {
+            const cleaned = this.value.replace(/[^0-9]/g, '');
+            const isValid = cleaned === '' || !isNaN(Number(cleaned));
+            this.classList.toggle('border-red-500', !isValid);
+            this.classList.toggle('ring-red-500', !isValid);
+        })
+        .on('change', function(event, d) {
+            const cleaned = this.value.replace(/[^0-9]/g, '');
+            const numeric = Number(cleaned) || 0;
+            state.interiors.mixSF[d.name] = numeric;
+            renderMixTable();
+        })
+        .on('blur', function(event, d) {
+            const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
+            this.value = numeric.toLocaleString('en-US');
+            this.classList.remove('border-red-500');
+            this.classList.remove('ring-red-500');
+        });
+
+    // Calculation table
+    const tableContainer = container.append('div');
+    const messageContainer = container.append('div').attr('class', 'mt-2');
+
+    function computeNSF() {
+        // NSF is the sum of the square footages of all classroom types
+        return roomTypes.reduce((sum, rt) => sum + (Number(state.interiors.mixSF[rt.name]) || 0), 0);
+    }
+
+    function renderMixTable() {
+        tableContainer.html('');
+        messageContainer.html('');
+
+        const totalGSF = Number(state.currentData?.grossSF) || 0;
+        const nsf = computeNSF();
+
+        // Build rows data
+        const rows = roomTypes.map(rt => {
+            const sf = Number(state.interiors.mixSF[rt.name] || 0);
+            const interiorsCost = Number(rt['C Interiors'] || 0) * sf;
+            const servicesCost = Number(rt['D Services'] || 0) * sf;
+            const equipmentCost = Number(rt['E Equipment and Furnishings'] || 0) * sf;
+            const totalCost = interiorsCost + servicesCost + equipmentCost;
+            const pctGSF = totalGSF > 0 ? (sf / totalGSF) : 0;
+            const pctNSF = nsf > 0 ? (sf / nsf) : 0;
+            return {
+                name: rt.name,
+                sf,
+                interiorsCost,
+                servicesCost,
+                equipmentCost,
+                totalCost,
+                pctGSF,
+                pctNSF
+            };
+        });
+
+        const totals = rows.reduce((acc, r) => {
+            acc.sf += r.sf;
+            acc.interiorsCost += r.interiorsCost;
+            acc.servicesCost += r.servicesCost;
+            acc.equipmentCost += r.equipmentCost;
+            acc.totalCost += r.totalCost;
+            return acc;
+        }, { sf: 0, interiorsCost: 0, servicesCost: 0, equipmentCost: 0, totalCost: 0 });
+
+        const table = tableContainer.append('table')
+            .attr('class', 'w-full text-sm text-left text-gray-600 border border-gray-200 rounded-lg overflow-hidden');
+
+        const thead = table.append('thead');
+        const headerRow = thead.append('tr').attr('class', 'bg-gray-50 text-xs uppercase text-gray-700');
+        headerRow.append('th').attr('class', 'px-4 py-2').text('Classroom Type');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('SF');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('% GSF');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('% NSF');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Interiors');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Services');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Equipment');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Total');
+
+        const tbody = table.append('tbody');
+        const tr = tbody.selectAll('tr.mix-row')
+            .data(rows, d => d.name)
+            .enter()
+            .append('tr')
+            .attr('class', 'bg-white border-b hover:bg-gray-50 mix-row');
+
+        tr.append('td').attr('class', 'px-4 py-2 text-gray-900').text(d => d.name);
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.sf.toLocaleString('en-US'));
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => `${(d.pctGSF * 100).toFixed(1)}%`);
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => `${(d.pctNSF * 100).toFixed(1)}%`);
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => utils.formatCurrencySmall(d.interiorsCost));
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => utils.formatCurrencySmall(d.servicesCost));
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => utils.formatCurrencySmall(d.equipmentCost));
+        tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => utils.formatCurrencySmall(d.totalCost));
+
+        // Totals row
+        const tfoot = table.append('tfoot');
+
+        const coverage = totalGSF > 0 ? (totals.sf / totalGSF) : 0;
+        let highlightClass = 'bg-blue-50';
+        if (coverage >= 0.75 && coverage < 0.85) {
+            highlightClass = 'bg-yellow-100';
+        } else if (coverage >= 0.85 && coverage <= 1.0) {
+            highlightClass = 'bg-orange-100';
+        } else if (coverage > 1.0) {
+            highlightClass = 'bg-red-100';
+        }
+
+        const totalRow = tfoot.append('tr').attr('class', `${highlightClass} border-t`);
+        totalRow.append('td').attr('class', 'px-4 py-2 font-bold text-blue-900').text('Total');
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(totals.sf.toLocaleString('en-US'));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => {
+            const totalGSF = Number(state.currentData?.grossSF) || 0;
+            const pct = totalGSF > 0 ? (totals.sf / totalGSF) * 100 : 0;
+            return `${pct.toFixed(1)}%`;
+        });
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => {
+            const nsf = computeNSF();
+            const pct = nsf > 0 ? (totals.sf / nsf) * 100 : 0;
+            return `${pct.toFixed(1)}%`;
+        });
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.interiorsCost));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.servicesCost));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.equipmentCost));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.totalCost));
+
+        // Over-coverage message
+        if (coverage > 1.0) {
+            const overBy = totals.sf - totalGSF;
+            const overPct = (coverage - 1.0) * 100;
+            messageContainer
+                .append('div')
+                .attr('class', 'text-sm text-red-600 flex items-center gap-1')
+                .html(`<span class="inline-block align-middle" style="font-size:1.1em;">&#9888;&#65039;</span> Entered classroom SF exceeds Gross SF by ${overBy.toLocaleString('en-US')} SF (${overPct.toFixed(1)}%).`);
+        } else if (coverage >= 0.75 && coverage <= 1.0) {
+            // Show warning for unrealistic building efficiency
+            messageContainer
+                .append('div')
+                .attr('class', 'text-sm text-orange-600 flex items-center gap-1')
+                .html(`<span class="inline-block align-middle" style="font-size:1.1em;">&#9888;&#65039;</span> Warning: Building Efficiency is Unrealistic (Classroom SF is ${Math.round(coverage * 100)}% of Gross SF).`);
+        }
+    }
+
+    renderMixTable();
+}

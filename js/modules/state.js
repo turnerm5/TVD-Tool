@@ -20,7 +20,9 @@ export const state = {
     currentData: null,
     originalData: null,
     interiors: {
-        targetValues: []
+        targetValues: [],
+        // Stores user-entered square footage by room/classroom type name
+        mixSF: {}
     },
     lockedCostOfWork: new Set(),
     currentView: 'splash-screen', // 'summary', 'slider', 'program'
