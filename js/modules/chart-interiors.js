@@ -562,15 +562,49 @@ export function renderInteriorsGraph() {
 
             const toUpdate = ['C Interiors', 'D Services', 'E Equipment and Furnishings'];
             const components = state.currentScheme?.costOfWork || [];
+
+            // Capture current total Cost of Work before updates
+            const preCow = utils.calculateTotalCostOfWork(components);
+
+            // Apply blended targets to the three categories
             components.forEach(c => {
                 if (toUpdate.includes(c.name)) {
                     c.target_value = Math.max(0, Number(blendedByCategory[c.name]) || 0);
                 }
             });
 
+            // Ask whether to keep the total identical by adjusting other categories
+            const keepBudgetSame = await ui.showConfirmDialog(
+                'Keep Budget the Same?',
+                'Update the other categories so the current estimate stays identical?',
+                'Yes, Keep Budget Same',
+                'No, Only Update These Three'
+            );
+
+            if (keepBudgetSame) {
+                const postCowUnbalanced = utils.calculateTotalCostOfWork(components);
+                const deltaCow = postCowUnbalanced - preCow; // positive if we increased cost
+                if (Math.abs(deltaCow) > 0.01) {
+                    const others = components.filter(c => !toUpdate.includes(c.name) && Number(c.square_footage) > 0);
+                    const othersCow = others.reduce((sum, c) => sum + (Number(c.target_value) * Number(c.square_footage)), 0);
+                    if (othersCow > 0) {
+                        // Scale other categories proportionally to absorb delta
+                        let factor = (othersCow - deltaCow) / othersCow;
+                        if (!isFinite(factor)) factor = 1;
+                        if (factor < 0) factor = 0; // clamp to zero to avoid negatives
+                        others.forEach(c => {
+                            const newTv = (Number(c.target_value) || 0) * factor;
+                            c.target_value = Math.max(0, newTv);
+                        });
+                    }
+                }
+            }
+
             // Trigger render via UI helper without changing view
             ui.setCurrentPhase(state.currentPhase || 'phase2');
-            await ui.showAlert('Target Values Updated', 'The overall target values now match the current classroom mix.');
+            await ui.showAlert('Target Values Updated', keepBudgetSame
+                ? 'Updated three categories and adjusted others to keep the estimate the same.'
+                : 'Updated three categories. Overall estimate may have changed.');
         });
 
     function showBenchmarkTooltipForInteriors(event, benchmarkData, componentData) {
