@@ -25,6 +25,7 @@ import * as fileHandlers from './modules/file-handlers.js';
 import * as slider from './modules/chart-slider.js';
 import * as summary from './modules/chart-summary.js';
 import * as program from './modules/chart-program.js';
+import * as interiors from './modules/chart-interiors.js';
 import * as benchmarks from './modules/chart-benchmarks.js';
 import * as utils from './modules/utils.js';
 
@@ -52,6 +53,7 @@ function render() {
     // --- 1. Hide all views and deactivate all buttons ---
     dom.mainChart.classList.add('hidden');
     dom.programView.classList.add('hidden');
+    dom.interiorsView.classList.add('hidden');
     
     dom.benchmarksView.classList.add('hidden');
     dom.summaryView.classList.add('hidden');
@@ -65,6 +67,7 @@ function render() {
 
     dom.chartViewBtn.classList.remove('active');
     dom.programViewBtn.classList.remove('active');
+    dom.interiorsViewBtn.classList.remove('active');
     dom.benchmarksViewBtn.classList.remove('active');
     dom.summaryViewBtn.classList.remove('active');
 
@@ -85,6 +88,10 @@ function render() {
         dom.programView.classList.remove('hidden');
         dom.programViewBtn.classList.add('active');
         program.renderPhase2ProgramView(render, slider.handleSquareFootageCellChange);
+    } else if (state.currentView === 'interiors') {
+        dom.interiorsView.classList.remove('hidden');
+        dom.interiorsViewBtn.classList.add('active');
+        interiors.renderPlaceholder();
     } else if (state.currentView === 'benchmarks') {
         dom.benchmarksView.classList.remove('hidden');
         dom.benchmarksViewBtn.classList.add('active');
@@ -163,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     dom.benchmarksViewBtn.addEventListener('click', () => { state.currentView = 'benchmarks'; state.selectedBenchmark = null; render(); });
     dom.summaryViewBtn.addEventListener('click', () => { state.currentView = 'summary'; state.currentPhase = 'phase2'; render(); });
+    dom.interiorsViewBtn.addEventListener('click', () => { state.currentView = 'interiors'; render(); });
 
     // --- File Drop Zone Handlers ---
     dom.fileInput.addEventListener('change', (e) => fileHandlers.handleFile(e.target.files[0]));

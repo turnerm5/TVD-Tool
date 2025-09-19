@@ -33,10 +33,12 @@ export const chartViewBtn = document.getElementById('chart-view-btn');
 export const programViewBtn = document.getElementById('program-view-btn');
 export const benchmarksViewBtn = document.getElementById('benchmarks-view-btn');
 export const summaryViewBtn = document.getElementById('summary-view-btn');
+export const interiorsViewBtn = document.getElementById('interiors-view-btn');
 
 // Views
 export const mainChart = document.getElementById('main-chart');
 export const programView = document.getElementById('program-view');
+export const interiorsView = document.getElementById('interiors-view');
 export const benchmarksView = document.getElementById('benchmarks-view');
 export const summaryView = document.getElementById('summary-view');
 export const sliderView = d3.select('#slider-view');

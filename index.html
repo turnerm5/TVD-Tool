@@ -81,7 +81,7 @@
         <div id="view-selector" class="flex justify-center mb-4 border-b">
             <button id="benchmarks-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Benchmarks</button>
             <button id="chart-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Target Values</button>
-            
+            <button id="interiors-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Interiors</button>
             <button id="program-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Program</button>
             <button id="summary-view-btn" class="view-btn py-2 px-4 border-b-2 font-semibold">Summary</button>
         </div>
@@ -113,6 +113,12 @@
             
             <div id="program-view" class="hidden">
                 <!-- Table will be rendered here by D3 -->
+            </div>
+            <div id="interiors-view" class="hidden">
+                <div id="interiors-placeholder" class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Interiors</h3>
+                    <p class="text-gray-600">Interiors charts will appear here.</p>
+                </div>
             </div>
             <div id="summary-view" class="hidden">
                 <div id="summary-chart-container" class="grid grid-cols-5 gap-4">
