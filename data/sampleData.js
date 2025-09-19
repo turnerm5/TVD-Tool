@@ -32,6 +32,44 @@ const sampleData = {
         { "name": "F Special Construction", "target_value": 20 },
         { "name": "G Building Sitework", "target_value": 42 }
     ],
+    "interiorTargetValues": [
+        {
+            "name": "Classrooms",
+            "C Interiors": 70,
+            "D Services": 282,
+            "E Equipment and Furnishings": 37
+        },
+        {
+            "name": "Curricular Space",
+            "C Interiors": 67,
+            "D Services": 276,
+            "E Equipment and Furnishings": 38
+        },
+        {
+            "name": "Offices",
+            "C Interiors": 66,
+            "D Services": 267,
+            "E Equipment and Furnishings": 35
+        },
+        {
+            "name": "Project",
+            "C Interiors": 69,
+            "D Services": 289,
+            "E Equipment and Furnishings": 39
+        },
+        {
+            "name": "Research",
+            "C Interiors": 77,
+            "D Services": 370,
+            "E Equipment and Furnishings": 51
+        },
+        {
+            "name": "Student Space",
+            "C Interiors": 55,
+            "D Services": 204,
+            "E Equipment and Furnishings": 25
+        }
+    ],
     "schemes": [
         {
             "name": "Predesign",
