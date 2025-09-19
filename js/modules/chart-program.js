@@ -163,10 +163,12 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('class', 'px-6 py-4')
         .html(d => utils.formatCurrencyBig(utils.calculateComponentValue(d)));
 
+    const grossSFForCalcs = Number(state.currentData?.grossSF) || 0;
+    const cowPerSFDisplay = grossSFForCalcs > 0 ? utils.formatCurrency(cowTotalTargetValue / grossSFForCalcs) : '-';
     const cowSubtotalRow = tbody.append('tr').attr('class', 'bg-blue-100 border-t border-blue-300 font-semibold');
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text('Cost of Work Subtotal');
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text('-');
-    cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text('-');
+    cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(cowPerSFDisplay);
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(utils.formatCurrencyBig(cowTotalTargetValue));
 
     const totalCow = utils.calculateTotalCostOfWork(phaseCostOfWork);
@@ -193,11 +195,13 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         });
     }
 
+    const grandTotal = totalCow + indirectsTotal;
+    const grandPerSFDisplay = grossSFForCalcs > 0 ? utils.formatCurrency(grandTotal / grossSFForCalcs) : '-';
     const grandTotalRow = tbody.append('tr').attr('class', 'bg-gray-200 border-t-2 border-gray-400 font-bold');
     grandTotalRow.append('td').attr('class', 'px-6 py-4 font-bold text-gray-900 uppercase').text('Grand Total');
     grandTotalRow.append('td').attr('class', 'px-6 py-4').text('-');
-    grandTotalRow.append('td').attr('class', 'px-6 py-4').text('-');
-    grandTotalRow.append('td').attr('class', 'px-6 py-4 font-bold text-gray-900').text(utils.formatCurrencyBig(totalCow + indirectsTotal));
+    grandTotalRow.append('td').attr('class', 'px-6 py-4').text(grandPerSFDisplay);
+    grandTotalRow.append('td').attr('class', 'px-6 py-4 font-bold text-gray-900').text(utils.formatCurrencyBig(grandTotal));
 }
 
 export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
@@ -258,6 +262,8 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             });
             
             updateProgramSF();
+            // Ensure Overall Square Footage field loads the scheme's GSF on selection
+            state.currentData.grossSF = d.grossSF || 0;
             render();
             renderProgramEstimate();
         });
@@ -436,6 +442,58 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
                 .text(phaseName);
         }
     }
+
+    // Overall Square Footage input above the main table
+    const overallSFContainer = mainContainer.append('div')
+        .attr('class', 'mb-3 flex items-center gap-3');
+
+    overallSFContainer.append('label')
+        .attr('for', 'overall-sf-input')
+        .attr('class', 'text-sm font-medium text-gray-700')
+        .text('Overall Square Footage');
+
+    overallSFContainer.append('input')
+        .attr('id', 'overall-sf-input')
+        .attr('type', 'text')
+        .attr('inputmode', 'numeric')
+        .attr('pattern', '[0-9,]*')
+        .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500')
+        .attr('value', utils.formatNumber(state.currentData?.grossSF || 0))
+        .on('focus', function() {
+            const numericValue = Number(state.currentData?.grossSF) || 0;
+            this.value = numericValue.toLocaleString('en-US');
+            this.select();
+        })
+        .on('change', async function() {
+            const newGross = Number(String(this.value).replace(/,/g, '')) || 0;
+            const oldGross = Number(state.currentData?.grossSF) || 0;
+            state.currentData.grossSF = newGross;
+
+            if (oldGross > 0 && newGross >= 0 && newGross !== oldGross) {
+                const scaleRatio = newGross / oldGross;
+                const confirmed = await ui.showConfirmDialog(
+                    'Scale Square Footages',
+                    `Would you like to scale all component square footages by ${(scaleRatio * 100).toFixed(1)}% to match the new Overall SF? Note: Keeping the square footage values as-is can result in misalignment with the overall $/SF calculations.`,
+                    'Scale',
+                    'Keep As-Is'
+                );
+                if (confirmed) {
+                    state.currentScheme.costOfWork.forEach(component => {
+                        const currentSF = Number(component.square_footage) || 0;
+                        component.square_footage = Math.round(currentSF * scaleRatio);
+                    });
+                    // Re-render to reflect scaled values
+                    render();
+                    renderProgramEstimate();
+                    return;
+                }
+            }
+        })
+        .on('blur', function() {
+            const numeric = Number(String(this.value).replace(/,/g, '')) || 0;
+            state.currentData.grossSF = numeric;
+            this.value = utils.formatNumber(numeric);
+        });
 
     const tableContainer = mainContainer.append('div')
         .attr('class', 'program-table-container');
