@@ -136,11 +136,24 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
     const sfCells = cowRows.append('td').attr('class', 'px-6 py-4');
     sfCells.append('input')
         .attr('type', 'text')
+        .attr('inputmode', 'numeric')
+        .attr('pattern', '[0-9,]*')
         .attr('class', 'text-left program-table-input')
         .attr('value', d => utils.formatSquareFootageWithChange(d.square_footage, d.name))
         .attr('data-phase', 'phase2')
         .attr('data-name', d => d.name)
-        .property('disabled', true);
+        .on('focus', function(event, d) {
+            const numericValue = Number(d.square_footage) || 0;
+            this.value = numericValue.toLocaleString('en-US');
+            this.select();
+        })
+        .on('change', handleSquareFootageCellChange)
+        .on('blur', function(event, d) {
+            const component = state.currentScheme.costOfWork.find(c => c.name === d.name);
+            if (component) {
+                this.value = utils.formatSquareFootageWithChange(component.square_footage, component.name);
+            }
+        });
 
     cowRows.append('td')
         .attr('class', 'px-6 py-4')
