@@ -46,8 +46,8 @@ export function renderValuesTable() {
     // Header
     const thead = table.append('thead');
     const headerRow = thead.append('tr').attr('class', 'bg-gray-50 text-xs uppercase text-gray-700');
-    headerRow.append('th').attr('class', 'px-4 py-2 w-2/3').text('Name');
-    headerRow.append('th').attr('class', 'px-4 py-2 w-1/3').text('$/SF');
+    headerRow.append('th').attr('class', 'px-4 py-2 w-4/5').text('Name');
+    headerRow.append('th').attr('class', 'px-4 py-2 w-1/5').text('$/SF');
 
     const tbody = table.append('tbody');
 
@@ -56,7 +56,7 @@ export function renderValuesTable() {
         // Subhead row for this room type
         const subhead = tbody.append('tr').attr('class', 'bg-blue-50 border-b');
         subhead.append('td')
-            .attr('class', 'px-4 py-2 font-bold text-blue-900 uppercase text-sm')
+            .attr('class', 'px-4 py-2 font-bold text-blue-900 uppercase text-xs')
             .attr('colspan', 2)
             .text(room.name);
 
@@ -70,14 +70,78 @@ export function renderValuesTable() {
             .attr('class', 'bg-white border-b hover:bg-gray-50');
 
         tr.append('td')
-            .attr('class', 'px-4 py-2 font-medium text-gray-900')
+            .attr('class', 'px-4 py-2 text-xs text-gray-900')
             .text(d => d[0]);
-        tr.append('td')
-            .attr('class', 'px-4 py-2')
-            .text(d => utils.formatCurrency(Number(d[1]) || 0));
+        const valueCells = tr.append('td').attr('class', 'font-xs px-4 py-2');
+        valueCells.append('input')
+            .attr('type', 'text')
+            .attr('inputmode', 'decimal')
+            .attr('pattern', '[0-9,\\.]*')
+            .attr('class', 'text-left program-table-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
+            .attr('data-room', room.name)
+            .attr('data-category', d => d[0])
+            .attr('value', d => utils.formatCurrency(Number(d[1]) || 0))
+            .on('focus', function(event, entry) {
+                const numeric = Number(entry[1]) || 0;
+                this.value = numeric.toString();
+                this.select();
+            })
+            .on('input', function(event, entry) {
+                const current = parseNumberFromInput(this.value);
+                const isValid = !isNaN(current) && isFinite(current) && current >= 0;
+                this.classList.toggle('border-red-500', !isValid);
+                this.classList.toggle('ring-red-500', !isValid);
+            })
+            .on('change', function(event, entry) {
+                const [category] = entry;
+                const newNumeric = parseNumberFromInput(this.value);
+                const roomObj = state.interiors.targetValues.find(r => r.name === room.name);
+                if (roomObj) {
+                    roomObj[category] = newNumeric;
+                }
+            })
+            .on('blur', function(event, entry) {
+                const cleaned = parseNumberFromInput(this.value);
+                this.value = utils.formatCurrency(cleaned || 0);
+                this.classList.remove('border-red-500');
+                this.classList.remove('ring-red-500');
+            })
+            .on('keydown', function(event) {
+                const key = event.key;
+                if (key === 'Enter' || key === 'ArrowDown' || key === 'ArrowUp') {
+                    event.preventDefault();
+                    // Commit current value to state
+                    const roomName = this.dataset.room;
+                    const category = this.dataset.category;
+                    const cleaned = parseNumberFromInput(this.value);
+                    const roomObj = state.interiors.targetValues.find(r => r.name === roomName);
+                    if (roomObj && category) {
+                        roomObj[category] = cleaned;
+                    }
+                    // Format current cell
+                    this.value = utils.formatCurrency(cleaned || 0);
+                    // Move focus
+                    const inputs = wrapper.selectAll('input.program-table-input').nodes();
+                    const idx = inputs.indexOf(this);
+                    let nextIdx = idx;
+                    if (key === 'Enter' || key === 'ArrowDown') nextIdx = Math.min(inputs.length - 1, idx + 1);
+                    if (key === 'ArrowUp') nextIdx = Math.max(0, idx - 1);
+                    if (inputs[nextIdx]) {
+                        inputs[nextIdx].focus();
+                        inputs[nextIdx].select();
+                    }
+                }
+            });
     });
 }
 
 function cssSafe(str) {
     return String(str).replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+function parseNumberFromInput(value) {
+    if (typeof value !== 'string') return 0;
+    const cleaned = value.replace(/[$,\s]/g, '');
+    const num = Number(cleaned);
+    return isNaN(num) ? 0 : num;
 }
