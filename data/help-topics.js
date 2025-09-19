@@ -23,13 +23,6 @@ export const helpTopics = {
             </ul>
         `
     },
-    'phase1': {
-        title: 'Phase 1 Costs',
-        content: `
-            <p>This view visualizes the initial cost distribution for the Integrated Sciences Building based on the conceptual design. It uses a Sankey diagram to show how high-level costs flow into more detailed sub-categories.</p>
-            <p>For the Integrated Sciences Building, early critical cost drivers include the <strong>demolition of existing structures</strong> on site and the extensive <strong>site utility work</strong> required to support a modern laboratory facility. This chart helps the team understand how these initial investments impact the overall budget before moving into more detailed design phases.</p>
-        `
-    },
     'program': {
         title: 'Phase 2 Program',
         content: `

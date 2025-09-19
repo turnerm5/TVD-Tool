@@ -11,28 +11,6 @@
  */
 
 const sampleData = {
-    "phase1": {
-        "totalProjectBudget": 20000000,
-        "costOfWork": [
-            { "Category": "Special Construction & Demo", "Subcategory": "Demolition", "Total": 5338387 },
-            { "Category": "Special Construction & Demo", "Subcategory": "Abelson / Eastlick Enclosure", "Total": 1000000 },
-            { "Category": "Sitework", "Subcategory": "Site Preparation", "Total": 0 },
-            { "Category": "Sitework", "Subcategory": "Site Improvements", "Total": 0 },
-            { "Category": "Sitework", "Subcategory": "Civil & Mechanical Utilities", "Total": 0 },
-            { "Category": "Sitework", "Subcategory": "Site Electrical Utilities", "Total": 0 },
-            { "Category": "Sitework", "Subcategory": "Site Lighting", "Total": 0 },
-            { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Total": 500000 },
-            { "Category": "Escalation & Contingency", "Subcategory": "Escalation", "Total": 524000 },
-            { "Category": "Escalation & Contingency", "Subcategory": "Escalation Phase 2", "Total": 0 },
-            { "Category": "Design", "Subcategory": "Design Fees", "Total": 4300000 },
-            { "Category": "Design", "Subcategory": "MEP Design", "Total": 2000000 },
-            { "Category": "GCs and Insurance", "Subcategory": "Preconstruction", "Total": 600000 },
-            { "Category": "GCs and Insurance", "Subcategory": "Subcontractor Default Insurance", "Total": 0 },
-            { "Category": "GCs and Insurance", "Subcategory": "Hoffman Bond", "Total": 0 },
-            { "Category": "GCs and Insurance", "Subcategory": "Builder's Risk Insurance", "Total": 0 },
-            { "Category": "GCs and Insurance", "Subcategory": "General Requirements (SGC, OH, FEE)", "Total": 2076000 }
-        ]
-    },
     "phase2": {
         "totalProjectBudget": 40000000
     },

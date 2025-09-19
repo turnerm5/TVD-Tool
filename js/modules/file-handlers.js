@@ -45,7 +45,7 @@ export function setUpdateProgramSF(fn) {
  * @returns {object} The processed data object.
  */
 function processData(data) {
-    if (!data.benchmarks || (!data.phase1 && !data.phase2)) return data;
+    if (!data.benchmarks) return data;
 
     const benchmarkCostsByName = {};
     data.benchmarks.forEach(proj => {
@@ -75,8 +75,8 @@ function processData(data) {
  * @param {string} [fileName='Sample Data'] - The name of the file being loaded.
  */
 export function loadData(data, fileName = 'Sample Data') {
-    if (!data.phase1 || !data.phase2) {
-        alert("Invalid JSON format. Must contain 'phase1' and 'phase2' objects at the top level.");
+    if (!data.phase2) {
+        alert("Invalid JSON format. Must contain a 'phase2' object at the top level.");
         return;
     }
     
@@ -265,12 +265,10 @@ export function exportJSON() {
     // Start with a clean copy of the original data to preserve the imported values.
     const dataToExport = JSON.parse(JSON.stringify(state.originalData));
 
-    // Clean up any transient properties.
-            [dataToExport.phase1, dataToExport.phase2].forEach(phase => {
-        if (phase.costOfWork) {
-            phase.costOfWork.forEach(c => delete c.locked);
-        }
-    });
+    // Clean up any transient properties for phase2.
+    if (dataToExport.phase2 && dataToExport.phase2.costOfWork) {
+        dataToExport.phase2.costOfWork.forEach(c => delete c.locked);
+    }
 
     // Replace the snapshots in the exported data with the current session's snapshots.
     if (state.snapshots.length > 0) {

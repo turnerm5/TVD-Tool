@@ -24,7 +24,6 @@ import * as ui from './modules/ui.js';
 import * as fileHandlers from './modules/file-handlers.js';
 import * as slider from './modules/chart-slider.js';
 import * as summary from './modules/chart-summary.js';
-import * as sankey from './modules/chart-sankey.js';
 import * as program from './modules/chart-program.js';
 import * as benchmarks from './modules/chart-benchmarks.js';
 import * as utils from './modules/utils.js';
@@ -53,7 +52,7 @@ function render() {
     // --- 1. Hide all views and deactivate all buttons ---
     dom.mainChart.classList.add('hidden');
     dom.programView.classList.add('hidden');
-    dom.phase1View.classList.add('hidden');
+    
     dom.benchmarksView.classList.add('hidden');
     dom.summaryView.classList.add('hidden');
     dom.legend.classList.add('hidden');
@@ -66,7 +65,6 @@ function render() {
 
     dom.chartViewBtn.classList.remove('active');
     dom.programViewBtn.classList.remove('active');
-    // dom.phase1ViewBtn.classList.remove('active');
     dom.benchmarksViewBtn.classList.remove('active');
     dom.summaryViewBtn.classList.remove('active');
 
@@ -87,12 +85,6 @@ function render() {
         dom.programView.classList.remove('hidden');
         dom.programViewBtn.classList.add('active');
         program.renderPhase2ProgramView(render, slider.handleSquareFootageCellChange);
-    } else if (state.currentView === 'phase1') {
-        dom.phase1View.classList.remove('hidden');
-        dom.phase1ViewBtn.classList.add('active');
-        requestAnimationFrame(() => {
-            sankey.renderSankeyChart(state.currentData);
-        });
     } else if (state.currentView === 'benchmarks') {
         dom.benchmarksView.classList.remove('hidden');
         dom.benchmarksViewBtn.classList.add('active');
@@ -168,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- View Selector Handlers ---
     dom.chartViewBtn.addEventListener('click', () => { state.currentView = 'chart'; state.currentPhase = 'phase2'; render(); });
     dom.programViewBtn.addEventListener('click', () => { state.currentView = 'program'; render(); });
-    // dom.phase1ViewBtn.addEventListener('click', () => { state.currentView = 'phase1'; render(); });
+    
     dom.benchmarksViewBtn.addEventListener('click', () => { state.currentView = 'benchmarks'; state.selectedBenchmark = null; render(); });
     dom.summaryViewBtn.addEventListener('click', () => { state.currentView = 'summary'; state.currentPhase = 'phase2'; render(); });
 

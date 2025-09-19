@@ -19,8 +19,8 @@ import * as ui from './ui.js';
  * @param {object} data - The data to be visualized.
  */
 export function renderSankeyChart(data) {
-    const phase1Data = data.phase1;
-    const { totalProjectBudget, costOfWork } = phase1Data;
+    // Phase 1 removed; this module is now unused.
+    return;
 
     // Filter out items with a total of 0
     const filteredCostOfWork = costOfWork.filter(c => c.Total > 0);

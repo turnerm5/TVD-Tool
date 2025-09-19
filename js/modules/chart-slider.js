@@ -42,7 +42,7 @@ function getEffectiveSf(component) {
  * and distributes the inverse of that delta proportionally across all other unlocked components.
  * @param {object} changedComponent - The component object that was directly modified.
  * @param {number} newValue - The new `target_value` value for the changed component.
- * @param {string} phaseKey - The key for the current phase ('phase1' or 'phase2').
+ * @param {string} phaseKey - The key for the current phase ('phase2').
  */
 function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // For phase2, use the current scheme data

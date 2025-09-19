@@ -9,7 +9,7 @@ An interactive web-based tool for visualizing, adjusting, and analyzing project 
 ## Key Features
 
 - **Multiple Views:**
-    - **Sankey Chart:** Visualizes the budget flow from the total project budget down through categories and subcategories for Phase 1.
+    
     - **Slider View:** An interactive bar chart for visually adjusting component costs. Drag the "Current ROM" bar to see real-time cost balancing across unlocked components.
     - **Program View:** A detailed tabular breakdown of all Phase 2 components, allowing for precise numerical input and at-a-glance comparison.
     - **Benchmarks View:** A gallery of benchmark projects used for comparison, displaying their overall cost per square foot.
@@ -53,12 +53,12 @@ The application's logic is modularized to separate concerns and improve maintain
 -   **`modules/dom.js`**: Caches selections for frequently accessed DOM elements to avoid repeated queries.
 -   **`modules/ui.js`**: Handles general UI updates, such as the splash screen visibility, button states, and all modal/confirmation dialogs.
 -   **`modules/file-handlers.js`**: Contains all logic for file operations: loading and parsing user-uploaded JSON, saving project state to JSON, and downloading the template.
--   **`modules/views.js`**: Responsible for rendering the non-chart views, including the Phase 1 table and the benchmarks grid/detail views.
+-   **`modules/views.js`**: Responsible for rendering non-chart views, including the benchmarks grid/detail views.
 -   **`modules/utils.js`**: A collection of helper functions for common tasks like formatting currencies and numbers.
 -   **`modules/chart-program.js`**: Renders and manages all interactions for the detailed tabular program view for Phase 2.
 -   **`modules/chart-slider.js`**: Renders and manages all interactions for the interactive slider chart view for Phase 2.
 -   **`modules/chart-summary.js`**: Renders the summary view, including the comparison table and associated charts.
--   **`modules/chart-sankey.js`**: Renders the Sankey chart for the Phase 1 budget breakdown.
+ 
 
 ## Project Structure
 
@@ -74,7 +74,7 @@ The application's logic is modularized to separate concerns and improve maintain
 │   ├── main.js
 │   └── modules/
 │       ├── chart-program.js
-│       ├── chart-sankey.js
+│       
 │       ├── chart-slider.js
 │       ├── chart-summary.js
 │       ├── chart-waterfall.js

@@ -168,7 +168,7 @@ function showDialog(config) {
 
 
 /**
- * Sets the current phase of the application (e.g., 'phase1' or 'phase2').
+ * Sets the current phase of the application (e.g., 'phase2').
  * @param {string} phase - The phase to set as active.
  */
 export function setCurrentPhase(phase) {
