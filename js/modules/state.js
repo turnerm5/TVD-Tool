@@ -19,6 +19,9 @@ import * as utils from './utils.js';
 export const state = {
     currentData: null,
     originalData: null,
+    interiors: {
+        targetValues: []
+    },
     lockedCostOfWork: new Set(),
     currentView: 'splash-screen', // 'summary', 'slider', 'program'
     snapshots: [],

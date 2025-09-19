@@ -121,6 +121,10 @@ export function loadData(data, fileName = 'Sample Data') {
     state.originalData.grossSF = predesignScheme.grossSF || 0;
     state.currentData = processedData;
     state.currentData.grossSF = predesignScheme.grossSF || 0;
+    // Load interiors target values into state for editing in Interiors view
+    state.interiors.targetValues = Array.isArray(processedData.interiorTargetValues)
+        ? JSON.parse(JSON.stringify(processedData.interiorTargetValues))
+        : [];
     
     // Initialize the current scheme with the Predesign scheme + target values
     state.currentScheme = JSON.parse(JSON.stringify(predesignScheme));
