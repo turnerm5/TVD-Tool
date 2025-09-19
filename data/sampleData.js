@@ -188,7 +188,10 @@ const sampleData = {
                     "systemDetail": "Facade of brick and metal panels with ceramic fritted glass on south-facing windows; exterior materials wrap into the interior.",
                     "image": "img/benchmarks/bsu-mat/enclosure.jpg"
                 },
-                { "name": "B30 Roofing", "cost": 11.39 },
+                { 
+                    "name": "B30 Roofing", 
+                    "cost": 11.39 
+                },
                 { 
                     "name": "C Interiors", 
                     "cost": 78.63,
@@ -203,8 +206,14 @@ const sampleData = {
                     "cons": "High energy consumption due to tight controls and filtration; complex to design, install, and commission.",
                     "image": "img/benchmarks/bsu-mat/services.jpg"
                 },
-                { "name": "E Equipment and Furnishings", "cost": 54.78 },
-                { "name": "F Special Construction", "cost": 4.14 },
+                { 
+                    "name": "E Equipment and Furnishings", 
+                    "cost": 54.78 
+                },
+                { 
+                    "name": "F Special Construction",
+                    "cost": 4.14 
+                },
                 { 
                     "name": "G Building Sitework", 
                     "cost": 34.09,
@@ -235,7 +244,10 @@ const sampleData = {
                     "systemDetail": "Extensive exterior glazing and interior glass walls to promote 'science on display'; cladding supported by a cold-formed steel backup system.",
                     "image": "img/benchmarks/osu-johnson-hall/enclosure.jpg"
                 },
-                { "name": "B30 Roofing", "cost": 16.35 },
+                { 
+                    "name": "B30 Roofing", 
+                    "cost": 16.35 
+                },
                 { 
                     "name": "C Interiors", 
                     "cost": 97.79,
@@ -254,7 +266,10 @@ const sampleData = {
                     "cost": 54.23,
                     "image": "img/benchmarks/osu-johnson-hall/equipment.jpg"
                 },
-                { "name": "F Special Construction", "cost": 2.11 },
+                { 
+                    "name": "F Special Construction", 
+                    "cost": 2.11 
+                },
                 { 
                     "name": "G Building Sitework", 
                     "cost": 46.20,
@@ -286,7 +301,10 @@ const sampleData = {
                     "systemDetail": "Perforated aluminum screen panel system over glazed curtainwall for solar shading; features a tiered, walkable green roof.",
                     "image": "img/benchmarks/ui-iric/enclosure.jpg"
                 },
-                { "name": "B30 Roofing", "cost": 21.72 },
+                { 
+                    "name": "B30 Roofing", 
+                    "cost": 21.72 
+                },
                 { 
                     "name": "C Interiors", 
                     "cost": 118.56,
@@ -312,106 +330,91 @@ const sampleData = {
         },
         {
             "id": "D",
-            "name": "UO Knight Campus Phase 1",
-            "image": "img/benchmarks/uo-knight/uo-knight.jpg",
-            "overall_sf_cost": 922.89,
-            "grossSF": 186729,
+            "name": "BSU Science and Research Building",
+            "image": "img/benchmarks/bsu-srb/bsu-srb.jpg",
+            "overall_sf_cost": 724.10,
+            "grossSF": 101000,
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
-                    "cost": 24.14,
-                    "systemDetail": "Foundation system required extensive site work, including the ecological restoration of an adjacent millrace."
+                    "cost": 16.46
                 },
                 { 
                     "name": "B10 Superstructure", 
-                    "cost": 136.08,
-                    "systemDetail": "Hybrid system of concrete and mass timber (Cross-Laminated Timber, glulam, and mass plywood panels), including a vibration-controlled mass timber lab.",
-                    "image": "img/benchmarks/uo-knight/superstructure.jpg"
+                    "cost": 95.47
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 140.63,
-                    "systemDetail": "Signature double-skin 'Cascading Wall' facade with folded, fritted glass panels on a cantilevered outrigger system; includes a tied-arch pedestrian skybridge.",
-                    "image": "img/benchmarks/uo-knight/enclosure.jpg"
+                    "cost": 112.07
                 },
-                { "name": "B30 Roofing", "cost": 13.32 },
+                { 
+                    "name": "B30 Roofing", 
+                    "cost": 20.00 
+                },
                 { 
                     "name": "C Interiors", 
-                    "cost": 137.02,
-                    "systemDetail": "Double-height research floors with floating faculty mezzanines overlooking open labs; features a basement cleanroom and a Biofabrication and Bioanalysis Core Facility.",
-                    "image": "img/benchmarks/uo-knight/interiors.jpg"
+                    "cost": 62.89
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 391.72,
-                    "systemDetail": "Chilled beam system for cooling combined with a heat recovery chiller that repurposes waste heat for building heating and hot water.",
-                    "pros": "Very energy efficient due to chilled beams and extensive heat recovery; quiet, draft-free cooling enhances occupant comfort.",
-                    "cons": "Requires careful humidity control to prevent condensation; a separate air system is still needed for fume hood ventilation.",
-                    "image": "img/benchmarks/uo-knight/services.jpg"
+                    "cost": 348.16
                 },
                 { 
                     "name": "E Equipment and Furnishings", 
-                    "cost": 44.18,
-                    "image": "img/benchmarks/uo-knight/equipment.jpg"
+                    "cost": 26.12
                 },
                 { 
                     "name": "F Special Construction", 
-                    "cost": 0.00,
-                    "image": "img/benchmarks/uo-knight/special.jpg"
+                    "cost": 3.71
                 },
                 { 
                     "name": "G Building Sitework", 
-                    "cost": 35.79, 
-                    "image": "img/benchmarks/uo-knight/sitework.jpg"
+                    "cost": 39.21
                 }
             ]
         },
         {
             "id": "E",
-            "name": "UW Molecular Engineering",
-            "image": "img/benchmarks/uw-mole/uw-mole.jpg",
-            "overall_sf_cost": 742.65,
-            "grossSF": 90374,
+            "name": "WSUV Life Sciences Building",
+            "image": "img/benchmarks/wsuv-lsb/wsuv-lsb.jpg",
+            "overall_sf_cost": 729.00,
+            "grossSF": 55000,
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
-                    "cost": 106.72,
-                    "systemDetail": "Partially below-grade construction featuring a massive, isolated concrete foundation to create the largest vibration-free laboratory space on the West Coast.",
-                    "image": "img/benchmarks/uw-mole/substructure.jpg"
+                    "cost": 44.00
                 },
                 { 
                     "name": "B10 Superstructure", 
-                    "cost": 28.49,
-                    "systemDetail": "Long-span structural frame designed to create large, open, and reconfigurable laboratory and office areas with minimal interior columns.",
-                    "image": "img/benchmarks/uw-mole/superstructure.jpg"
+                    "cost": 60.00
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 121.03,
-                    "systemDetail": "High-performance, factory-assembled unitized curtainwall system with integrated sun shades, automated ventilation windows, and an adjacent stone rainscreen.",
-                    "image": "img/benchmarks/uw-mole/enclosure.jpg"
+                    "cost": 38.00
                 },
-                { "name": "B30 Roofing", "cost": 14.37 },
+                { 
+                    "name": "B30 Roofing", 
+                    "cost": 36.00 
+                },
                 { 
                     "name": "C Interiors", 
-                    "cost": 64.70,
-                    "systemDetail": "Open-plan, shared labs with reconfigurable elements and 100% outside air systems; houses the Molecular Analysis Facility in the vibration-free basement.",
-                    "image": "img/benchmarks/uw-mole/interiors.jpg"
+                    "cost": 18.00
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 265.79,
-                    "systemDetail": "Hybrid system featuring naturally ventilated offices and an optimized lab ventilation system using energy-efficient chilled beams.",
-                    "pros": "Extremely energy efficient by using natural ventilation for offices; chilled beams provide quiet, comfortable lab cooling.",
-                    "cons": "Natural ventilation is climate-dependent; lab system requires separate air handling for fume hoods and humidity control.",
-                    "image": "img/benchmarks/uw-mole/services.jpg"
+                    "cost": 310.00
                 },
-                { "name": "E Equipment and Furnishings", "cost": 33.60 },
-                { "name": "F Special Construction", "cost": 34.30 },
+                { 
+                    "name": "E Equipment and Furnishings", 
+                    "cost": 35.00 
+                },
+                { 
+                    "name": "F Special Construction", 
+                    "cost": 21.54 
+                },
                 { 
                     "name": "G Building Sitework", 
-                    "cost": 73.65,
-                    "image": "img/benchmarks/uw-mole/sitework.jpg"
+                    "cost": 49.00
                 }
             ]
         },
