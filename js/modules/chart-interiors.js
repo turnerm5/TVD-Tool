@@ -257,6 +257,7 @@ export function renderClassroomMix() {
     // Calculation table
     const tableContainer = container.append('div');
     const messageContainer = container.append('div').attr('class', 'mt-2');
+    const donutsContainer = container.append('div').attr('id', 'interiors-donuts');
 
     function computeNSF() {
         // NSF is the sum of the square footages of all classroom types
@@ -266,6 +267,7 @@ export function renderClassroomMix() {
     function renderMixTable() {
         tableContainer.html('');
         messageContainer.html('');
+        donutsContainer.html('');
 
         const totalGSF = Number(state.currentData?.grossSF) || 0;
         const nsf = computeNSF();
@@ -376,12 +378,35 @@ export function renderClassroomMix() {
                 .attr('class', 'text-sm text-orange-600 flex items-center gap-1')
                 .html(`<span class="inline-block align-middle" style="font-size:1.1em;">&#9888;&#65039;</span> Warning: Building Efficiency is Unrealistic (Classroom SF is ${Math.round(coverage * 100)}% of Gross SF).`);
         }
+
+        // Donut charts: % by Space and % by Cost
+        const donutWrapper = donutsContainer
+            .append('div')
+            .attr('class', 'mt-4 grid grid-cols-1 md:grid-cols-2 gap-4');
+
+        const widthAvailable = donutsContainer.node() ? donutsContainer.node().clientWidth : 400;
+        const palette = (d3.schemeTableau10 || d3.schemeCategory10);
+        const color = d3.scaleOrdinal()
+            .domain(rows.map(r => r.name))
+            .range(palette);
+
+        const spaceData = rows
+            .filter(r => r.sf > 0)
+            .map(r => ({ name: r.name, value: r.sf }));
+        const costData = rows
+            .filter(r => r.totalCost > 0)
+            .map(r => ({ name: r.name, value: r.totalCost }));
+
+        const size = Math.max(200, Math.min(320, Math.floor((widthAvailable - 16) / 2)));
+        const radius = Math.floor(size / 2);
+        const innerRadius = Math.floor(radius * 0.6);
+
+        drawDonut(donutWrapper.append('div'), spaceData, '% by Space', radius, innerRadius, size, color);
+        drawDonut(donutWrapper.append('div'), costData, '% by Cost', radius, innerRadius, size, color);
     }
 
     renderMixTable();
 
-    // Keep breakouts height in sync with the graph card
-    syncBreakoutsHeightWithGraph();
 }
 
 /**
@@ -610,8 +635,6 @@ export function renderInteriorsGraph() {
                 : 'Updated three categories. Overall estimate may have changed.');
         });
 
-    // After laying out the graph, sync breakouts height to match this card
-    syncBreakoutsHeightWithGraph();
 
     function showBenchmarkTooltipForInteriors(event, benchmarkData, componentData) {
         hideBenchmarkTooltipForInteriors();
@@ -656,13 +679,51 @@ export function renderInteriorsGraph() {
     }
 }
 
-// Ensure the middle column (interiors-breakouts) matches the graph card height
-function syncBreakoutsHeightWithGraph() {
-    const breakoutsNode = dom.interiorsBreakouts;
-    const graphNode = dom.interiorsGraph;
-    if (!breakoutsNode || !graphNode) return;
-    const graphHeightPx = graphNode.offsetHeight;
-    if (graphHeightPx && isFinite(graphHeightPx)) {
-        breakoutsNode.style.height = graphHeightPx + 'px';
-    }
+
+// Draw a single donut chart with legend
+function drawDonut(containerSel, items, title, radius, innerRadius, size, color) {
+    const total = d3.sum(items, d => d.value);
+    const pie = d3.pie().sort(null).value(d => d.value);
+    const arc = d3.arc().innerRadius(innerRadius).outerRadius(radius);
+
+    const wrap = containerSel
+        .append('div')
+        .attr('class', 'bg-white rounded-md border border-gray-200 p-3');
+
+    wrap.append('div')
+        .attr('class', 'text-sm font-semibold text-gray-700 mb-2')
+        .text(title);
+
+    const svg = wrap.append('svg')
+        .attr('width', size)
+        .attr('height', size)
+        .append('g')
+        .attr('transform', `translate(${Math.floor(size / 2)},${Math.floor(size / 2)})`);
+
+    svg.selectAll('path')
+        .data(pie(items))
+        .enter()
+        .append('path')
+        .attr('d', arc)
+        .attr('fill', d => color(d.data.name));
+
+    // Legend
+    const legend = wrap.append('div').attr('class', 'mt-3 space-y-1');
+    const legendItems = legend.selectAll('div')
+        .data(items)
+        .enter()
+        .append('div')
+        .attr('class', 'flex items-center justify-between text-xs');
+
+    const left = legendItems.append('div').attr('class', 'flex items-center gap-2');
+    left.append('span')
+        .attr('class', 'inline-block rounded-sm')
+        .style('width', '10px')
+        .style('height', '10px')
+        .style('background-color', d => color(d.name));
+    left.append('span').text(d => d.name);
+
+    legendItems.append('span')
+        .attr('class', 'tabular-nums text-gray-700')
+        .text(d => total > 0 ? d3.format('.0%')(d.value / total) : '0%');
 }
