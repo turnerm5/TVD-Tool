@@ -138,7 +138,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('type', 'text')
         .attr('inputmode', 'numeric')
         .attr('pattern', '[0-9,]*')
-        .attr('class', 'text-left program-table-input')
+        .attr('class', 'text-left program-table-input editable-input')
         .attr('value', d => utils.formatSquareFootageWithChange(d.square_footage, d.name))
         .attr('data-phase', 'phase2')
         .attr('data-name', d => d.name)
@@ -460,7 +460,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         .attr('type', 'text')
         .attr('inputmode', 'numeric')
         .attr('pattern', '[0-9,]*')
-        .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500')
+        .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
         .attr('value', utils.formatNumber(state.currentData?.grossSF || 0))
         .on('focus', function() {
             const numericValue = Number(state.currentData?.grossSF) || 0;

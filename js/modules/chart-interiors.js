@@ -78,7 +78,7 @@ export function renderValuesTable() {
             .attr('type', 'text')
             .attr('inputmode', 'decimal')
             .attr('pattern', '[0-9,\\.]*')
-            .attr('class', 'text-left program-table-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
+            .attr('class', 'text-left program-table-input editable-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
             .attr('data-room', room.name)
             .attr('data-category', d => d[0])
             .attr('value', d => utils.formatCurrency(Number(d[1]) || 0))
@@ -174,7 +174,7 @@ export function renderClassroomMix() {
         .attr('type', 'text')
         .attr('inputmode', 'numeric')
         .attr('pattern', '[0-9,]*')
-        .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500')
+        .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
         .attr('value', utils.formatNumber(state.currentData?.grossSF || 0))
         .on('focus', function() {
             const current = Number(state.currentData?.grossSF || 0);
@@ -224,7 +224,7 @@ export function renderClassroomMix() {
         .attr('type', 'text')
         .attr('inputmode', 'numeric')
         .attr('pattern', '[0-9,]*')
-        .attr('class', 'w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
+        .attr('class', 'w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
         .attr('value', d => {
             const v = state.interiors.mixSF[d.name] || 0;
             return Number(v).toLocaleString('en-US');

@@ -444,6 +444,14 @@ body {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
 }
 
+/* Shared style for all editable inputs */
+.editable-input {
+    background-color: #fefce8; /* more subtle yellow */
+}
+.editable-input:focus {
+    background-color: #ffe29a; /* lighter, more orangish yellow on focus */
+}
+
 .interiors-treemap-leaf text {
     fill: white;
     text-shadow: 1px 1px 2px black;
