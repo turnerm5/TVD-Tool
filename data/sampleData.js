@@ -361,23 +361,23 @@ const sampleData = {
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 112.07
+                    "cost": 117.82
                 },
                 { 
                     "name": "B30 Roofing", 
-                    "cost": 20.00 
+                    "cost": 14.25 
                 },
                 { 
                     "name": "C Interiors", 
-                    "cost": 62.89
+                    "cost": 79.60
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 348.16
+                    "cost": 406.21
                 },
                 { 
                     "name": "E Equipment and Furnishings", 
-                    "cost": 26.12
+                    "cost": 38.74
                 },
                 { 
                     "name": "F Special Construction", 
@@ -398,39 +398,39 @@ const sampleData = {
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
-                    "cost": 44.00
+                    "cost": 49.28
                 },
                 { 
                     "name": "B10 Superstructure", 
-                    "cost": 60.00
+                    "cost": 67.20
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 38.00
+                    "cost": 42.56
                 },
                 { 
                     "name": "B30 Roofing", 
-                    "cost": 36.00 
+                    "cost": 40.32 
                 },
                 { 
                     "name": "C Interiors", 
-                    "cost": 18.00
+                    "cost": 20.16
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 310.00
+                    "cost": 347.20
                 },
                 { 
                     "name": "E Equipment and Furnishings", 
-                    "cost": 35.00 
+                    "cost": 39.20 
                 },
                 { 
                     "name": "F Special Construction", 
-                    "cost": 21.54 
+                    "cost": 24.13 
                 },
                 { 
                     "name": "G Building Sitework", 
-                    "cost": 49.00
+                    "cost": 54.88
                 }
             ]
         },
