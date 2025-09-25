@@ -22,52 +22,52 @@ const sampleData = {
         { "Category": "Permits", "Subcategory": "Building Permit", "Percentage": 0.0034 }
     ],
     "initialTargetValues": [
-        { "name": "A Substructure", "target_value": 33.50 },
-        { "name": "B10 Superstructure", "target_value": 98 },
-        { "name": "B20 Enclosure", "target_value": 100 },
-        { "name": "B30 Roofing", "target_value": 15 },
-        { "name": "C Interiors", "target_value": 115 },
-        { "name": "D Services", "target_value": 265 },
-        { "name": "E Equipment and Furnishings", "target_value": 50.00 },
-        { "name": "F Special Construction", "target_value": 20 },
-        { "name": "G Building Sitework", "target_value": 42 }
+        { "name": "A Substructure", "target_value": 29.99 },
+        { "name": "B10 Superstructure", "target_value": 74.41 },
+        { "name": "B20 Enclosure", "target_value": 75.78 },
+        { "name": "B30 Roofing", "target_value": 33.52 },
+        { "name": "C Interiors", "target_value": 86.11 },
+        { "name": "D Services", "target_value": 349.05 },
+        { "name": "E Equipment and Furnishings", "target_value": 41.35 },
+        { "name": "F Special Construction", "target_value": 20.70 },
+        { "name": "G Building Sitework", "target_value": 35.85 }
     ],
     "interiorTargetValues": [
         {
-            "name": "Classrooms",
-            "C Interiors": 63,
-            "D Services": 200,
-            "E Equipment and Furnishings": 25
+            "name": "Teaching Classrooms",
+            "C Interiors": 69.3,
+            "D Services": 275,
+            "E Equipment and Furnishings": 27.5
         },
         {
             "name": "Curricular Space",
-            "C Interiors": 62,
-            "D Services": 190,
-            "E Equipment and Furnishings": 30
+            "C Interiors": 68.2,
+            "D Services": 209,
+            "E Equipment and Furnishings": 33
         },
         {
             "name": "Offices",
-            "C Interiors": 70,
-            "D Services": 210,
-            "E Equipment and Furnishings": 20
+            "C Interiors": 77,
+            "D Services": 231,
+            "E Equipment and Furnishings": 22
         },
         {
             "name": "Project",
-            "C Interiors": 65,
-            "D Services": 200,
-            "E Equipment and Furnishings": 39
+            "C Interiors": 71.5,
+            "D Services": 220,
+            "E Equipment and Furnishings": 42.9
         },
         {
             "name": "Research",
-            "C Interiors": 80,
-            "D Services": 370,
-            "E Equipment and Furnishings": 51
+            "C Interiors": 88,
+            "D Services": 407,
+            "E Equipment and Furnishings": 56.1
         },
         {
             "name": "Student Space",
-            "C Interiors": 55,
-            "D Services": 180,
-            "E Equipment and Furnishings": 15
+            "C Interiors": 60.5,
+            "D Services": 198,
+            "E Equipment and Furnishings": 16.5
         }
     ],
     "schemes": [
