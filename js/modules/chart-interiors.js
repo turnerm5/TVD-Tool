@@ -131,6 +131,29 @@ export function renderValuesTable() {
                         inputs[nextIdx].focus();
                         inputs[nextIdx].select();
                     }
+                } else if (key === 'Tab') {
+                    // Commit and cycle focus within the table
+                    const roomName = this.dataset.room;
+                    const category = this.dataset.category;
+                    const cleaned = parseNumberFromInput(this.value);
+                    const roomObj = state.interiors.targetValues.find(r => r.name === roomName);
+                    if (roomObj && category) {
+                        roomObj[category] = cleaned;
+                    }
+                    this.value = utils.formatCurrency(cleaned || 0);
+                    const inputs = wrapper.selectAll('input.program-table-input').nodes();
+                    const idx = inputs.indexOf(this);
+                    let nextIdx;
+                    if (event.shiftKey) {
+                        nextIdx = idx === 0 ? inputs.length - 1 : idx - 1;
+                    } else {
+                        nextIdx = idx === inputs.length - 1 ? 0 : idx + 1;
+                    }
+                    event.preventDefault();
+                    if (inputs[nextIdx]) {
+                        inputs[nextIdx].focus();
+                        inputs[nextIdx].select();
+                    }
                 }
             });
     });
@@ -253,6 +276,27 @@ export function renderClassroomMix() {
             this.value = `${numeric.toLocaleString('en-US')} sf`;
             this.classList.remove('border-red-500');
             this.classList.remove('ring-red-500');
+        })
+        .on('keydown', function(event, d) {
+            if (event.key === 'Tab') {
+                const cleaned = this.value.replace(/[^0-9]/g, '');
+                const numeric = Number(cleaned) || 0;
+                state.interiors.mixSF[d.name] = numeric;
+                this.value = `${numeric.toLocaleString('en-US')} sf`;
+                const inputs = inputsWrapper.selectAll('div.mix-input input.editable-input').nodes();
+                const idx = inputs.indexOf(this);
+                let nextIdx;
+                if (event.shiftKey) {
+                    nextIdx = idx === 0 ? inputs.length - 1 : idx - 1;
+                } else {
+                    nextIdx = idx === inputs.length - 1 ? 0 : idx + 1;
+                }
+                event.preventDefault();
+                if (inputs[nextIdx]) {
+                    inputs[nextIdx].focus();
+                    inputs[nextIdx].select();
+                }
+            }
         });
 
     // Calculation table
@@ -502,21 +546,21 @@ export function renderInteriorsGraph() {
 
     // Benchmark range and caps
     cols.append('div').attr('class', 'benchmark-range')
-        .style('top', d => Math.min(yScale(d.benchmark_low), yScale(d.benchmark_high)) + 'px')
+        .style('top', d => (Math.min(yScale(d.benchmark_low), yScale(d.benchmark_high)) - paddingTop) + 'px')
         .style('height', d => Math.abs(yScale(d.benchmark_low) - yScale(d.benchmark_high)) + 'px');
     cols.append('div').attr('class', 'benchmark-cap benchmark-cap-low')
-        .style('top', d => yScale(d.benchmark_low) + 'px');
+        .style('top', d => (yScale(d.benchmark_low) - paddingTop) + 'px');
     cols.append('div').attr('class', 'benchmark-cap benchmark-cap-high')
-        .style('top', d => yScale(d.benchmark_high) + 'px');
+        .style('top', d => (yScale(d.benchmark_high) - paddingTop) + 'px');
 
     // Current target (light gray) - using ghost-rom visuals
     cols.append('div').attr('class', 'ghost-rom')
-        .style('top', d => (yScale(d.currentTarget) - 3) + 'px');
+        .style('top', d => (yScale(d.currentTarget) - paddingTop - 3) + 'px');
 
     // Blended target (dark bar) - read only
     cols.append('div')
         .attr('class', 'current-rom')
-        .style('top', d => (yScale(d.blendedTarget) - 3) + 'px');
+        .style('top', d => (yScale(d.blendedTarget) - paddingTop - 3) + 'px');
 
     // Labels
     cols.append('div')
@@ -524,7 +568,12 @@ export function renderInteriorsGraph() {
         .text(d => d.name);
 
     // Benchmark indicators (blue circles + short line) with hover tooltip
-    const svg = cols.append('svg').attr('class', 'benchmark-indicator-svg');
+    const svg = cols
+        .append('svg')
+        .attr('class', 'benchmark-indicator-svg')
+        // Align SVG overlay exactly with the chart content area
+        .style('top', `-${paddingTop}px`)
+        .style('height', `calc(100% + ${paddingTop + paddingBottom}px)`);
 
     const benchProjects = state.currentData?.benchmarks || [];
 
