@@ -34,40 +34,40 @@ const sampleData = {
     ],
     "interiorTargetValues": [
         {
-            "name": "Teaching Classrooms",
+            "name": "Teaching Lab",
             "C Interiors": 69.3,
-            "D Services": 305,
-            "E Equipment and Furnishings": 37.5
+            "D Services": 450,
+            "E Equipment and Furnishings": 47.5
         },
         {
-            "name": "Curricular Space",
+            "name": "Lecture Hall",
             "C Interiors": 68.2,
             "D Services": 209,
             "E Equipment and Furnishings": 33
         },
         {
-            "name": "Offices",
+            "name": "Classroom",
             "C Interiors": 77,
             "D Services": 231,
             "E Equipment and Furnishings": 22
         },
         {
-            "name": "Project",
+            "name": "Student Success Open",
             "C Interiors": 71.5,
             "D Services": 220,
             "E Equipment and Furnishings": 42.9
         },
         {
-            "name": "Research",
+            "name": "Student Success Closed",
             "C Interiors": 88,
             "D Services": 450,
             "E Equipment and Furnishings": 56.1
         },
         {
-            "name": "Student Space",
-            "C Interiors": 60.5,
-            "D Services": 250,
-            "E Equipment and Furnishings": 16.5
+            "name": "Building Support",
+            "C Interiors": 10,
+            "D Services": 200,
+            "E Equipment and Furnishings": 5
         }
     ],
     "schemes": [
@@ -75,7 +75,7 @@ const sampleData = {
             "name": "Predesign",
             "description": "Northside core built right up to Eastlick. The three story massing version can connect with a ramped bridge to 3rd Level of Abelson.",
             "image": "img/schemes/predesign.jpg",
-            "grossSF": 58000,
+            "grossSF": 55000,
             "floors": 3,
             "floorData": [
                 { "floor": 1, "sf": 19334, "shelled": false, "phase": 1 },
