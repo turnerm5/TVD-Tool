@@ -348,44 +348,44 @@ const sampleData = {
             "id": "D",
             "name": "BSU Science and Research Building",
             "image": "img/benchmarks/bsu-srb/bsu-srb.jpg",
-            "overall_sf_cost": 724.10,
+            "overall_sf_cost": 811.00,
             "grossSF": 101000,
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
-                    "cost": 16.46
+                    "cost": 18.43
                 },
                 { 
                     "name": "B10 Superstructure", 
-                    "cost": 95.47
+                    "cost": 106.93
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 117.82
+                    "cost": 132.00
                 },
                 { 
                     "name": "B30 Roofing", 
-                    "cost": 14.25 
+                    "cost": 15.96 
                 },
                 { 
                     "name": "C Interiors", 
-                    "cost": 79.60
+                    "cost": 89.15
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 406.21
+                    "cost": 454.96
                 },
                 { 
                     "name": "E Equipment and Furnishings", 
-                    "cost": 38.74
+                    "cost": 43.39
                 },
                 { 
                     "name": "F Special Construction", 
-                    "cost": 3.71
+                    "cost": 4.16
                 },
                 { 
                     "name": "G Building Sitework", 
-                    "cost": 39.21
+                    "cost": 43.91
                 }
             ]
         },
@@ -438,42 +438,44 @@ const sampleData = {
             "id": "F",
             "name": "WSU Tri-Cities",
             "image": "img/benchmarks/wsu-tricities/wsu-tricities.jpg",
-            "overall_sf_cost": 544.25,
+            "overall_sf_cost": 609.56,
             "grossSF": 38391,
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
-                    "cost": 4.87,
+                    "cost": 5.45,
                     "systemDetail": "Conventional spread footings."
                 },
                 { 
                     "name": "B10 Superstructure", 
-                    "cost": 106.57,
+                    "cost": 119.36,
                     "systemDetail": "Conventional structural steel frame."
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 71.53,
+                    "cost": 80.12,
                     "systemDetail": "Simple, durable, and environmentally friendly finishes hold up under high traffic and aesthetically connect to the palette of the local desert ecosystem.",
                     "image": "img/benchmarks/wsu-tricities/enclosure.jpg"
                 },
-                { "name": "B30 Roofing", "cost": 14.36 },
+                { 
+                    "name": "B30 Roofing", 
+                    "cost": 16.08 },
                 { 
                     "name": "C Interiors", 
-                    "cost": 63.08,
+                    "cost": 70.65,
                     "systemDetail": "Central feature is a grand staircase with integrated seating within an open atrium; contains a suite of teaching labs for core science disciplines.",
                     "image": "img/benchmarks/wsu-tricities/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 237.97,
+                    "cost": 266.53,
                     "systemDetail": "Conventional Variable Air Volume (VAV) system with full hydronics (boilers and chiller) and heat recovery.",
                     "pros": "Robust and reliable system using proven VAV technology for lab safety; heat recovery improves efficiency.",
                     "cons": "Higher energy consumption compared to radiant or chilled beam systems; requires significant space for ductwork."
                 },
-                { "name": "E Equipment and Furnishings", "cost": 26.29 },
-                { "name": "F Special Construction", "cost": 0.06 },
-                { "name": "G Building Sitework", "cost": 19.52 }
+                { "name": "E Equipment and Furnishings", "cost": 29.44 },
+                { "name": "F Special Construction", "cost": 0.07 },
+                { "name": "G Building Sitework", "cost": 21.86 }
             ]
         }
     ]
