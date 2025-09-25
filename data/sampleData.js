@@ -185,38 +185,38 @@ const sampleData = {
             "id": "A",
             "name": "BSU Materials Science",
             "image": "img/benchmarks/bsu-mat/bsu-mat.jpg",
-            "overall_sf_cost": 643.43,
+            "overall_sf_cost": 720.64,
             "grossSF": 89800,
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
-                    "cost": 12.31,
+                    "cost": 13.79,
                     "systemDetail": "25-inch thick monolithic concrete foundation for vibration isolation of sensitive materials science instrumentation; includes an underground stormwater retention system."
                 },
                 { 
                     "name": "B10 Superstructure", 
-                    "cost": 72.23,
+                    "cost": 80.90,
                     "systemDetail": "Exposed structural system of concrete, steel, and wood, designed to serve as a teaching tool for materials science."
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 102.18,
+                    "cost": 114.44,
                     "systemDetail": "Facade of brick and metal panels with ceramic fritted glass on south-facing windows; exterior materials wrap into the interior.",
                     "image": "img/benchmarks/bsu-mat/enclosure.jpg"
                 },
                 { 
                     "name": "B30 Roofing", 
-                    "cost": 11.75 
+                    "cost": 13.16 
                 },
                 { 
                     "name": "C Interiors", 
-                    "cost": 81.08,
+                    "cost": 90.81,
                     "systemDetail": "Over 40 materials science labs, including core facilities for electron microscopy and surface science; features polished concrete and end-grain wood floors.",
                     "image": "img/benchmarks/bsu-mat/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 289.76,
+                    "cost": 324.53,
                     "systemDetail": "High-precision Variable Air Volume (VAV) system with HEPA filtration and low-velocity laminar airflow for vibration and particulate control.",
                     "pros": "Provides exceptional environmental stability (temperature, vibration, particulates) for sensitive research; highly responsive.",
                     "cons": "High energy consumption due to tight controls and filtration; complex to design, install, and commission.",
@@ -224,15 +224,15 @@ const sampleData = {
                 },
                 { 
                     "name": "E Equipment and Furnishings", 
-                    "cost": 56.48 
+                    "cost": 63.26 
                 },
                 { 
                     "name": "F Special Construction",
-                    "cost": 3.98 
+                    "cost": 4.46 
                 },
                 { 
                     "name": "G Building Sitework", 
-                    "cost": 35.15,
+                    "cost": 39.37,
                     "image": "img/benchmarks/bsu-mat/sitework.jpg"
                 }
             ]
@@ -241,54 +241,54 @@ const sampleData = {
             "id": "B",
             "name": "OSU Johnson Hall",
             "image": "img/benchmarks/osu-johnson-hall/osu-johnson-hall.jpg",
-            "overall_sf_cost": 778.76,
+            "overall_sf_cost": 872.21,
             "grossSF": 61886,
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
-                    "cost": 19.42,
+                    "cost": 21.75,
                     "systemDetail": "Detail needed."
                 },
                 { 
                     "name": "B10 Superstructure", 
-                    "cost": 65.66,
+                    "cost": 73.54,
                     "systemDetail": "Five 52-foot, freestanding concrete shear walls. Structural steel frame with composite metal decks; features a full-story steel transfer truss to create a column-free auditorium."
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 124.22,
+                    "cost": 139.13,
                     "systemDetail": "Extensive exterior glazing and interior glass walls to promote 'science on display'; cladding supported by a cold-formed steel backup system.",
                     "image": "img/benchmarks/osu-johnson-hall/enclosure.jpg"
                 },
                 { 
                     "name": "B30 Roofing", 
-                    "cost": 16.35 
+                    "cost": 18.31 
                 },
                 { 
                     "name": "C Interiors", 
-                    "cost": 97.79,
+                    "cost": 109.52,
                     "systemDetail": "Highly complex labs with 32 different specialty gas piping systems; features a 'Unit Ops' teaching lab and a biomedical prototyping facility.",
                     "image": "img/benchmarks/osu-johnson-hall/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 355.77,
+                    "cost": 398.47,
                     "systemDetail": "Hybrid system using radiant floors/ceilings and chilled beams, with a dedicated VAV exhaust system (Phoenix) and heat recovery for lab safety.",
                     "pros": "Extremely energy-efficient due to radiant systems and heat recovery; provides superior, quiet occupant comfort.",
                     "cons": "Complex control integration between systems; radiant systems have slow thermal response times; potential condensation risk."
                 },
                 { 
                     "name": "E Equipment and Furnishings", 
-                    "cost": 54.23,
+                    "cost": 60.74,
                     "image": "img/benchmarks/osu-johnson-hall/equipment.jpg"
                 },
                 { 
                     "name": "F Special Construction", 
-                    "cost": 2.11 
+                    "cost": 2.36 
                 },
                 { 
                     "name": "G Building Sitework", 
-                    "cost": 46.20,
+                    "cost": 51.74,
                     "image": "img/benchmarks/osu-johnson-hall/sitework.jpg"
                 }
             ]
@@ -297,49 +297,49 @@ const sampleData = {
             "id": "C",
             "name": "UI Integrated Research Building",
             "image": "img/benchmarks/ui-iric/ui-iric.jpg",
-            "overall_sf_cost": 817.28,
+            "overall_sf_cost": 915.34,
             "grossSF": 78267,
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
-                    "cost": 28.57,
+                    "cost": 32.00,
                     "systemDetail": "Includes a 3,500 cubic foot rainwater catchment system for irrigation; specific structural foundation details are not available."
                 },
                 { 
                     "name": "B10 Superstructure", 
-                    "cost": 80.71,
+                    "cost": 90.40,
                     "systemDetail": "Structural system accommodates a three-story central atrium; specific framing material and type are not available.",
                     "image": "img/benchmarks/ui-iric/superstructure.jpg"
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 118.38,
+                    "cost": 132.59,
                     "systemDetail": "Perforated aluminum screen panel system over glazed curtainwall for solar shading; features a tiered, walkable green roof.",
                     "image": "img/benchmarks/ui-iric/enclosure.jpg"
                 },
                 { 
                     "name": "B30 Roofing", 
-                    "cost": 21.72 
+                    "cost": 24.33 
                 },
                 { 
                     "name": "C Interiors", 
-                    "cost": 118.56,
+                    "cost": 132.79,
                     "systemDetail": "Raised access flooring system with cementitious panels and modular workbenches to provide maximum lab flexibility for rotating research teams.",
                     "image": "img/benchmarks/ui-iric/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 349.49,
+                    "cost": 391.43,
                     "systemDetail": "Mixed system with Variable Air Volume (VAV) controllers for labs, fan coil units for general spaces, and chilled beams for supplemental cooling.",
                     "pros": "Flexible design accommodates different research needs; uses proven VAV technology for lab safety; biomass boiler provides sustainable energy.",
                     "cons": "VAV portion has high energy use and potential for noise; multiple system types increase maintenance complexity.",
                     "image": "img/benchmarks/ui-iric/services.jpg"
                 },
-                { "name": "E Equipment and Furnishings", "cost": 49.78 },
-                { "name": "F Special Construction", "cost": 0.35 },
+                { "name": "E Equipment and Furnishings", "cost": 55.75 },
+                { "name": "F Special Construction", "cost": 0.39 },
                 { 
                     "name": "G Building Sitework", 
-                    "cost": 49.72,
+                    "cost": 55.69,
                     "image": "img/benchmarks/ui-iric/sitework.jpg"
                 }
             ]
