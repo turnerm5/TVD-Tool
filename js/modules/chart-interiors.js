@@ -175,7 +175,7 @@ export function renderClassroomMix() {
         .attr('inputmode', 'numeric')
         .attr('pattern', '[0-9,]*')
         .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
-        .attr('value', utils.formatNumber(state.currentData?.grossSF || 0))
+        .attr('value', `${utils.formatNumber(state.currentData?.grossSF || 0)} sf`)
         .on('focus', function() {
             const current = Number(state.currentData?.grossSF || 0);
             this.value = current.toString();
@@ -192,13 +192,13 @@ export function renderClassroomMix() {
             const numeric = Number(cleaned) || 0;
             if (!state.currentData) return;
             state.currentData.grossSF = numeric;
-            this.value = utils.formatNumber(numeric);
+            this.value = `${utils.formatNumber(numeric)} sf`;
             renderMixTable();
             renderInteriorsGraph();
         })
         .on('blur', function() {
             const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
-            this.value = utils.formatNumber(numeric);
+            this.value = `${utils.formatNumber(numeric)} sf`;
             this.classList.remove('border-red-500');
             this.classList.remove('ring-red-500');
         });
@@ -227,7 +227,7 @@ export function renderClassroomMix() {
         .attr('class', 'w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
         .attr('value', d => {
             const v = state.interiors.mixSF[d.name] || 0;
-            return Number(v).toLocaleString('en-US');
+            return `${Number(v).toLocaleString('en-US')} sf`;
         })
         .on('focus', function(event, d) {
             const current = Number(state.interiors.mixSF[d.name] || 0) || 0;
@@ -244,12 +244,13 @@ export function renderClassroomMix() {
             const cleaned = this.value.replace(/[^0-9]/g, '');
             const numeric = Number(cleaned) || 0;
             state.interiors.mixSF[d.name] = numeric;
+            this.value = `${numeric.toLocaleString('en-US')} sf`;
             renderMixTable();
             renderInteriorsGraph();
         })
         .on('blur', function(event, d) {
             const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
-            this.value = numeric.toLocaleString('en-US');
+            this.value = `${numeric.toLocaleString('en-US')} sf`;
             this.classList.remove('border-red-500');
             this.classList.remove('ring-red-500');
         });
@@ -699,6 +700,63 @@ function drawDonut(containerSel, items, title, radius, innerRadius, size, color)
         .attr('height', size)
         .append('g')
         .attr('transform', `translate(${Math.floor(size / 2)},${Math.floor(size / 2)})`);
+
+    if (!items || items.length === 0 || total <= 0) {
+        // Placeholder donut: four equal slices, white fill with light gray dotted outlines and placeholder % labels
+        const placeholderData = [20, 40, 30, 10];
+        const placeholderPie = d3.pie().sort(null);
+        const placeholderArc = d3.arc().innerRadius(innerRadius).outerRadius(radius);
+
+        svg.selectAll('path.placeholder-slice')
+            .data(placeholderPie(placeholderData))
+            .enter()
+            .append('path')
+            .attr('class', 'placeholder-slice')
+            .attr('d', placeholderArc)
+            .attr('fill', '#ffffff')
+            .attr('stroke', '#cbd5e1')
+            .attr('stroke-width', 3)
+            .attr('stroke-dasharray', '4 4');
+
+        // Add centered text
+        svg.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'middle')
+            .attr('fill', '#64748b') // Tailwind slate-500
+            .attr('font-size', Math.floor(radius * 0.16))
+            .attr('font-weight', 500)
+            .attr('y', 0)
+            .text('Enter room square footages to begin')
+            .call(function(text) {
+                // Optionally wrap text if too long
+                const width = radius * 1.5;
+                const words = 'Enter room square footages to begin'.split(' ');
+                let line = [];
+                let lineNumber = 0;
+                const lineHeight = 1.2; // ems
+                let tspan = text.text(null)
+                    .append('tspan')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('dy', 0 + 'em');
+                for (let i = 0; i < words.length; i++) {
+                    line.push(words[i]);
+                    tspan.text(line.join(' '));
+                    if (tspan.node().getComputedTextLength() > width && line.length > 1) {
+                        line.pop();
+                        tspan.text(line.join(' '));
+                        line = [words[i]];
+                        tspan = text.append('tspan')
+                            .attr('x', 0)
+                            .attr('y', 0)
+                            .attr('dy', ++lineNumber * lineHeight + 'em')
+                            .text(words[i]);
+                    }
+                }
+            });
+
+        return;
+    }
 
     svg.selectAll('path')
         .data(pie(items))

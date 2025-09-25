@@ -68,12 +68,12 @@ export function formatSquareFootageWithChange(currentSF, componentName) {
     const formattedSF = roundedSF.toLocaleString('en-US');
     
     if (change === 0) {
-        return `${formattedSF} SF`;
+        return `${formattedSF} sf`;
     }
     
     const changeFormatted = Math.abs(Math.round(change)).toLocaleString('en-US');
     const changeSign = change > 0 ? '+' : '-';
-    return `${formattedSF} SF (${changeSign}${changeFormatted} SF)`;
+    return `${formattedSF} sf (${changeSign}${changeFormatted} sf)`;
 }
 
 /**

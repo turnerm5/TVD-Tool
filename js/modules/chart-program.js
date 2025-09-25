@@ -461,10 +461,10 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         .attr('inputmode', 'numeric')
         .attr('pattern', '[0-9,]*')
         .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
-        .attr('value', utils.formatNumber(state.currentData?.grossSF || 0))
+        .attr('value', `${utils.formatNumber(state.currentData?.grossSF || 0)} sf`)
         .on('focus', function() {
             const numericValue = Number(state.currentData?.grossSF) || 0;
-            this.value = numericValue.toLocaleString('en-US');
+            this.value = numericValue.toString();
             this.select();
         })
         .on('change', async function() {
@@ -491,11 +491,13 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
                     return;
                 }
             }
+            // Set display with unit when not re-rendering above
+            this.value = `${utils.formatNumber(newGross)} sf`;
         })
         .on('blur', function() {
             const numeric = Number(String(this.value).replace(/,/g, '')) || 0;
             state.currentData.grossSF = numeric;
-            this.value = utils.formatNumber(numeric);
+            this.value = `${utils.formatNumber(numeric)} sf`;
         });
 
     const tableContainer = mainContainer.append('div')
