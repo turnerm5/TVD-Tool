@@ -190,33 +190,33 @@ const sampleData = {
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
-                    "cost": 11.60,
+                    "cost": 12.31,
                     "systemDetail": "25-inch thick monolithic concrete foundation for vibration isolation of sensitive materials science instrumentation; includes an underground stormwater retention system."
                 },
                 { 
                     "name": "B10 Superstructure", 
-                    "cost": 68.68,
+                    "cost": 72.23,
                     "systemDetail": "Exposed structural system of concrete, steel, and wood, designed to serve as a teaching tool for materials science."
                 },
                 { 
                     "name": "B20 Enclosure", 
-                    "cost": 99.10,
+                    "cost": 102.18,
                     "systemDetail": "Facade of brick and metal panels with ceramic fritted glass on south-facing windows; exterior materials wrap into the interior.",
                     "image": "img/benchmarks/bsu-mat/enclosure.jpg"
                 },
                 { 
                     "name": "B30 Roofing", 
-                    "cost": 11.39 
+                    "cost": 11.75 
                 },
                 { 
                     "name": "C Interiors", 
-                    "cost": 78.63,
+                    "cost": 81.08,
                     "systemDetail": "Over 40 materials science labs, including core facilities for electron microscopy and surface science; features polished concrete and end-grain wood floors.",
                     "image": "img/benchmarks/bsu-mat/interiors.jpg"
                 },
                 { 
                     "name": "D Services", 
-                    "cost": 281.02,
+                    "cost": 289.76,
                     "systemDetail": "High-precision Variable Air Volume (VAV) system with HEPA filtration and low-velocity laminar airflow for vibration and particulate control.",
                     "pros": "Provides exceptional environmental stability (temperature, vibration, particulates) for sensitive research; highly responsive.",
                     "cons": "High energy consumption due to tight controls and filtration; complex to design, install, and commission.",
@@ -224,15 +224,15 @@ const sampleData = {
                 },
                 { 
                     "name": "E Equipment and Furnishings", 
-                    "cost": 54.78 
+                    "cost": 56.48 
                 },
                 { 
                     "name": "F Special Construction",
-                    "cost": 4.14 
+                    "cost": 3.98 
                 },
                 { 
                     "name": "G Building Sitework", 
-                    "cost": 34.09,
+                    "cost": 35.15,
                     "image": "img/benchmarks/bsu-mat/sitework.jpg"
                 }
             ]
