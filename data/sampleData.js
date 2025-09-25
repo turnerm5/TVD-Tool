@@ -394,7 +394,7 @@ const sampleData = {
             "name": "WSUV Life Sciences Building",
             "image": "img/benchmarks/wsuv-lsb/wsuv-lsb.jpg",
             "overall_sf_cost": 729.00,
-            "grossSF": 55000,
+            "grossSF": 60700,
             "costOfWork": [
                 { 
                     "name": "A Substructure", 
