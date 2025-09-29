@@ -190,13 +190,25 @@ export function createImportedDataSeries() {
                 benchmark_high: targetValueData ? Number(targetValueData.benchmark_high) || 0 : 0
             };
         });
+    } else if (state.currentScheme && Array.isArray(state.currentScheme.costOfWork)) {
+        // Fallback: synthesize baseline from current working scheme so charts render pre-snapshot
+        costOfWork = state.currentScheme.costOfWork.map(component => {
+            const targetValueData = initialTargetValues.find(tv => tv.name === component.name);
+            return {
+                name: component.name,
+                square_footage: Number(component.square_footage) || 0,
+                target_value: targetValueData ? Number(targetValueData.target_value) || 0 : (Number(component.target_value) || 0),
+                benchmark_low: targetValueData ? Number(targetValueData.benchmark_low) || 0 : (Number(component.benchmark_low) || 0),
+                benchmark_high: targetValueData ? Number(targetValueData.benchmark_high) || 0 : (Number(component.benchmark_high) || 0)
+            };
+        });
     }
     
     return {
         name: getBaselineName(),
         color: "#9ca3af", // gray-400
         costOfWork: costOfWork,
-        grossSF: state.originalData.grossSF
+        grossSF: state.originalData.grossSF || state.currentData?.grossSF || 0
     };
 }
 

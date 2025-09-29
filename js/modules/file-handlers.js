@@ -107,7 +107,7 @@ export function loadData(data, fileName = 'Sample Data') {
     state.currentData.grossSF = Number(state.currentData.grossSF) || 55000;
     
     // Initialize new floor model defaults
-    state.numFloors = 1;
+    state.numFloors = 3;
     state.shelledFloorsCount = 0;
     
     // Load interiors target values into state for editing in Interiors view

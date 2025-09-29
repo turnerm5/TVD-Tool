@@ -36,7 +36,7 @@ export const state = {
     previousSquareFootage: {}, // Track previous square footage values for showing changes
     predesignDeleted: false, // Track if the Predesign scheme has been deleted
     // New floor-based program inputs
-    numFloors: 1,
+    numFloors: 3,
     shelledFloorsCount: 0,
 
     /**

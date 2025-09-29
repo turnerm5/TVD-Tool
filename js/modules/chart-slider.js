@@ -234,28 +234,34 @@ export function renderChart() {
     // Update labels and ghost bars for each component.
     updateGroup.each(function(d) {
         const original = originalComponents[d.name];
-        if (!original) return;
         
-        // Update the value labels
+        // Always update the current value label and position it to the right of the black bar
         const valueGroup = d3.select(this).select(".value-label-group");
         valueGroup.select(".current-value-label").text(utils.formatCurrency(d.target_value));
         valueGroup.style("top", yScale(d.target_value) - 10 + "px").style("bottom", null);
 
-        // Position the ghost bar
         const ghostBar = d3.select(this).select(".ghost-rom");
-        ghostBar.style("top", yScale(original.target_value) - 3 + "px").style("bottom", null);
-
-        // Show/hide and update the delta label
         const deltaLabel = valueGroup.select(".delta-label");
-        if (d.target_value !== original.target_value) {
-            ghostBar.style("display", "block");
-            const delta = d.target_value - original.target_value;
-            const isOutsideBenchmark = d.target_value < d.benchmark_low || d.target_value > d.benchmark_high;
-            deltaLabel.style("display", "block")
-                .text(`${delta > 0 ? '+' : ''}${utils.formatCurrency(delta)}`)
-                .classed('outside-benchmark', isOutsideBenchmark)
-                .classed('inside-benchmark', !isOutsideBenchmark);
+
+        if (original) {
+            // Position the ghost bar at the original value
+            ghostBar.style("top", yScale(original.target_value) - 3 + "px").style("bottom", null);
+
+            // Show/hide and update the delta label
+            if (d.target_value !== original.target_value) {
+                ghostBar.style("display", "block");
+                const delta = d.target_value - original.target_value;
+                const isOutsideBenchmark = d.target_value < d.benchmark_low || d.target_value > d.benchmark_high;
+                deltaLabel.style("display", "block")
+                    .text(`${delta > 0 ? '+' : ''}${utils.formatCurrency(delta)}`)
+                    .classed('outside-benchmark', isOutsideBenchmark)
+                    .classed('inside-benchmark', !isOutsideBenchmark);
+            } else {
+                ghostBar.style("display", "none");
+                deltaLabel.style("display", "none");
+            }
         } else {
+            // No original baseline available; hide ghost and delta, but keep current value label visible
             ghostBar.style("display", "none");
             deltaLabel.style("display", "none");
         }

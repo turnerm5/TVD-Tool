@@ -11,15 +11,15 @@
  */
 
 const INITIAL_TARGET_VALUES = [
-    { "name": "A Substructure", "target_value": 29.99 },
-    { "name": "B10 Superstructure", "target_value": 74.41 },
-    { "name": "B20 Enclosure", "target_value": 75.78 },
-    { "name": "B30 Roofing", "target_value": 33.52 },
-    { "name": "C Interiors", "target_value": 86.11 },
-    { "name": "D Services", "target_value": 349.05 },
-    { "name": "E Equipment and Furnishings", "target_value": 41.35 },
-    { "name": "F Special Construction", "target_value": 20.70 },
-    { "name": "G Building Sitework", "target_value": 35.85 }
+    { "name": "A Substructure", "target_value": 18.69 },
+    { "name": "B10 Superstructure", "target_value": 76.36 },
+    { "name": "B20 Enclosure", "target_value": 72.19 },
+    { "name": "B30 Roofing", "target_value": 22.06 },
+    { "name": "C Interiors", "target_value": 72.38 },
+    { "name": "D Services", "target_value": 310.21 },
+    { "name": "E Equipment and Furnishings", "target_value": 38.59 },
+    { "name": "F Special Construction", "target_value": 9.80 },
+    { "name": "G Building Sitework", "target_value": 31.29 }
 ];
 
 

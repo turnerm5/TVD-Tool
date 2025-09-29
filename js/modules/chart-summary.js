@@ -58,19 +58,23 @@ function wrap(text, width) {
  */
 export function renderSummaryCharts() {
     // --- 1. Data Preparation ---
-    // Create stable baseline series using pure original data (never changes)
-    const importedSeries = utils.createImportedDataSeries();
-    const allSeriesData = state.predesignDeleted ? [...state.snapshots] : [importedSeries, ...state.snapshots];
+    // Do not include a baseline series; only show user snapshots
+    const allSeriesData = [...state.snapshots];
     
     // Check if no schemes are present (empty state)
-    if (allSeriesData.length === 0 || (state.snapshots.length === 0 && state.predesignDeleted)) {
+    if (allSeriesData.length === 0) {
         renderEmptyState();
         return;
     }
     
     const seriesNames = allSeriesData.map(d => d.name);
             const originalPredesignScheme = utils.getBaselineScheme();
-            const costOfWorkNames = originalPredesignScheme ? originalPredesignScheme.costOfWork.map(c => c.name) : [];
+            // Prefer names from the snapshot data; fallback to initialTargetValues if needed
+            const costOfWorkNames = (allSeriesData[0]?.costOfWork?.map(c => c.name)) || (originalPredesignScheme
+                ? originalPredesignScheme.costOfWork.map(c => c.name)
+                : ((state.originalData && Array.isArray(state.originalData.initialTargetValues))
+                    ? state.originalData.initialTargetValues.map(c => c.name)
+                    : []));
         const gmpValue = state.originalData.phase2.totalProjectBudget;
     
     // --- Render Left Chart ---
@@ -144,9 +148,10 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
     const yMax = d3.max(allSeriesData, series => 
                         d3.max(series.costOfWork, c => utils.calculateComponentValue(c))
     );
+    const safeYMax = (Number.isFinite(yMax) && yMax > 0) ? yMax : 1;
     
     const y = d3.scaleLinear()
-        .domain([0, yMax * 1.1]).nice()
+        .domain([0, safeYMax * 1.1]).nice()
         .range([height, 0]);
         
     const color = d3.scaleOrdinal()
@@ -370,12 +375,11 @@ export function updateSummary() {
     summaryPanel.appendChild(header);
 
     // --- Data Series Table ---
-    // Create stable baseline series using pure original data (never changes)
-    const importedSeries = utils.createImportedDataSeries();
-    const allSeries = state.predesignDeleted ? [...state.snapshots] : [importedSeries, ...state.snapshots];
+    // Do not include a baseline series in the table; only show snapshots
+    const allSeries = [...state.snapshots];
 
     // Check if no schemes are present (empty state)
-    if (allSeries.length === 0 || (state.snapshots.length === 0 && state.predesignDeleted)) {
+    if (allSeries.length === 0) {
         const emptyStateDiv = document.createElement('div');
         emptyStateDiv.className = 'flex items-center justify-center py-12';
         emptyStateDiv.innerHTML = `
