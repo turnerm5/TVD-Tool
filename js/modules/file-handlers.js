@@ -114,6 +114,10 @@ export function loadData(data, fileName = 'Sample Data') {
     state.interiors.targetValues = Array.isArray(processedData.interiorTargetValues)
         ? JSON.parse(JSON.stringify(processedData.interiorTargetValues))
         : [];
+    // Load interior mix schemes for quick selection in Interiors view
+    state.currentData.interiorMixSchemes = Array.isArray(processedData.interiorMixSchemes)
+        ? JSON.parse(JSON.stringify(processedData.interiorMixSchemes))
+        : [];
     
     // Initialize the current scheme from target values (no predefined schemes)
     state.currentScheme = {

@@ -180,6 +180,32 @@ export function renderClassroomMix() {
     const container = d3.select(dom.interiorsBreakouts);
     container.html('');
 
+    // Program scheme quick-select buttons (Max Lab, Mix, Max Student Success)
+    const schemesBar = container.append('div')
+        .attr('class', 'mb-3 flex flex-wrap items-center gap-2');
+
+    const schemes = Array.isArray(state.currentData?.interiorMixSchemes)
+        ? state.currentData.interiorMixSchemes
+        : [];
+
+    schemesBar.selectAll('button.scheme-btn')
+        .data(schemes, d => d.key)
+        .enter()
+        .append('button')
+        .attr('class', d => `scheme-btn px-3 py-1.5 text-xs rounded-md font-medium border ${state.interiors.selectedMixScheme === d.key ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`)
+        .text(d => d.label)
+        .on('click', (event, d) => {
+            const roomTypes = state.interiors?.targetValues || [];
+            const next = {};
+            roomTypes.forEach(rt => {
+                next[rt.name] = Number(d.values[rt.name]) || 0;
+            });
+            state.interiors.mixSF = next;
+            state.interiors.selectedMixScheme = d.key;
+            renderClassroomMix();
+            renderInteriorsGraph();
+        });
+
     // Ensure we have a container for the Overall SF input
     const overallSFContainer = container.append('div')
         .attr('class', 'mb-3');
@@ -305,8 +331,12 @@ export function renderClassroomMix() {
     const donutsContainer = container.append('div').attr('id', 'interiors-donuts');
 
     function computeNSF() {
-        // NSF is the sum of the square footages of all classroom types
-        return roomTypes.reduce((sum, rt) => sum + (Number(state.interiors.mixSF[rt.name]) || 0), 0);
+        // NSF is the sum of SF for room types flagged includeInNSF
+        return roomTypes.reduce((sum, rt) => {
+            const include = (rt.includeInNSF !== false);
+            const sf = Number(state.interiors.mixSF[rt.name]) || 0;
+            return include ? sum + sf : sum;
+        }, 0);
     }
 
     function renderMixTable() {
@@ -325,7 +355,8 @@ export function renderClassroomMix() {
             const equipmentCost = Number(rt['E Equipment and Furnishings'] || 0) * sf;
             const totalCost = interiorsCost + servicesCost + equipmentCost;
             const pctGSF = totalGSF > 0 ? (sf / totalGSF) : 0;
-            const pctNSF = nsf > 0 ? (sf / nsf) : 0;
+            const includeInNSF = (rt.includeInNSF !== false);
+            const pctNSF = (includeInNSF && nsf > 0) ? (sf / nsf) : null;
             return {
                 name: rt.name,
                 sf,
@@ -334,9 +365,25 @@ export function renderClassroomMix() {
                 equipmentCost,
                 totalCost,
                 pctGSF,
-                pctNSF
+                pctNSF,
+                includeInNSF
             };
         });
+
+        // Add Circulation row (calculated): GrossSF - sum of all program SF
+        const programTotalSF = rows.reduce((sum, r) => sum + r.sf, 0);
+        const circulationSF = Math.max(0, totalGSF - programTotalSF);
+        const circulationRow = {
+            name: 'Circulation',
+            sf: circulationSF,
+            interiorsCost: 0,
+            servicesCost: 0,
+            equipmentCost: 0,
+            totalCost: 0,
+            pctGSF: totalGSF > 0 ? (circulationSF / totalGSF) : 0,
+            pctNSF: null,
+            includeInNSF: false
+        };
 
         const totals = rows.reduce((acc, r) => {
             acc.sf += r.sf;
@@ -363,7 +410,7 @@ export function renderClassroomMix() {
 
         const tbody = table.append('tbody');
         const tr = tbody.selectAll('tr.mix-row')
-            .data(rows, d => d.name)
+            .data([...rows, circulationRow], d => d.name)
             .enter()
             .append('tr')
             .attr('class', 'bg-white border-b hover:bg-gray-50 mix-row');
@@ -371,16 +418,16 @@ export function renderClassroomMix() {
         tr.append('td').attr('class', 'px-4 py-2 text-gray-900').text(d => d.name);
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.sf.toLocaleString('en-US'));
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => `${(d.pctGSF * 100).toFixed(1)}%`);
-        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => `${(d.pctNSF * 100).toFixed(1)}%`);
-        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => utils.formatCurrencySmall(d.interiorsCost));
-        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => utils.formatCurrencySmall(d.servicesCost));
-        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => utils.formatCurrencySmall(d.equipmentCost));
-        tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => utils.formatCurrencySmall(d.totalCost));
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => (d.pctNSF === null ? '-' : `${(d.pctNSF * 100).toFixed(1)}%`));
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.interiorsCost));
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.servicesCost));
+        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.equipmentCost));
+        tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.totalCost));
 
         // Totals row with coverage highlighting
         const tfoot = table.append('tfoot');
 
-        const coverage = totalGSF > 0 ? (totals.sf / totalGSF) : 0;
+        const coverage = totalGSF > 0 ? ((totals.sf + circulationSF) / totalGSF) : 0;
         let highlightClass = 'bg-blue-50';
         if (coverage >= 0.75 && coverage < 0.85) {
             highlightClass = 'bg-yellow-100';
@@ -392,10 +439,10 @@ export function renderClassroomMix() {
 
         const totalRow = tfoot.append('tr').attr('class', `${highlightClass} border-t`);
         totalRow.append('td').attr('class', 'px-4 py-2 font-bold text-blue-900').text('Total');
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(totals.sf.toLocaleString('en-US'));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => (totals.sf + circulationSF).toLocaleString('en-US'));
         totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => {
             const totalGSF = Number(state.currentData?.grossSF) || 0;
-            const pct = totalGSF > 0 ? (totals.sf / totalGSF) * 100 : 0;
+            const pct = totalGSF > 0 ? ((totals.sf + circulationSF) / totalGSF) * 100 : 0;
             return `${pct.toFixed(1)}%`;
         });
         totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => {

@@ -22,7 +22,8 @@ export const state = {
     interiors: {
         targetValues: [],
         // Stores user-entered square footage by room/classroom type name
-        mixSF: {}
+        mixSF: {},
+        selectedMixScheme: null
     },
     lockedCostOfWork: new Set(),
     currentView: 'splash-screen', // 'summary', 'slider', 'program'

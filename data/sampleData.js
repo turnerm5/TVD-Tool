@@ -15,11 +15,11 @@ const sampleData = {
         "totalProjectBudget": 40000000
     },
     "indirectCosts": [
-        { "Category": "GCs and Insurance", "Subcategory": "Design and Fee", "Percentage": 0.0686 },
-        { "Category": "Escalation & Contingency", "Subcategory": "Design Contingency", "Percentage": 0.0538 },
-        { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Percentage": 0.0538 },
-        { "Category": "GCs and Insurance", "Subcategory": "Bonds and Insurance", "Percentage": 0.0437 },
-        { "Category": "Permits", "Subcategory": "Building Permit", "Percentage": 0.0034 }
+        { "Category": "GCs and Insurance", "Subcategory": "SGCs, CA, and Fee", "Percentage": 0.094 },
+        { "Category": "Escalation & Contingency", "Subcategory": "Design and Escalation Contingency", "Percentage": 0.076 },
+        { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Percentage": 0.04 },
+        { "Category": "GCs and Insurance", "Subcategory": "Insurance", "Percentage": 0.022 },
+        { "Category": "Permits", "Subcategory": "Building Permit", "Percentage": 0.003 }
     ],
     "initialTargetValues": [
         { "name": "A Substructure", "target_value": 29.99 },
@@ -37,37 +37,81 @@ const sampleData = {
             "name": "Teaching Lab",
             "C Interiors": 69.3,
             "D Services": 450,
-            "E Equipment and Furnishings": 47.5
+            "E Equipment and Furnishings": 47.5,
+            "includeInNSF": true
         },
         {
             "name": "Classroom",
             "C Interiors": 77,
             "D Services": 231,
-            "E Equipment and Furnishings": 22
+            "E Equipment and Furnishings": 22,
+            "includeInNSF": true
         },
         {
-            "name": "Student Success Open",
+            "name": "Collaborative Space",
             "C Interiors": 71.5,
             "D Services": 220,
-            "E Equipment and Furnishings": 42.9
+            "E Equipment and Furnishings": 42.9,
+            "includeInNSF": true
         },
         {
-            "name": "Student Success Closed",
+            "name": "Student Success Center",
             "C Interiors": 88,
             "D Services": 450,
-            "E Equipment and Furnishings": 56.1
+            "E Equipment and Furnishings": 56.1,
+            "includeInNSF": true
         },
         {
-            "name": "Lecture Hall",
+            "name": "Offices",
             "C Interiors": 68.2,
             "D Services": 209,
-            "E Equipment and Furnishings": 33
+            "E Equipment and Furnishings": 33,
+            "includeInNSF": true
         },
         {
             "name": "Building Support",
             "C Interiors": 10,
             "D Services": 200,
-            "E Equipment and Furnishings": 5
+            "E Equipment and Furnishings": 5,
+            "includeInNSF": false
+        }
+    ],
+    "interiorMixSchemes": [
+        {
+            "key": "maxLab",
+            "label": "Max Lab",
+            "values": {
+                "Teaching Lab": 17630,
+                "Classroom": 6060,
+                "Offices": 1500,
+                "Student Success Center": 4660,
+                "Collaborative Space": 1470,
+                "Building Support": 13700
+            }
+        },
+        {
+            "key": "mix",
+            "label": "Mix",
+            "values": {
+                "Teaching Lab": 14104,
+                "Classroom": 8152,
+                "Offices": 1200,
+                "Student Success Center": 6126,
+                "Collaborative Space": 1590,
+                "Building Support": 13700
+            }
+        },
+        {
+            "key": "maxStudentSuccess",
+            "label": "Max Student Success",
+            "values": {
+                "Teaching Lab": 10584,
+                "Classroom": 6700,
+                "Offices": 1200,
+                "Student Success Center": 8100,
+                "Collaborative Space": 4500,
+                "Building Support": 13700
+            }
         }
     ],
     "schemes": [],
