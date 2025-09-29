@@ -223,7 +223,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     
     headerContainer.append('h3')
         .attr('class', 'text-lg font-bold text-gray-800')
-        .text('Potential Opportunities');
+        .text('Floors');
     
     // Add estimate display and button container
     const rightContainer = headerContainer.append('div')
@@ -300,8 +300,6 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             render();
             renderProgramEstimate();
         });
-
-    // (Removed floor visualization under shell controls per request)
 
     // Overall Square Footage input above the main table
     const overallSFContainer = mainContainer.append('div')

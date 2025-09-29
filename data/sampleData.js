@@ -16,7 +16,6 @@ const sampleData = {
     "initialTargetValues": INITIAL_TARGET_VALUES,
     "interiorTargetValues": INTERIOR_TARGET_VALUES,
     "interiorMixSchemes": INTERIOR_MIX_SCHEMES,
-    "schemes": [],
     "lockSets": LOCK_SETS,
     "benchmarks": BENCHMARKS
 };
