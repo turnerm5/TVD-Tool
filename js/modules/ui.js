@@ -46,6 +46,36 @@ export function showMainContent() {
 }
 
 /**
+ * Renders the global Total Estimate in the header.
+ */
+export function renderGlobalEstimate() {
+    if (!dom.globalEstimate || !state.currentScheme) return;
+
+    const { costOfWork } = state.currentScheme;
+    const { indirectCostPercentages } = state;
+
+    const cowTotal = utils.calculateTotalCostOfWork(costOfWork);
+    const indirectTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
+    const totalProjectCost = cowTotal + indirectTotal;
+
+    const gmp = state.originalData?.phase2?.totalProjectBudget ?? 0;
+    const variance = totalProjectCost - gmp;
+
+    dom.globalEstimate.innerHTML = `
+        <div class="flex items-baseline gap-3">
+            <div>
+                <span class="text-gray-600">Total Estimate: </span>
+                <span class="text-gray-900">${utils.formatCurrencyBig(totalProjectCost)}</span>
+            </div>
+            <div class="text-xs font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
+                <span>Δ: </span>
+                <span>${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}</span>
+            </div>
+        </div>
+    `;
+}
+
+/**
  * A generic dialog function that can be configured for different use cases.
  * @param {object} config - The configuration object for the dialog.
  * @param {string} config.title - The dialog title.

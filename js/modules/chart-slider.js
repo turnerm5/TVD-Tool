@@ -18,6 +18,7 @@
 import { state } from './state.js';
 import * as dom from './dom.js';
 import * as utils from './utils.js';
+import * as ui from './ui.js';
 
 let render, yScale;
 
@@ -269,7 +270,7 @@ export function renderChart() {
 
     updateGroup.select(".component-label").text(d => d.name);
 
-    renderTotalEstimate();
+    ui.renderGlobalEstimate();
     renderLockControls();
 
     // --- Render the benchmark indicators (A, B, C, D) within each column's SVG ---
@@ -501,30 +502,7 @@ function dragStarted(event, d) {
 /**
  * Renders the total estimated cost display.
  */
-function renderTotalEstimate() {
-    if (!dom.totalEstimateDisplay) return;
-
-    const { costOfWork } = state.currentScheme;
-    const { indirectCostPercentages } = state;
-    
-    const cowTotal = utils.calculateTotalCostOfWork(costOfWork);
-    const indirectTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
-    const totalProjectCost = cowTotal + indirectTotal;
-
-    const gmp = state.originalData.phase2.totalProjectBudget;
-    const variance = totalProjectCost - gmp;
-
-    dom.totalEstimateDisplay.innerHTML = `
-        <div class="text-lg font-semibold">
-            <span class="text-gray-600">Total Estimate: </span>
-            <span class="text-gray-900">${utils.formatCurrencyBig(totalProjectCost)}</span>
-        </div>
-        <div class="text-sm font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
-            <span>Budget &Delta;: </span>
-            <span>${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}</span>
-        </div>
-    `;
-}
+// Removed local renderTotalEstimate; use ui.renderGlobalEstimate instead
 
 
 /**
@@ -536,7 +514,7 @@ function renderTotalEstimate() {
 function dragged(event, d) {
     const newRom = yScale.invert(event.y);
     applyChangeAndBalance(d, newRom, 'phase2');
-    renderTotalEstimate();
+    ui.renderGlobalEstimate();
 }
 
 /**

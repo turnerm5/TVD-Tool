@@ -71,31 +71,7 @@ export function updateProgramSF() {
 /**
  * Renders the total estimated cost display for the Program View.
  */
-function renderProgramEstimate() {
-    const programEstimateDisplay = document.getElementById('program-estimate-display');
-    if (!programEstimateDisplay) return;
-
-    const { costOfWork } = state.currentScheme;
-    const { indirectCostPercentages } = state;
-    
-    const cowTotal = utils.calculateTotalCostOfWork(costOfWork);
-    const indirectTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
-    const totalProjectCost = cowTotal + indirectTotal;
-
-    const gmp = state.originalData.phase2.totalProjectBudget;
-    const variance = totalProjectCost - gmp;
-
-    programEstimateDisplay.innerHTML = `
-        <div class="text-sm font-semibold">
-            <span class="text-gray-600">Total Estimate: </span>
-            <span class="text-gray-900">${utils.formatCurrencyBig(totalProjectCost)}</span>
-        </div>
-        <div class="text-xs font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
-            <span>Budget &Delta;: </span>
-            <span>${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}</span>
-        </div>
-    `;
-}
+// Removed program-specific estimate rendering; use ui.renderGlobalEstimate
 
 function updatePhase2ProgramTable(container, render, handleSquareFootageCellChange) {
     container.html('');
@@ -230,9 +206,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     const rightContainer = headerContainer.append('div')
         .attr('class', 'flex items-center gap-4');
     
-    rightContainer.append('div')
-        .attr('id', 'program-estimate-display')
-        .attr('class', 'text-center');
+    // Removed inline program estimate element; using global header estimate instead
         
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-6 gap-4')
@@ -255,7 +229,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             state.shelledFloorsCount = Math.min(state.shelledFloorsCount || 0, state.numFloors);
             updateProgramSF();
             render();
-            renderProgramEstimate();
+            ui.renderGlobalEstimate();
         });
 
     floorCards.append('div')
@@ -280,7 +254,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             state.shelledFloorsCount = Math.max(0, (state.shelledFloorsCount || 0) - 1);
             updateProgramSF();
             render();
-            renderProgramEstimate();
+            ui.renderGlobalEstimate();
         });
 
     shellControls.append('div')
@@ -294,7 +268,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             state.shelledFloorsCount = Math.min(state.numFloors || 1, (state.shelledFloorsCount || 0) + 1);
             updateProgramSF();
             render();
-            renderProgramEstimate();
+            ui.renderGlobalEstimate();
         });
 
     // Overall Square Footage input above the main table
@@ -360,6 +334,6 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         .attr('class', 'program-table-container');
     updatePhase2ProgramTable(tableContainer, render, handleSquareFootageCellChange);
     
-    // Initial render of the estimate display
-    renderProgramEstimate();
+    // Update global estimate after initial render
+    ui.renderGlobalEstimate();
 }

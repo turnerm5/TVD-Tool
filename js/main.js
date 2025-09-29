@@ -60,9 +60,7 @@ function render() {
     dom.legend.classList.add('hidden');
     dom.summaryLegend.classList.add('hidden');
     dom.maximizeBtn.classList.add('hidden');
-    if (dom.totalEstimateDisplay) {
-        dom.totalEstimateDisplay.classList.add('hidden');
-    }
+    // Global estimate sits in header; always update after render
 
     dom.chartViewBtn.classList.remove('active');
     dom.programViewBtn.classList.remove('active');
@@ -76,9 +74,6 @@ function render() {
         // dom.phaseSelector.classList.remove('hidden');
         dom.legend.classList.remove('hidden');
         dom.maximizeBtn.classList.remove('hidden');
-        if (dom.totalEstimateDisplay) {
-            dom.totalEstimateDisplay.classList.remove('hidden');
-        }
         dom.chartViewBtn.classList.add('active');
         slider.renderChart();
         slider.renderYAxisLabels();
@@ -108,6 +103,8 @@ function render() {
             summary.updateSummary();
         });
     }
+    // After view-specific renders, update the header estimate once
+    ui.renderGlobalEstimate();
 }
 
 // --- DEPENDENCY INJECTION ---
@@ -145,18 +142,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     dom.exportJsonBtn.addEventListener('click', fileHandlers.exportJSON);
-    dom.resetButton.addEventListener('click', async () => {
-        const confirmed = await ui.showConfirmDialog(
-            "Confirm Reset",
-            "Are you sure you want to reset all values to their original imported state? All unsaved changes will be lost.",
-            "Yes, Reset",
-            "Cancel"
-        );
-        if (confirmed) {
-            fileHandlers.loadData(state.originalData);
-            // Reset button state will be updated by the loadData function's call to updateResetButtonState
-        }
-    });
+    if (dom.resetButton) {
+        dom.resetButton.addEventListener('click', async () => {
+            const confirmed = await ui.showConfirmDialog(
+                "Confirm Reset",
+                "Are you sure you want to reset all values to their original imported state? All unsaved changes will be lost.",
+                "Yes, Reset",
+                "Cancel"
+            );
+            if (confirmed) {
+                fileHandlers.loadData(state.originalData);
+                // Reset button state will be updated by the loadData function's call to updateResetButtonState
+            }
+        });
+    }
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);
     dom.takeSnapshotBtn.addEventListener('click', async () => {
         await utils.takeSnapshot(state, ui, render);
