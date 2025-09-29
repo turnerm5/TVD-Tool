@@ -16,49 +16,55 @@ import * as utils from './utils.js';
 import * as ui from './ui.js';
 
 export function updateProgramSF() {
-    if (!state.currentScheme || !state.currentScheme.name) return;
+    if (!state.currentScheme || !Array.isArray(state.currentScheme.costOfWork)) return;
 
-    const originalScheme = state.originalData.schemes.find(s => s.name === state.currentScheme.name);
-    if (!originalScheme || !originalScheme.floorData || !originalScheme.costOfWork) return;
+    const grossSF = Number(state.currentData?.grossSF) || 0;
+    const floors = Math.min(Math.max(Number(state.numFloors) || 1, 1), 5); // clamp 1-5
+    const shelled = Math.min(Math.max(Number(state.shelledFloorsCount) || 0, 0), floors);
 
-    let activeGrossSF = 0;
-    let nonShelledActiveSF = 0;
+    const perFloorSF = floors > 0 ? grossSF / floors : 0;
+    const finishedFloors = floors - shelled;
+    const finishedSF = Math.max(0, finishedFloors) * perFloorSF;
 
-    state.currentScheme.floorData.forEach(f => {
-        if (state.activePhases.includes(f.phase)) {
-            activeGrossSF += f.sf;
-            if (!f.shelled) {
-                nonShelledActiveSF += f.sf;
-            }
-        }
-    });
+    // Geometry assumptions: ideal rectangle 1.6:1, perimeter drives enclosure; roofing equals footprint area.
+    // Foundation and superstructure scale with grossSF; interiors and equipment scale with finishedSF.
+    // Sitework keep proportional to grossSF.
 
-    state.currentData.grossSF = activeGrossSF;
-
-    state.currentScheme.costOfWork.forEach(currentComponent => {
-        const originalComponent = originalScheme.costOfWork.find(c => c.name === currentComponent.name);
-        if (!originalComponent) return;
-
-        let newSF = 0;
-        const componentName = currentComponent.name;
-
-        if (componentName === 'C Interiors' || componentName === 'E Equipment and Furnishings') {
-            newSF = nonShelledActiveSF;
+    state.currentScheme.costOfWork.forEach(component => {
+        const name = component.name;
+        let sf = 0;
+        if (name === 'C Interiors' || name === 'E Equipment and Furnishings') {
+            sf = finishedSF;
+        } else if (name === 'B30 Roofing') {
+            // Roofing equals building footprint (one roof) which is perFloorSF
+            sf = perFloorSF;
+        } else if (name === 'B20 Enclosure') {
+            // Approximate enclosure area as perimeter * floor height * floors.
+            // For a rectangle with ratio 1.6:1 and area A, sides: a = sqrt(A/1.6), b = 1.6a -> perimeter P = 2(a+b)
+            // Use floor-to-floor height 15 ft.
+            const A = perFloorSF; // footprint
+            const a = Math.sqrt(A / 1.6);
+            const b = 1.6 * a;
+            const perimeter = 2 * (a + b);
+            const floorToFloor = 15;
+            sf = perimeter * floorToFloor * floors;
+        } else if (name === 'A Substructure') {
+            // Foundation equals footprint area per requirements for single floor; for multi-floor, keep footprint
+            sf = perFloorSF;
+        } else if (name === 'B10 Superstructure') {
+            // Superstructure scales with total grossSF
+            sf = grossSF;
+        } else if (name === 'D Services' || name === 'F Special Construction') {
+            // Services and special construction should not change with shelling; use grossSF
+            sf = grossSF;
+        } else if (name === 'G Building Sitework') {
+            // Sitework = 80,000 sf minus floor plate (footprint)
+            sf = Math.max(0, 80000 - perFloorSF);
         } else {
-            if (Array.isArray(originalComponent.square_footage)) {
-                state.activePhases.forEach(phase => {
-                    const phaseIndex = phase - 1;
-                    if (phaseIndex < originalComponent.square_footage.length) {
-                        newSF += originalComponent.square_footage[phaseIndex];
-                    }
-                });
-            } else {
-                if (state.activePhases.includes(1)) { // Single phase schemes are phase 1
-                    newSF = originalComponent.square_footage;
-                }
-            }
+            // Default to grossSF if unknown
+            sf = grossSF;
         }
-        currentComponent.square_footage = Math.round(newSF);
+        component.square_footage = Math.round(sf);
     });
 }
 
@@ -234,214 +240,68 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-6 gap-4')
-        .style('height', '350px');
-    const schemeData = state.currentData.schemes || [];
+        .style('height', '180px');
 
-    const schemeCards = schemeGrid.selectAll('.scheme-card')
-        .data(schemeData, d => d.name)
+    // Five floor cards (1-5)
+    const floorCardsData = [1, 2, 3, 4, 5];
+    const floorCards = schemeGrid.selectAll('.floor-card')
+        .data(floorCardsData)
         .join('div')
-        .attr('class', d => `scheme-card bg-white relative rounded-lg overflow-hidden shadow-md cursor-pointer h-full ${state.selectedSchemeName === d.name ? 'ring-4 ring-red-500' : 'border border-gray-200'}`)
+        .attr('class', 'floor-card rounded-lg shadow-md border border-gray-200 h-full flex flex-col cursor-pointer')
+        .style('background-color', d => {
+            const total = state.numFloors || 1;
+            const shelled = Math.min(state.shelledFloorsCount || 0, total);
+            const finished = Math.max(0, total - shelled);
+            return d <= finished ? '#22c55e' : (d <= total ? '#f59e0b' : '#ef4444');
+        })
         .on('click', (event, d) => {
-            state.updatePreviousSquareFootage();
-            state.selectedSchemeName = d.name;
-            state.activePhases = [1];
-            state.currentScheme = JSON.parse(JSON.stringify(d));
-            
-            // Re-merge initialTargetValues to ensure they are present
-            state.currentScheme.costOfWork.forEach(component => {
-                const targetValueData = state.originalData.initialTargetValues.find(tv => tv.name === component.name);
-                if (targetValueData) {
-                    component.target_value = Number(targetValueData.target_value) || 0;
-                    component.benchmark_low = Number(targetValueData.benchmark_low) || 0;
-                    component.benchmark_high = Number(targetValueData.benchmark_high) || 0;
-                } else {
-                    component.target_value = 0;
-                    component.benchmark_low = 0;
-                    component.benchmark_high = 0;
-                }
-            });
-            
+            state.numFloors = d;
+            state.shelledFloorsCount = Math.min(state.shelledFloorsCount || 0, state.numFloors);
             updateProgramSF();
-            // Ensure Overall Square Footage field loads the scheme's GSF on selection
-            state.currentData.grossSF = d.grossSF || 0;
             render();
             renderProgramEstimate();
         });
 
-    schemeCards.append('img')
-        .attr('src', d => d.image)
-        .attr('alt', d => d.name)
-        .attr('class', 'w-full object-cover')
-        .style('height', '40%');
-    const contentContainer = schemeCards.append('div')
-        .attr('class', 'p-2 bg-white h-2/5 flex flex-col justify-between');
-    contentContainer.append('h4')
-        .attr('class', 'font-semibold text-base text-gray-800 mb-1')
-        .text(d => d.name);
-    contentContainer.append('p')
-        .attr('class', 'text-sm text-gray-600 mb-2 leading-tight')
-        .html(d => d.description);
-    const statsContainer = contentContainer.append('div')
-        .attr('class', 'text-sm text-gray-700');
-    statsContainer.append('div')
-        .attr('class', 'mb-1')
-        .html(d => `<strong>Floors:</strong> ${d.floors}<br><strong>Total SF:</strong> ${d.grossSF.toLocaleString()}`);
+    floorCards.append('div')
+        .attr('class', 'p-2 text-center font-semibold text-white')
+        .text(d => `Floor ${d}`);
 
-    // Add Shell Control Card (Column 5)
+    // Sixth card for shelled floors count
     const shellCard = schemeGrid.append('div')
         .attr('class', 'bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 h-full flex flex-col');
-    
-    // Header with title
-    const shellHeader = shellCard.append('div')
-        .attr('class', 'bg-gray-100 p-2 flex items-center justify-center border-b border-gray-200')
-        .style('height', '50px');
-    
-    shellHeader.append('h4')
-        .attr('class', 'font-semibold text-sm text-gray-800 text-center')
-        .text('Shell a Floor?');
-    
-    // Building visualization container
-    const buildingContainer = shellCard.append('div')
-        .attr('class', 'flex-grow flex')
-        .style('height', '300px');
 
-    if (state.currentScheme.phases > 1) {
-        // Multi-phase layout: side-by-side columns
-        state.activePhases.forEach((phase, phaseIndex) => {
-            // Use custom phase name if available, otherwise default to "Phase X"
-            const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[phase-1] 
-                ? state.currentScheme.phaseNames[phase-1] 
-                : `Phase ${phase}`;
-            
-            const phaseColumn = buildingContainer.append('div')
-                .attr('class', 'flex-1 flex flex-col border-r border-gray-300')
-                .style('border-right', phaseIndex === state.activePhases.length - 1 ? 'none' : '1px solid #d1d5db');
-            
-            // Phase header
-            phaseColumn.append('div')
-                .attr('class', 'bg-gray-50 border-b border-gray-300 p-1 text-center')
-                .style('height', '30px')
-                .append('div')
-                .attr('class', 'text-xs font-semibold text-gray-700')
-                .text(phaseName);
-            
-            // Get floors for this phase and sort them (top floor first)
-            const floorsInPhase = state.currentScheme.floorData
-                .filter(f => f.phase === phase)
-                .sort((a, b) => b.floor - a.floor);
-            
-            // Calculate height for each floor rectangle (subtract header height)
-            const availableHeight = 270; // 300px - 30px header
-            const floorHeight = floorsInPhase.length > 0 ? availableHeight / floorsInPhase.length : availableHeight;
-            
-            // Create floor rectangles for this phase
-            floorsInPhase.forEach((floor, floorIndex) => {
-                const floorRect = phaseColumn.append('div')
-                    .attr('class', 'border-b border-gray-300 flex items-center justify-center cursor-pointer transition-colors duration-200 hover:opacity-80')
-                    .style('height', `${floorHeight}px`)
-                    .style('background-color', floor.shelled ? '#ef4444' : '#22c55e') // Red for shelled, green for non-shelled
-                    .style('border-bottom', floorIndex === floorsInPhase.length - 1 ? 'none' : '1px solid #d1d5db')
-                    .on('click', function() {
-                        floor.shelled = !floor.shelled;
-                        updateProgramSF();
-                        render();
-                        renderProgramEstimate();
-                    });
-                
-                floorRect.append('div')
-                    .attr('class', 'text-white font-semibold text-xs text-center drop-shadow-sm')
-                    .text(`Floor ${floor.floor}`);
-            });
+    shellCard.append('div')
+        .attr('class', 'bg-gray-100 p-2 text-center font-semibold text-gray-800 border-b border-gray-200')
+        .text('Shelled Floors');
+
+    const shellControls = shellCard.append('div')
+        .attr('class', 'flex-1 flex items-center justify-center gap-2');
+
+    shellControls.append('button')
+        .attr('class', 'px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 transition')
+        .text('-')
+        .on('click', () => {
+            state.shelledFloorsCount = Math.max(0, (state.shelledFloorsCount || 0) - 1);
+            updateProgramSF();
+            render();
+            renderProgramEstimate();
         });
-    } else {
-        // Single phase layout: single column (original behavior)
-        const singleColumn = buildingContainer.append('div')
-            .attr('class', 'flex-1 flex flex-col');
-        
-        // Get all floors and sort them (top floor first)
-        const allFloors = state.currentScheme.floorData
-            .filter(f => state.activePhases.includes(f.phase))
-            .sort((a, b) => b.floor - a.floor);
-        
-        // Calculate height for each floor rectangle
-        const floorHeight = allFloors.length > 0 ? 300 / allFloors.length : 300;
-        
-        // Create floor rectangles
-        allFloors.forEach((floor, floorIndex) => {
-            const floorRect = singleColumn.append('div')
-                .attr('class', 'border-b border-gray-300 flex items-center justify-center cursor-pointer transition-colors duration-200 hover:opacity-80')
-                .style('height', `${floorHeight}px`)
-                .style('background-color', floor.shelled ? '#ef4444' : '#22c55e') // Red for shelled, green for non-shelled
-                .style('border-bottom', floorIndex === allFloors.length - 1 ? 'none' : '1px solid #d1d5db')
-                .on('click', function() {
-                    floor.shelled = !floor.shelled;
-                    updateProgramSF();
-                    render();
-                    renderProgramEstimate();
-                });
-            
-            floorRect.append('div')
-                .attr('class', 'text-white font-semibold text-xs text-center drop-shadow-sm')
-                .text(`Floor ${floor.floor}`);
+
+    shellControls.append('div')
+        .attr('class', 'text-lg font-semibold text-gray-800 w-8 text-center')
+        .text(() => `${state.shelledFloorsCount || 0}`);
+
+    shellControls.append('button')
+        .attr('class', 'px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 transition')
+        .text('+')
+        .on('click', () => {
+            state.shelledFloorsCount = Math.min(state.numFloors || 1, (state.shelledFloorsCount || 0) + 1);
+            updateProgramSF();
+            render();
+            renderProgramEstimate();
         });
-    }
 
-    // Add Phase Control Card (Column 6) - only if multi-phase
-    if (state.currentScheme.phases > 1) {
-        const phaseCard = schemeGrid.append('div')
-            .attr('class', 'bg-white rounded-lg overflow-hidden shadow-md border border-gray-200 h-full flex flex-col');
-        
-        phaseCard.append('div')
-            .attr('class', 'bg-blue-100 h-[40%] flex items-center justify-center')
-            .append('div')
-            .attr('class', 'text-blue-700 font-bold text-xl')
-            .text('📋');
-        
-        const phaseContent = phaseCard.append('div')
-            .attr('class', 'p-3 flex flex-col justify-between h-[60%]');
-        
-        phaseContent.append('h4')
-            .attr('class', 'font-semibold text-base text-gray-800 mb-2')
-            .text('Active Phases');
-        
-        const phasesContainer = phaseContent.append('div')
-            .attr('class', 'flex flex-col space-y-2 flex-grow');
-
-        for (let i = 1; i <= state.currentScheme.phases; i++) {
-            const checkboxWrapper = phasesContainer.append('div')
-                .attr('class', 'flex items-center');
-
-            checkboxWrapper.append('input')
-                .attr('type', 'checkbox')
-                .attr('id', `phase-${i}`)
-                .attr('class', 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500')
-                .property('checked', state.activePhases.includes(i))
-                .on('change', function(event) {
-                    const phaseNum = i;
-                    const isChecked = event.target.checked;
-                    if (isChecked) {
-                        if (!state.activePhases.includes(phaseNum)) state.activePhases.push(phaseNum);
-                    } else {
-                        const phaseIndex = state.activePhases.indexOf(phaseNum);
-                        if (phaseIndex > -1) state.activePhases.splice(phaseIndex, 1);
-                    }
-                    state.activePhases.sort();
-                    updateProgramSF();
-                    render();
-                    renderProgramEstimate();
-                });
-            
-            // Use custom phase name if available, otherwise default to "Phase X"
-            const phaseName = state.currentScheme.phaseNames && state.currentScheme.phaseNames[i-1] 
-                ? state.currentScheme.phaseNames[i-1] 
-                : `Phase ${i}`;
-            
-            checkboxWrapper.append('label')
-                .attr('for', `phase-${i}`)
-                .attr('class', 'ml-2 text-sm text-gray-900')
-                .text(phaseName);
-        }
-    }
+    // (Removed floor visualization under shell controls per request)
 
     // Overall Square Footage input above the main table
     const overallSFContainer = mainContainer.append('div')
@@ -480,24 +340,26 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
                     'Scale',
                     'Keep As-Is'
                 );
-                if (confirmed) {
-                    state.currentScheme.costOfWork.forEach(component => {
-                        const currentSF = Number(component.square_footage) || 0;
-                        component.square_footage = Math.round(currentSF * scaleRatio);
-                    });
-                    // Re-render to reflect scaled values
-                    render();
-                    renderProgramEstimate();
-                    return;
-                }
+                // Whether scaling or keeping as-is, recompute based on the new inputs
+                updateProgramSF();
+                render();
+                renderProgramEstimate();
+                return;
             }
             // Set display with unit when not re-rendering above
             this.value = `${utils.formatNumber(newGross)} sf`;
+            // Always recompute in case oldGross was 0 previously
+            updateProgramSF();
+            render();
+            renderProgramEstimate();
         })
         .on('blur', function() {
             const numeric = Number(String(this.value).replace(/,/g, '')) || 0;
             state.currentData.grossSF = numeric;
             this.value = `${utils.formatNumber(numeric)} sf`;
+            updateProgramSF();
+            render();
+            renderProgramEstimate();
         });
 
     const tableContainer = mainContainer.append('div')

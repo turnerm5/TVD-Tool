@@ -80,13 +80,6 @@ export function loadData(data, fileName = 'Sample Data') {
         return;
     }
     
-    // Select baseline scheme: prefer 'Predesign', else first available
-    const predesignScheme = (data.schemes && data.schemes.find(s => s.name === 'Predesign')) || (Array.isArray(data.schemes) ? data.schemes[0] : null);
-    if (!predesignScheme || !predesignScheme.costOfWork) {
-        alert("Invalid JSON format. Must contain at least one scheme with costOfWork data.");
-        return;
-    }
-    
     // Validate that initialTargetValues exists
     if (!data.initialTargetValues || !Array.isArray(data.initialTargetValues)) {
         alert("Invalid JSON format. Must contain 'initialTargetValues' array.");
@@ -105,70 +98,39 @@ export function loadData(data, fileName = 'Sample Data') {
 
     state.lockedCostOfWork = new Set();
 
-    // Lock components based on baseline scheme data
-    const processedPredesignScheme = (processedData.schemes && processedData.schemes.find(s => s.name === 'Predesign')) || (Array.isArray(processedData.schemes) ? processedData.schemes[0] : null);
-    if (processedPredesignScheme && processedPredesignScheme.costOfWork) {
-        processedPredesignScheme.costOfWork.forEach(component => {
-            const sf = Array.isArray(component.square_footage) ? component.square_footage.reduce((a, b) => a + b, 0) : component.square_footage;
-            if (component.target_value === 0 || sf === 0) {
-                const lockKey = `phase2-${component.name}`;
-                state.lockedCostOfWork.add(lockKey);
-            }
-        });
-    }
-
+    // Initialize state containers
     state.originalData = JSON.parse(JSON.stringify(processedData));
-    state.originalData.grossSF = predesignScheme.grossSF || 0;
     state.currentData = processedData;
-    state.currentData.grossSF = predesignScheme.grossSF || 0;
-    state.selectedSchemeName = predesignScheme.name || utils.getBaselineName();
+    
+    // Initialize grossSF default to 55,000 if not provided
+    state.originalData.grossSF = Number(state.originalData.grossSF) || 55000;
+    state.currentData.grossSF = Number(state.currentData.grossSF) || 55000;
+    
+    // Initialize new floor model defaults
+    state.numFloors = 1;
+    state.shelledFloorsCount = 0;
+    
     // Load interiors target values into state for editing in Interiors view
     state.interiors.targetValues = Array.isArray(processedData.interiorTargetValues)
         ? JSON.parse(JSON.stringify(processedData.interiorTargetValues))
         : [];
     
-    // Initialize the current scheme with the baseline scheme + target values
-    state.currentScheme = JSON.parse(JSON.stringify(predesignScheme));
-    
-    // Merge initialTargetValues into the current scheme
-    state.currentScheme.costOfWork.forEach(component => {
-        const targetValueData = processedData.initialTargetValues.find(tv => tv.name === component.name);
-        if (targetValueData) {
-            component.target_value = Number(targetValueData.target_value) || 0;
-            component.benchmark_low = Number(targetValueData.benchmark_low) || 0;
-            component.benchmark_high = Number(targetValueData.benchmark_high) || 0;
-        } else {
-            component.target_value = 0;
-            component.benchmark_low = 0;
-            component.benchmark_high = 0;
-        }
-
-        // If square_footage is an array, sum it for the initial value.
-        if (Array.isArray(component.square_footage)) {
-            component.square_footage = component.square_footage.reduce((a, b) => a + b, 0);
-        }
-    });
+    // Initialize the current scheme from target values (no predefined schemes)
+    state.currentScheme = {
+        name: 'Custom',
+        phases: 1,
+        floorData: [],
+        costOfWork: processedData.initialTargetValues.map(tv => ({
+            name: tv.name,
+            square_footage: 0,
+            target_value: Number(tv.target_value) || 0,
+            benchmark_low: Number(tv.benchmark_low) || 0,
+            benchmark_high: Number(tv.benchmark_high) || 0
+        }))
+    };
     
     // Calculate indirect cost percentages now that originalData is set
     state.calculateIndirectCostPercentages();
-    
-    // Set shelled floors based on the baseline scheme's floorData
-    if (predesignScheme.floorData && Array.isArray(predesignScheme.floorData)) {
-        // Assuming single phase for initial setup. Phased logic will be handled elsewhere.
-        state.shelledFloors = predesignScheme.floorData
-            .filter(f => f.phase === 1)
-            .map(f => f.shelled);
-    } else {
-        // Fallback for old format
-        const floorCount = predesignScheme.floors || 0;
-        const shelledFloorsCount = predesignScheme.shelledFloors || 0; // Legacy property
-        state.shelledFloors = new Array(floorCount).fill(false);
-        for (let i = floorCount - shelledFloorsCount; i < floorCount; i++) {
-            if (i >= 0 && i < floorCount) {
-                state.shelledFloors[i] = true;
-            }
-        }
-    }
 
     // Initialize active phases
     state.activePhases = [1];
@@ -181,7 +143,7 @@ export function loadData(data, fileName = 'Sample Data') {
         updateProgramSF();
     }
 
-    // Now that C Interiors is adjusted, set the initial baseline for all components
+    // Set the initial baseline for all components
     state.updatePreviousSquareFootage();
             
     console.log('Data loaded. Original Gross SF:', state.originalData.grossSF, 'Current Gross SF:', state.currentData.grossSF);

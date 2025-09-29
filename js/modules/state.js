@@ -34,6 +34,9 @@ export const state = {
     selectedSchemeName: 'Predesign', // The name of the scheme card that should be highlighted
     previousSquareFootage: {}, // Track previous square footage values for showing changes
     predesignDeleted: false, // Track if the Predesign scheme has been deleted
+    // New floor-based program inputs
+    numFloors: 1,
+    shelledFloorsCount: 0,
 
     /**
      * Stores current square footage values as the new "previous" values for change tracking.
