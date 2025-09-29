@@ -12,7 +12,22 @@
 
 /**
  * @file chart-interiors.js
- * @description Placeholder renderer for the Interiors view.
+ * @description Renders the Interiors experience for Phase 2, including:
+ *   - Editable Values table bound to `state.interiors.targetValues`
+ *   - Classroom Mix inputs and derived calculations (NSF/GSF, costs, totals)
+ *   - Donut charts summarizing mix by space and by cost
+ *   - Read-only graph comparing Current Target vs. Classroom Mix with benchmark indicators
+ *
+ * Data dependencies:
+ *   - `state.currentData` for `grossSF`, `benchmarks`, and `interiorMixSchemes`
+ *   - `state.currentScheme.costOfWork` for current component target values and benchmarks
+ *   - `state.interiors.targetValues` for per-room-type $/SF categories
+ *   - `state.interiors.mixSF` for user-entered SF by room type
+ *
+ * Rendering notes:
+ *   - This module derives visuals from `state` and DOM. User interactions update `state`
+ *     and re-render dependent sections as needed (without global side-effects beyond state).
+ *   - Inputs validate and sanitize on the fly; values are formatted on blur for a clean UI.
  */
 
 import * as dom from './dom.js';
@@ -22,6 +37,7 @@ import * as ui from './ui.js';
 
 /**
  * Renders a simple placeholder inside the Interiors view.
+ * Currently a no-op with a container guard; retained for API parity and extensibility.
  */
 export function renderPlaceholder() {
     const container = dom.interiorsView;
@@ -29,8 +45,12 @@ export function renderPlaceholder() {
 }
 
 /**
- * Renders the Values table for Interiors using state.interiors.targetValues.
- * Flexible to any number of room types and value keys.
+ * Renders the editable Values table for Interiors using `state.interiors.targetValues`.
+ * - Dynamically lists each room type (by `name`) and all numeric keys (e.g., categories like "C Interiors").
+ * - Each input accepts currency-like typing, stores a sanitized number in state on commit, and formats on blur.
+ * - Keyboard UX: Enter/ArrowUp/ArrowDown commits and moves vertically; Tab cycles within the table.
+ *
+ * This mutates `state.interiors.targetValues` in-place but does not itself trigger other view renders.
  */
 export function renderValuesTable() {
     if (!dom.interiorsValues) return;
@@ -88,21 +108,21 @@ export function renderValuesTable() {
                 this.select();
             })
             .on('input', function(event, entry) {
-                const current = parseNumberFromInput(this.value);
+                const current = utils.parseNumberFromInput(this.value);
                 const isValid = !isNaN(current) && isFinite(current) && current >= 0;
                 this.classList.toggle('border-red-500', !isValid);
                 this.classList.toggle('ring-red-500', !isValid);
             })
             .on('change', function(event, entry) {
                 const [category] = entry;
-                const newNumeric = parseNumberFromInput(this.value);
+                const newNumeric = utils.parseNumberFromInput(this.value);
                 const roomObj = state.interiors.targetValues.find(r => r.name === room.name);
                 if (roomObj) {
                     roomObj[category] = newNumeric;
                 }
             })
             .on('blur', function(event, entry) {
-                const cleaned = parseNumberFromInput(this.value);
+                const cleaned = utils.parseNumberFromInput(this.value);
                 this.value = utils.formatCurrency(cleaned || 0);
                 this.classList.remove('border-red-500');
                 this.classList.remove('ring-red-500');
@@ -114,7 +134,7 @@ export function renderValuesTable() {
                     // Commit current value to state
                     const roomName = this.dataset.room;
                     const category = this.dataset.category;
-                    const cleaned = parseNumberFromInput(this.value);
+                    const cleaned = utils.parseNumberFromInput(this.value);
                     const roomObj = state.interiors.targetValues.find(r => r.name === roomName);
                     if (roomObj && category) {
                         roomObj[category] = cleaned;
@@ -135,7 +155,7 @@ export function renderValuesTable() {
                     // Commit and cycle focus within the table
                     const roomName = this.dataset.room;
                     const category = this.dataset.category;
-                    const cleaned = parseNumberFromInput(this.value);
+                    const cleaned = utils.parseNumberFromInput(this.value);
                     const roomObj = state.interiors.targetValues.find(r => r.name === roomName);
                     if (roomObj && category) {
                         roomObj[category] = cleaned;
@@ -159,21 +179,36 @@ export function renderValuesTable() {
     });
 }
 
+/**
+ * Converts an arbitrary string to a CSS-safe token by replacing unsafe characters with underscores.
+ * @param {string} str
+ * @returns {string}
+ */
 function cssSafe(str) {
     return String(str).replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
-function parseNumberFromInput(value) {
-    if (typeof value !== 'string') return 0;
-    const cleaned = value.replace(/[$,\s]/g, '');
-    const num = Number(cleaned);
-    return isNaN(num) ? 0 : num;
-}
+/**
+ * Parses a numeric value from a currency-like input string.
+ * Strips currency symbols, commas, and whitespace; returns 0 when parsing fails.
+ * @param {string} value
+ * @returns {number}
+ */
+// Moved to utils.parseNumberFromInput for reuse across modules
 
 /**
  * Renders the Classroom Mix inputs and calculations in the middle panel.
- * - Inputs: per classroom type SF
- * - Table: costs and % of GSF/NSF per type, plus totals
+ * UI Sections:
+ * - Scheme buttons: quick-apply presets to populate `state.interiors.mixSF`
+ * - Overall SF input: edits `state.currentData.grossSF`
+ * - Per-room-type SF inputs: control `state.interiors.mixSF`
+ * - Calculation table: per-type SF, %GSF, category costs, and totals
+ * - Donut charts: % by Space and % by Cost
+ *
+ * Notes:
+ * - If a "Circulation/Support" row exists and is flagged `includeInNSF === false`, it is auto-filled
+ *   to absorb the difference between total GSF and the sum of program SF.
+ * - Building Efficiency is computed as NSF / GSF using only types with `includeInNSF !== false`.
  */
 export function renderClassroomMix() {
     if (!dom.interiorsBreakouts) return;
@@ -195,6 +230,7 @@ export function renderClassroomMix() {
         .attr('class', d => `scheme-btn px-3 py-1.5 text-xs rounded-md font-medium border ${state.interiors.selectedMixScheme === d.key ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`)
         .text(d => d.label)
         .on('click', (event, d) => {
+            // Build a complete `mixSF` map from the selected preset, defaulting missing entries to 0
             const roomTypes = state.interiors?.targetValues || [];
             const next = {};
             roomTypes.forEach(rt => {
@@ -202,6 +238,7 @@ export function renderClassroomMix() {
             });
             state.interiors.mixSF = next;
             state.interiors.selectedMixScheme = d.key;
+            // Re-render dependent visuals that rely on the current Mix
             renderClassroomMix();
             renderInteriorsGraph();
         });
@@ -225,17 +262,20 @@ export function renderClassroomMix() {
         .attr('pattern', '[0-9,]*')
         .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
         .attr('value', `${utils.formatNumber(state.currentData?.grossSF || 0)} sf`)
+        // Show raw numeric for easier editing and select text
         .on('focus', function() {
             const current = Number(state.currentData?.grossSF || 0);
             this.value = current.toString();
             this.select();
         })
+        // Live-validate numeric characters only; mark visibly if invalid
         .on('input', function() {
             const cleaned = this.value.replace(/[^0-9]/g, '');
             const isValid = cleaned === '' || !isNaN(Number(cleaned));
             this.classList.toggle('border-red-500', !isValid);
             this.classList.toggle('ring-red-500', !isValid);
         })
+        // Commit to state and re-render dependent sections
         .on('change', function() {
             const cleaned = this.value.replace(/[^0-9]/g, '');
             const numeric = Number(cleaned) || 0;
@@ -245,6 +285,7 @@ export function renderClassroomMix() {
             renderMixTable();
             renderInteriorsGraph();
         })
+        // Format on blur and clear invalid styling
         .on('blur', function() {
             const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
             this.value = `${utils.formatNumber(numeric)} sf`;
@@ -278,17 +319,20 @@ export function renderClassroomMix() {
             const v = state.interiors.mixSF[d.name] || 0;
             return `${Number(v).toLocaleString('en-US')} sf`;
         })
+        // Show raw numeric for easier editing and select text
         .on('focus', function(event, d) {
             const current = Number(state.interiors.mixSF[d.name] || 0) || 0;
             this.value = current.toString();
             this.select();
         })
+        // Live-validate numeric characters only; mark visibly if invalid
         .on('input', function() {
             const cleaned = this.value.replace(/[^0-9]/g, '');
             const isValid = cleaned === '' || !isNaN(Number(cleaned));
             this.classList.toggle('border-red-500', !isValid);
             this.classList.toggle('ring-red-500', !isValid);
         })
+        // Commit to state and refresh dependent visuals
         .on('change', function(event, d) {
             const cleaned = this.value.replace(/[^0-9]/g, '');
             const numeric = Number(cleaned) || 0;
@@ -297,12 +341,14 @@ export function renderClassroomMix() {
             renderMixTable();
             renderInteriorsGraph();
         })
+        // Format on blur and clear invalid styling
         .on('blur', function(event, d) {
             const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
             this.value = `${numeric.toLocaleString('en-US')} sf`;
             this.classList.remove('border-red-500');
             this.classList.remove('ring-red-500');
         })
+        // On Tab, commit and wrap focus among inputs for smooth data entry
         .on('keydown', function(event, d) {
             if (event.key === 'Tab') {
                 const cleaned = this.value.replace(/[^0-9]/g, '');
@@ -331,7 +377,7 @@ export function renderClassroomMix() {
     const donutsContainer = container.append('div').attr('id', 'interiors-donuts');
 
     function computeNSF() {
-        // NSF is the sum of SF for room types flagged includeInNSF
+        // NSF is the sum of SF for room types flagged includeInNSF (default true)
         return roomTypes.reduce((sum, rt) => {
             const include = (rt.includeInNSF !== false);
             const sf = Number(state.interiors.mixSF[rt.name]) || 0;
@@ -370,7 +416,8 @@ export function renderClassroomMix() {
             };
         });
 
-        // Merge auto-calculated circulation SF into the Circulation/Support row, if present
+        // Merge auto-calculated circulation/support SF into its row, if present,
+        // absorbing the gap between total GSF and the sum of program SF.
         const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false) && /circulation|support/i.test(rt.name));
         const circulationName = circulationRoomType ? circulationRoomType.name : null;
         const programTotalSF = rows
@@ -443,7 +490,7 @@ export function renderClassroomMix() {
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.equipmentCost));
         tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.totalCost));
 
-        // Totals row with highlighting
+        // Totals row with highlighting reflecting Building Efficiency thresholds
         const tfoot = table.append('tfoot');
 
         // Building Efficiency is NSF / GSF where NSF sums only includeInNSF room types
@@ -503,6 +550,7 @@ export function renderClassroomMix() {
             .append('div')
             .attr('class', 'mt-4 grid grid-cols-1 md:grid-cols-2 gap-4');
 
+        // Compute available width for responsive donut sizing; default to 400 if unavailable
         const widthAvailable = donutsContainer.node() ? donutsContainer.node().clientWidth : 400;
         const palette = (d3.schemeTableau10 || d3.schemeCategory10);
         const color = d3.scaleOrdinal()
@@ -529,8 +577,11 @@ export function renderClassroomMix() {
 }
 
 /**
- * Renders a read-only slider-like graph for Interiors, Services, Equipment
- * showing current target vs. classroom mix blended targets with benchmark indicators.
+ * Renders a read-only, slider-like graph for the three Interiors-related categories
+ * (C Interiors, D Services, E Equipment and Furnishings), comparing:
+ *   - Current target values (light gray bar)
+ *   - Blended targets computed from the current Classroom Mix (dark bar)
+ * Also draws benchmark ranges and per-project indicators with hover tooltips.
  */
 export function renderInteriorsGraph() {
     if (!dom.interiorsGraph) return;
@@ -562,6 +613,7 @@ export function renderInteriorsGraph() {
     const blendedByCategory = {};
     categories.forEach(cat => {
         if (totalMixSf > 0) {
+            // Weighted average $/SF by category based on Mix SF weights
             const weighted = roomTypes.reduce((sum, rt) => sum + ((Number(state.interiors.mixSF[rt.name]) || 0) * (Number(rt[cat]) || 0)), 0);
             blendedByCategory[cat] = weighted / totalMixSf;
         } else {
@@ -589,6 +641,7 @@ export function renderInteriorsGraph() {
 
     const chartHeight = container.node().clientHeight;
 
+    // Allow external override via state.yDomainMax; otherwise fit data (including benchmarks)
     const yDomainMax = state.yDomainMax || d3.max([
         d3.max(data, d => Math.max(d.currentTarget, d.blendedTarget, d.benchmark_high)),
         0
@@ -651,6 +704,7 @@ export function renderInteriorsGraph() {
 
     const benchProjects = state.currentData?.benchmarks || [];
 
+    // For each column, render indicators for benchmarks that include this component
     svg.each(function(componentData) {
         const s = d3.select(this);
         const indicators = s.selectAll('.benchmark-indicator-group')
@@ -695,6 +749,7 @@ export function renderInteriorsGraph() {
     actions
         .attr('class', 'mt-2');
 
+    // Disable action button until there is a non-zero Mix total
     const disabled = totalMixSf === 0;
     actions.html('');
     actions.append('button')
@@ -718,7 +773,7 @@ export function renderInteriorsGraph() {
             // Capture current total Cost of Work before updates
             const preCow = utils.calculateTotalCostOfWork(components);
 
-            // Apply blended targets to the three categories
+            // Apply blended targets to the three target categories
             components.forEach(c => {
                 if (toUpdate.includes(c.name)) {
                     c.target_value = Math.max(0, Number(blendedByCategory[c.name]) || 0);
@@ -740,7 +795,7 @@ export function renderInteriorsGraph() {
                     const others = components.filter(c => !toUpdate.includes(c.name) && Number(c.square_footage) > 0);
                     const othersCow = others.reduce((sum, c) => sum + (Number(c.target_value) * Number(c.square_footage)), 0);
                     if (othersCow > 0) {
-                        // Scale other categories proportionally to absorb delta
+                        // Scale other categories proportionally to absorb delta while clamping at zero
                         let factor = (othersCow - deltaCow) / othersCow;
                         if (!isFinite(factor)) factor = 1;
                         if (factor < 0) factor = 0; // clamp to zero to avoid negatives
@@ -760,6 +815,10 @@ export function renderInteriorsGraph() {
         });
 
 
+    /**
+     * Shows a tooltip with benchmark project details for a specific component column.
+     * Prefers component-specific image when available; falls back to the project image.
+     */
     function showBenchmarkTooltipForInteriors(event, benchmarkData, componentData) {
         hideBenchmarkTooltipForInteriors();
         const benchmarkComponent = benchmarkData.costOfWork.find(c => c.name === componentData.name);
@@ -798,6 +857,9 @@ export function renderInteriorsGraph() {
         tooltip.style('left', left + 'px').style('top', top + 'px');
     }
 
+    /**
+     * Removes any active Interiors benchmark tooltip from the DOM.
+     */
     function hideBenchmarkTooltipForInteriors() {
         d3.select('.benchmark-tooltip').remove();
     }
@@ -805,6 +867,17 @@ export function renderInteriorsGraph() {
 
 
 // Draw a single donut chart with legend
+/**
+ * Draws a single donut chart with a simple legend.
+ * Displays a neutral placeholder when `items` is empty or when the total is 0.
+ * @param {d3.Selection} containerSel - Parent selection to append into
+ * @param {{name:string,value:number}[]} items - Slice data items
+ * @param {string} title - Chart title text
+ * @param {number} radius - Outer radius (px)
+ * @param {number} innerRadius - Inner radius (px)
+ * @param {number} size - SVG width/height (px)
+ * @param {d3.ScaleOrdinal<string,string>} color - Ordinal color scale keyed by item name
+ */
 function drawDonut(containerSel, items, title, radius, innerRadius, size, color) {
     const total = d3.sum(items, d => d.value);
     const pie = d3.pie().sort(null).value(d => d.value);
@@ -825,7 +898,9 @@ function drawDonut(containerSel, items, title, radius, innerRadius, size, color)
         .attr('transform', `translate(${Math.floor(size / 2)},${Math.floor(size / 2)})`);
 
     if (!items || items.length === 0 || total <= 0) {
-        // Placeholder donut: four equal slices, white fill with light gray dotted outlines and placeholder % labels
+        // Placeholder donut:
+        // - Four equal slices with white fill and light gray dotted outlines
+        // - Centered helper text encouraging users to enter room SF
         const placeholderData = [20, 40, 30, 10];
         const placeholderPie = d3.pie().sort(null);
         const placeholderArc = d3.arc().innerRadius(innerRadius).outerRadius(radius);

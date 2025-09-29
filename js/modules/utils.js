@@ -66,6 +66,23 @@ export const formatCurrencySmall = (d) => {
 };
 
 /**
+ * Parses a numeric value from a currency-like input string.
+ * Removes currency symbols, commas, and whitespace; returns 0 if parsing fails.
+ * Examples:
+ *  - "$1,234.50" -> 1234.5
+ *  - " 2 500 " -> 2500
+ *  - "abc" -> 0
+ * @param {string} value
+ * @returns {number}
+ */
+export function parseNumberFromInput(value) {
+    if (typeof value !== 'string') return 0;
+    const cleaned = value.replace(/[$,\s]/g, '');
+    const num = Number(cleaned);
+    return isNaN(num) ? 0 : num;
+}
+
+/**
  * Formats a number with commas as thousands separators.
  * @param {number} num - The number to format.
  * @returns {string} The formatted number string.
