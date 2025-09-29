@@ -370,20 +370,38 @@ export function renderClassroomMix() {
             };
         });
 
-        // Add Circulation row (calculated): GrossSF - sum of all program SF
-        const programTotalSF = rows.reduce((sum, r) => sum + r.sf, 0);
+        // Merge auto-calculated circulation SF into the Circulation/Support row, if present
+        const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false) && /circulation|support/i.test(rt.name));
+        const circulationName = circulationRoomType ? circulationRoomType.name : null;
+        const programTotalSF = rows
+            .filter(r => r.name !== circulationName)
+            .reduce((sum, r) => sum + r.sf, 0);
         const circulationSF = Math.max(0, totalGSF - programTotalSF);
-        const circulationRow = {
-            name: 'Circulation',
-            sf: circulationSF,
-            interiorsCost: 0,
-            servicesCost: 0,
-            equipmentCost: 0,
-            totalCost: 0,
-            pctGSF: totalGSF > 0 ? (circulationSF / totalGSF) : 0,
-            pctNSF: null,
-            includeInNSF: false
-        };
+        const includeCirculation = totalGSF > 0;
+        if (circulationName) {
+            const idx = rows.findIndex(r => r.name === circulationName);
+            if (idx !== -1) {
+                const rateInteriors = Number(circulationRoomType['C Interiors'] || 0);
+                const rateServices = Number(circulationRoomType['D Services'] || 0);
+                const rateEquipment = Number(circulationRoomType['E Equipment and Furnishings'] || 0);
+                const newSf = includeCirculation ? circulationSF : 0;
+                const newInteriors = rateInteriors * newSf;
+                const newServices = rateServices * newSf;
+                const newEquipment = rateEquipment * newSf;
+                const newTotal = newInteriors + newServices + newEquipment;
+                rows[idx] = {
+                    ...rows[idx],
+                    sf: newSf,
+                    interiorsCost: newInteriors,
+                    servicesCost: newServices,
+                    equipmentCost: newEquipment,
+                    totalCost: newTotal,
+                    pctGSF: totalGSF > 0 ? (newSf / totalGSF) : 0,
+                    pctNSF: null,
+                    includeInNSF: false
+                };
+            }
+        }
 
         const totals = rows.reduce((acc, r) => {
             acc.sf += r.sf;
@@ -402,15 +420,17 @@ export function renderClassroomMix() {
         headerRow.append('th').attr('class', 'px-4 py-2').text('Classroom Type');
         headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('SF');
         headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('% GSF');
-        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('% NSF');
         headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Interiors');
         headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Services');
         headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Equipment');
         headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Total');
 
         const tbody = table.append('tbody');
+        const tableRows = includeCirculation && circulationName
+            ? rows
+            : rows.filter(r => r.name !== circulationName);
         const tr = tbody.selectAll('tr.mix-row')
-            .data([...rows, circulationRow], d => d.name)
+            .data(tableRows, d => d.name)
             .enter()
             .append('tr')
             .attr('class', 'bg-white border-b hover:bg-gray-50 mix-row');
@@ -418,36 +438,31 @@ export function renderClassroomMix() {
         tr.append('td').attr('class', 'px-4 py-2 text-gray-900').text(d => d.name);
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.sf.toLocaleString('en-US'));
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => `${(d.pctGSF * 100).toFixed(1)}%`);
-        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => (d.pctNSF === null ? '-' : `${(d.pctNSF * 100).toFixed(1)}%`));
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.interiorsCost));
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.servicesCost));
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.equipmentCost));
         tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.totalCost));
 
-        // Totals row with coverage highlighting
+        // Totals row with highlighting
         const tfoot = table.append('tfoot');
 
-        const coverage = totalGSF > 0 ? ((totals.sf + circulationSF) / totalGSF) : 0;
+        // Building Efficiency is NSF / GSF where NSF sums only includeInNSF room types
+        const buildingEfficiency = totalGSF > 0 ? (nsf / totalGSF) : 0;
         let highlightClass = 'bg-blue-50';
-        if (coverage >= 0.75 && coverage < 0.85) {
+        if (buildingEfficiency >= 0.75 && buildingEfficiency < 0.85) {
             highlightClass = 'bg-yellow-100';
-        } else if (coverage >= 0.85 && coverage <= 1.0) {
+        } else if (buildingEfficiency >= 0.85 && buildingEfficiency <= 1.0) {
             highlightClass = 'bg-orange-100';
-        } else if (coverage > 1.0) {
+        } else if (buildingEfficiency > 1.0) {
             highlightClass = 'bg-red-100';
         }
 
         const totalRow = tfoot.append('tr').attr('class', `${highlightClass} border-t`);
         totalRow.append('td').attr('class', 'px-4 py-2 font-bold text-blue-900').text('Total');
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => (totals.sf + circulationSF).toLocaleString('en-US'));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => totals.sf.toLocaleString('en-US'));
         totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => {
             const totalGSF = Number(state.currentData?.grossSF) || 0;
-            const pct = totalGSF > 0 ? ((totals.sf + circulationSF) / totalGSF) * 100 : 0;
-            return `${pct.toFixed(1)}%`;
-        });
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => {
-            const nsf = computeNSF();
-            const pct = nsf > 0 ? (totals.sf / nsf) * 100 : 0;
+            const pct = totalGSF > 0 ? (totals.sf / totalGSF) * 100 : 0;
             return `${pct.toFixed(1)}%`;
         });
         totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.interiorsCost));
@@ -455,20 +470,32 @@ export function renderClassroomMix() {
         totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.equipmentCost));
         totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.totalCost));
 
-        // Over-coverage or warning messages
-        if (coverage > 1.0) {
-            const overBy = totals.sf - totalGSF;
-            const overPct = (coverage - 1.0) * 100;
+        // Building Efficiency row (NSF / GSF)
+        const beRow = tfoot.append('tr').attr('class', 'border-t');
+        beRow.append('td').attr('class', 'px-4 py-2 font-bold text-blue-900').text('Building Efficiency');
+        beRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => {
+            const pct = buildingEfficiency * 100;
+            return `${pct.toFixed(1)}%`;
+        });
+        beRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text('-');
+        beRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text('-');
+        beRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text('-');
+        beRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text('-');
+        beRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text('-');
+
+        // Warnings tied to Building Efficiency
+        if (buildingEfficiency > 1.0) {
+            const overBy = Math.max(0, nsf - totalGSF);
+            const overPct = (buildingEfficiency - 1.0) * 100;
             messageContainer
                 .append('div')
                 .attr('class', 'text-sm text-red-600 flex items-center gap-1')
-                .html(`<span class="inline-block align-middle" style="font-size:1.1em;">&#9888;&#65039;</span> Entered classroom SF exceeds Gross SF by ${overBy.toLocaleString('en-US')} SF (${overPct.toFixed(1)}%).`);
-        } else if (coverage >= 0.75 && coverage <= 1.0) {
-            // Show warning for unrealistic building efficiency
+                .html(`<span class="inline-block align-middle" style="font-size:1.1em;">&#9888;&#65039;</span> Entered NSF exceeds Gross SF by ${overBy.toLocaleString('en-US')} SF (${overPct.toFixed(1)}%).`);
+        } else if (buildingEfficiency >= 0.75 && buildingEfficiency <= 1.0) {
             messageContainer
                 .append('div')
                 .attr('class', 'text-sm text-orange-600 flex items-center gap-1')
-                .html(`<span class="inline-block align-middle" style="font-size:1.1em;">&#9888;&#65039;</span> Warning: Building Efficiency is Unrealistic (Classroom SF is ${Math.round(coverage * 100)}% of Gross SF).`);
+                .html(`<span class="inline-block align-middle" style="font-size:1.1em;">&#9888;&#65039;</span> Warning: Building Efficiency is Unrealistic (Building Efficiency is ${Math.round(buildingEfficiency * 100)}%).`);
         }
 
         // Donut charts: % by Space and % by Cost

@@ -69,7 +69,7 @@ const sampleData = {
             "includeInNSF": true
         },
         {
-            "name": "Building Support",
+            "name": "Circulation and Support",
             "C Interiors": 10,
             "D Services": 200,
             "E Equipment and Furnishings": 5,
