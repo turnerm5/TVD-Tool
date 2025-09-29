@@ -145,7 +145,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('inputmode', 'numeric')
         .attr('pattern', '[0-9,]*')
         .attr('class', 'text-left program-table-input editable-input')
-        .attr('value', d => utils.formatSquareFootageWithChange(d.square_footage, d.name))
+        .attr('value', d => `${utils.formatNumber(Math.round(Number(d.square_footage) || 0))} sf`)
         .attr('data-phase', 'phase2')
         .attr('data-name', d => d.name)
         .on('focus', function(event, d) {
@@ -157,7 +157,8 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .on('blur', function(event, d) {
             const component = state.currentScheme.costOfWork.find(c => c.name === d.name);
             if (component) {
-                this.value = utils.formatSquareFootageWithChange(component.square_footage, component.name);
+                const numericValue = Math.round(Number(component.square_footage) || 0);
+                this.value = `${utils.formatNumber(numericValue)} sf`;
             }
         });
 
