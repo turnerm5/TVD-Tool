@@ -271,12 +271,13 @@ export async function takeSnapshot(state, ui, renderCallback) {
         return;
     }
     
-    const snapshotName = await ui.showModalDialog(
-        "Take Snapshot",
-        "Enter a name for this snapshot",
-        "Create Snapshot",
-        "Cancel"
-    );
+    const snapshotName = await ui.showDialog({
+        title: "Take Snapshot",
+        placeholder: "Enter a name for this snapshot",
+        confirmText: "Create Snapshot",
+        cancelText: "Cancel",
+        isConfirmation: false
+    });
     
     if (snapshotName) {
         const phase2CostOfWork = state.currentScheme.costOfWork;

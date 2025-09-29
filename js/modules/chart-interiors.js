@@ -210,6 +210,7 @@ export function renderValuesTable() {
  *   to absorb the difference between total GSF and the sum of program SF.
  * - Building Efficiency is computed as NSF / GSF using only types with `includeInNSF !== false`.
  */
+
 export function renderClassroomMix() {
     if (!dom.interiorsBreakouts) return;
     const container = d3.select(dom.interiorsBreakouts);
@@ -396,9 +397,12 @@ export function renderClassroomMix() {
         // Build rows data
         const rows = roomTypes.map(rt => {
             const sf = Number(state.interiors.mixSF[rt.name] || 0);
-            const interiorsCost = Number(rt['C Interiors'] || 0) * sf;
-            const servicesCost = Number(rt['D Services'] || 0) * sf;
-            const equipmentCost = Number(rt['E Equipment and Furnishings'] || 0) * sf;
+            const rateInteriors = Number(rt['C Interiors'] || 0);
+            const rateServices = Number(rt['D Services'] || 0);
+            const rateEquipment = Number(rt['E Equipment and Furnishings'] || 0);
+            const interiorsCost = rateInteriors * sf;
+            const servicesCost = rateServices * sf;
+            const equipmentCost = rateEquipment * sf;
             const totalCost = interiorsCost + servicesCost + equipmentCost;
             const pctGSF = totalGSF > 0 ? (sf / totalGSF) : 0;
             const includeInNSF = (rt.includeInNSF !== false);
@@ -406,6 +410,10 @@ export function renderClassroomMix() {
             return {
                 name: rt.name,
                 sf,
+                // store both rates ($/SF) and derived costs for reuse in UI and donuts
+                rateInteriors,
+                rateServices,
+                rateEquipment,
                 interiorsCost,
                 servicesCost,
                 equipmentCost,
@@ -439,6 +447,9 @@ export function renderClassroomMix() {
                 rows[idx] = {
                     ...rows[idx],
                     sf: newSf,
+                    rateInteriors,
+                    rateServices,
+                    rateEquipment,
                     interiorsCost: newInteriors,
                     servicesCost: newServices,
                     equipmentCost: newEquipment,
@@ -467,10 +478,10 @@ export function renderClassroomMix() {
         headerRow.append('th').attr('class', 'px-4 py-2').text('Classroom Type');
         headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('SF');
         headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('% GSF');
-        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Interiors');
-        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Services');
-        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Equipment');
-        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Total');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Interiors $/SF');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Services $/SF');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Equipment $/SF');
+        headerRow.append('th').attr('class', 'px-4 py-2 text-right').text('Total $/SF');
 
         const tbody = table.append('tbody');
         const tableRows = includeCirculation && circulationName
@@ -485,10 +496,144 @@ export function renderClassroomMix() {
         tr.append('td').attr('class', 'px-4 py-2 text-gray-900').text(d => d.name);
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.sf.toLocaleString('en-US'));
         tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => `${(d.pctGSF * 100).toFixed(1)}%`);
-        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.interiorsCost));
-        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.servicesCost));
-        tr.append('td').attr('class', 'px-4 py-2 text-right').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.equipmentCost));
-        tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => d.totalCost === 0 ? '-' : utils.formatCurrencySmall(d.totalCost));
+        const tdInteriors = tr.append('td').attr('class', 'px-4 py-2 text-right');
+        tdInteriors.append('input')
+            .attr('type', 'text')
+            .attr('inputmode', 'decimal')
+            .attr('class', 'text-right program-table-input editable-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
+            .attr('data-room', d => d.name)
+            .attr('data-category', 'C Interiors')
+            .attr('value', d => utils.formatCurrency(Number(d.rateInteriors) || 0))
+            .on('focus', function(event, row) {
+                const roomName = this.dataset.room;
+                const category = this.dataset.category;
+                const currentRoom = (state.interiors && Array.isArray(state.interiors.targetValues))
+                    ? state.interiors.targetValues.find(r => r.name === roomName)
+                    : null;
+                const latest = (currentRoom && typeof currentRoom[category] === 'number')
+                    ? Number(currentRoom[category])
+                    : utils.parseNumberFromInput(this.value);
+                const numeric = isFinite(latest) ? latest : 0;
+                this.value = numeric.toString();
+                this.select();
+            })
+            .on('input', function() {
+                const current = utils.parseNumberFromInput(this.value);
+                const isValid = !isNaN(current) && isFinite(current) && current >= 0;
+                this.classList.toggle('border-red-500', !isValid);
+                this.classList.toggle('ring-red-500', !isValid);
+            })
+            .on('change', function() {
+                const roomName = this.dataset.room;
+                const category = this.dataset.category;
+                const newNumeric = utils.parseNumberFromInput(this.value);
+                const roomObj = state.interiors.targetValues.find(r => r.name === roomName);
+                if (roomObj && category) {
+                    roomObj[category] = newNumeric;
+                }
+                this.value = utils.formatCurrency(newNumeric || 0);
+                renderMixTable();
+                renderInteriorsGraph();
+            })
+            .on('blur', function() {
+                const cleaned = utils.parseNumberFromInput(this.value);
+                this.value = utils.formatCurrency(cleaned || 0);
+                this.classList.remove('border-red-500');
+                this.classList.remove('ring-red-500');
+            });
+
+        const tdServices = tr.append('td').attr('class', 'px-4 py-2 text-right');
+        tdServices.append('input')
+            .attr('type', 'text')
+            .attr('inputmode', 'decimal')
+            .attr('class', 'text-right program-table-input editable-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
+            .attr('data-room', d => d.name)
+            .attr('data-category', 'D Services')
+            .attr('value', d => utils.formatCurrency(Number(d.rateServices) || 0))
+            .on('focus', function(event, row) {
+                const roomName = this.dataset.room;
+                const category = this.dataset.category;
+                const currentRoom = (state.interiors && Array.isArray(state.interiors.targetValues))
+                    ? state.interiors.targetValues.find(r => r.name === roomName)
+                    : null;
+                const latest = (currentRoom && typeof currentRoom[category] === 'number')
+                    ? Number(currentRoom[category])
+                    : utils.parseNumberFromInput(this.value);
+                const numeric = isFinite(latest) ? latest : 0;
+                this.value = numeric.toString();
+                this.select();
+            })
+            .on('input', function() {
+                const current = utils.parseNumberFromInput(this.value);
+                const isValid = !isNaN(current) && isFinite(current) && current >= 0;
+                this.classList.toggle('border-red-500', !isValid);
+                this.classList.toggle('ring-red-500', !isValid);
+            })
+            .on('change', function() {
+                const roomName = this.dataset.room;
+                const category = this.dataset.category;
+                const newNumeric = utils.parseNumberFromInput(this.value);
+                const roomObj = state.interiors.targetValues.find(r => r.name === roomName);
+                if (roomObj && category) {
+                    roomObj[category] = newNumeric;
+                }
+                this.value = utils.formatCurrency(newNumeric || 0);
+                renderMixTable();
+                renderInteriorsGraph();
+            })
+            .on('blur', function() {
+                const cleaned = utils.parseNumberFromInput(this.value);
+                this.value = utils.formatCurrency(cleaned || 0);
+                this.classList.remove('border-red-500');
+                this.classList.remove('ring-red-500');
+            });
+
+        const tdEquipment = tr.append('td').attr('class', 'px-4 py-2 text-right');
+        tdEquipment.append('input')
+            .attr('type', 'text')
+            .attr('inputmode', 'decimal')
+            .attr('class', 'text-right program-table-input editable-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
+            .attr('data-room', d => d.name)
+            .attr('data-category', 'E Equipment and Furnishings')
+            .attr('value', d => utils.formatCurrency(Number(d.rateEquipment) || 0))
+            .on('focus', function(event, row) {
+                const roomName = this.dataset.room;
+                const category = this.dataset.category;
+                const currentRoom = (state.interiors && Array.isArray(state.interiors.targetValues))
+                    ? state.interiors.targetValues.find(r => r.name === roomName)
+                    : null;
+                const latest = (currentRoom && typeof currentRoom[category] === 'number')
+                    ? Number(currentRoom[category])
+                    : utils.parseNumberFromInput(this.value);
+                const numeric = isFinite(latest) ? latest : 0;
+                this.value = numeric.toString();
+                this.select();
+            })
+            .on('input', function() {
+                const current = utils.parseNumberFromInput(this.value);
+                const isValid = !isNaN(current) && isFinite(current) && current >= 0;
+                this.classList.toggle('border-red-500', !isValid);
+                this.classList.toggle('ring-red-500', !isValid);
+            })
+            .on('change', function() {
+                const roomName = this.dataset.room;
+                const category = this.dataset.category;
+                const newNumeric = utils.parseNumberFromInput(this.value);
+                const roomObj = state.interiors.targetValues.find(r => r.name === roomName);
+                if (roomObj && category) {
+                    roomObj[category] = newNumeric;
+                }
+                this.value = utils.formatCurrency(newNumeric || 0);
+                renderMixTable();
+                renderInteriorsGraph();
+            })
+            .on('blur', function() {
+                const cleaned = utils.parseNumberFromInput(this.value);
+                this.value = utils.formatCurrency(cleaned || 0);
+                this.classList.remove('border-red-500');
+                this.classList.remove('ring-red-500');
+            });
+        tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => utils.formatCurrencySmall(d.rateInteriors + d.rateServices + d.rateEquipment));
 
         // Totals row with highlighting reflecting Building Efficiency thresholds
         const tfoot = table.append('tfoot');
@@ -504,6 +649,19 @@ export function renderClassroomMix() {
             highlightClass = 'bg-red-100';
         }
 
+        // Compute blended $/SF values weighted by the current Mix SF for displayed rows
+        const sumSFForBlend = tableRows.reduce((sum, r) => sum + r.sf, 0);
+        const blendedInteriors = sumSFForBlend > 0
+            ? (tableRows.reduce((sum, r) => sum + (r.sf * r.rateInteriors), 0) / sumSFForBlend)
+            : 0;
+        const blendedServices = sumSFForBlend > 0
+            ? (tableRows.reduce((sum, r) => sum + (r.sf * r.rateServices), 0) / sumSFForBlend)
+            : 0;
+        const blendedEquipment = sumSFForBlend > 0
+            ? (tableRows.reduce((sum, r) => sum + (r.sf * r.rateEquipment), 0) / sumSFForBlend)
+            : 0;
+        const blendedTotal = blendedInteriors + blendedServices + blendedEquipment;
+
         const totalRow = tfoot.append('tr').attr('class', `${highlightClass} border-t`);
         totalRow.append('td').attr('class', 'px-4 py-2 font-bold text-blue-900').text('Total');
         totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => totals.sf.toLocaleString('en-US'));
@@ -512,10 +670,10 @@ export function renderClassroomMix() {
             const pct = totalGSF > 0 ? (totals.sf / totalGSF) * 100 : 0;
             return `${pct.toFixed(1)}%`;
         });
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.interiorsCost));
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.servicesCost));
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.equipmentCost));
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(utils.formatCurrencySmall(totals.totalCost));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrencySmall(blendedInteriors));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrencySmall(blendedServices));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrencySmall(blendedEquipment));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrencySmall(blendedTotal));
 
         // Building Efficiency row (NSF / GSF)
         const beRow = tfoot.append('tr').attr('class', 'border-t');

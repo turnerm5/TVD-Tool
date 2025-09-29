@@ -86,7 +86,7 @@ export function renderGlobalEstimate() {
  * @param {boolean} [config.isConfirmation=false] - If true, shows a red confirm button.
  * @returns {Promise<string|boolean|null>} - The result of the dialog interaction.
  */
-function showDialog(config) {
+ export function showDialog(config) {
     return new Promise((resolve) => {
         const { title, message, placeholder, confirmText, cancelText, isConfirmation } = config;
 
@@ -204,24 +204,6 @@ function showDialog(config) {
 export function setCurrentPhase(phase) {
     state.currentPhase = phase;
     render();
-}
-
-/**
- * Shows a modal dialog with a title, input field, and action buttons.
- * @param {string} title - The modal title
- * @param {string} placeholder - Placeholder text for the input field
- * @param {string} confirmText - Text for the confirm button
- * @param {string} cancelText - Text for the cancel button
- * @returns {Promise<string|null>} - Returns the input value if confirmed, null if cancelled
- */
-export function showModalDialog(title, placeholder, confirmText = 'OK', cancelText = 'Cancel') {
-    return showDialog({
-        title,
-        placeholder,
-        confirmText,
-        cancelText,
-        isConfirmation: false
-    });
 }
 
 /**
