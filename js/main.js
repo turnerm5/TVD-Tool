@@ -60,7 +60,6 @@ function render() {
     dom.legend.classList.add('hidden');
     dom.summaryLegend.classList.add('hidden');
     dom.maximizeBtn.classList.add('hidden');
-    dom.takeSnapshotBtn.classList.add('hidden');
     if (dom.totalEstimateDisplay) {
         dom.totalEstimateDisplay.classList.add('hidden');
     }
@@ -77,7 +76,6 @@ function render() {
         // dom.phaseSelector.classList.remove('hidden');
         dom.legend.classList.remove('hidden');
         dom.maximizeBtn.classList.remove('hidden');
-        dom.takeSnapshotBtn.classList.remove('hidden');
         if (dom.totalEstimateDisplay) {
             dom.totalEstimateDisplay.classList.remove('hidden');
         }
@@ -160,11 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     dom.maximizeBtn.addEventListener('click', slider.balanceToGmp);
-    // Use event delegation for take snapshot buttons (handles both static and dynamically created buttons)
-    document.addEventListener('click', async (event) => {
-        if (event.target && (event.target.id === 'take-snapshot-btn' || event.target.id === 'program-take-snapshot-btn')) {
-            await utils.takeSnapshot(state, ui, render);
-        }
+    dom.takeSnapshotBtn.addEventListener('click', async () => {
+        await utils.takeSnapshot(state, ui, render);
     });
     
     // --- View Selector Handlers ---

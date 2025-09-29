@@ -254,10 +254,10 @@ export function calculateSeriesTotal(series, indirectCostPercentages) {
  * @param {function} renderCallback - Callback function to re-render after snapshot
  */
 export async function takeSnapshot(state, ui, renderCallback) {
-    if (state.snapshots.length >= 3) {
+    if (state.snapshots.length >= 4) {
         ui.showAlert(
             "Snapshot Limit Reached",
-            "You can only save up to 3 snapshots. Please delete an existing snapshot to save a new one."
+            "You can only save up to 4 snapshots. Please delete an existing snapshot to save a new one."
         );
         return;
     }
@@ -276,13 +276,31 @@ export async function takeSnapshot(state, ui, renderCallback) {
             target_value: c.target_value,
             square_footage: c.square_footage
         }));
-        
+        // Compute floorData from current floor settings so snapshots persist shelled floors
+        const floors = Math.min(Math.max(Number(state.numFloors) || 1, 1), 5);
+        const shelled = Math.min(Math.max(Number(state.shelledFloorsCount) || 0, 0), floors);
+        const perFloorSF = floors > 0 ? (Number(state.currentData?.grossSF) || 0) / floors : 0;
+        const floorData = Array.from({ length: floors }, (_, idx) => ({
+            phase: 1,
+            sf: perFloorSF,
+            // Treat highest-numbered floors as shelled based on count
+            shelled: idx >= (floors - shelled)
+        }));
+
         const snapshot = {
             name: snapshotName,
             grossSF: state.currentData.grossSF,
             costOfWork: snapshotCostOfWork,
-            floorData: state.currentScheme.floorData ? JSON.parse(JSON.stringify(state.currentScheme.floorData)) : undefined,
-            activePhases: [...state.activePhases]
+            floorData,
+            interiors: {
+                // Persist the user's Interiors SF inputs and $/SF categories
+                mixSF: state.interiors && state.interiors.mixSF
+                    ? JSON.parse(JSON.stringify(state.interiors.mixSF))
+                    : {},
+                targetValues: state.interiors && Array.isArray(state.interiors.targetValues)
+                    ? JSON.parse(JSON.stringify(state.interiors.targetValues))
+                    : []
+            }
         };
         
         state.addSnapshot(snapshot);

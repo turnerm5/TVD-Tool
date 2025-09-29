@@ -233,11 +233,6 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     rightContainer.append('div')
         .attr('id', 'program-estimate-display')
         .attr('class', 'text-center');
-    
-    rightContainer.append('button')
-        .attr('id', 'program-take-snapshot-btn')
-        .attr('class', 'bg-blue-600 text-white py-1 px-3 text-sm rounded-md font-medium hover:bg-blue-700 transition')
-        .text('Take Snapshot');
         
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-6 gap-4')
