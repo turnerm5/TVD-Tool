@@ -84,7 +84,7 @@ export function renderValuesTable() {
         // Extract value keys dynamically (exclude 'name')
         const valueEntries = Object.entries(room).filter(([k, v]) => k !== 'name' && typeof v === 'number');
 
-        const tr = tbody.selectAll(`tr.row-${cssSafe(room.name)}`)
+        const tr = tbody.selectAll(`tr.row-${utils.cssSafe(room.name)}`)
             .data(valueEntries, d => room.name + '-' + d[0])
             .enter()
             .append('tr')
@@ -195,17 +195,6 @@ export function renderValuesTable() {
             });
     });
 }
-
-/**
- * Converts an arbitrary string to a CSS-safe token by replacing unsafe characters with underscores.
- * @param {string} str
- * @returns {string}
- */
-function cssSafe(str) {
-    return String(str).replace(/[^a-zA-Z0-9_-]/g, '_');
-}
-
-
 
 /**
  * Renders the Classroom Mix inputs and calculations in the middle panel.

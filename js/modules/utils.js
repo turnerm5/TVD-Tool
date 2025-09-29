@@ -93,6 +93,15 @@ export function formatNumber(num) {
 }
 
 /**
+ * Converts an arbitrary string to a CSS-safe token by replacing unsafe characters with underscores.
+ * @param {string} str
+ * @returns {string}
+ */
+export function cssSafe(str) {
+    return String(str).replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+/**
  * Formats square footage with change indication.
  * @param {number} currentSF - The current square footage value.
  * @param {string} componentName - The name of the component for change tracking.
