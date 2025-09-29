@@ -58,7 +58,7 @@ function wrap(text, width) {
  */
 export function renderSummaryCharts() {
     // --- 1. Data Preparation ---
-    // Create stable "Predesign" series using pure original data (never changes)
+    // Create stable baseline series using pure original data (never changes)
     const importedSeries = utils.createImportedDataSeries();
     const allSeriesData = state.predesignDeleted ? [...state.snapshots] : [importedSeries, ...state.snapshots];
     
@@ -69,7 +69,7 @@ export function renderSummaryCharts() {
     }
     
     const seriesNames = allSeriesData.map(d => d.name);
-            const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+            const originalPredesignScheme = utils.getBaselineScheme();
             const costOfWorkNames = originalPredesignScheme ? originalPredesignScheme.costOfWork.map(c => c.name) : [];
         const gmpValue = state.originalData.phase2.totalProjectBudget;
     
@@ -370,7 +370,7 @@ export function updateSummary() {
     summaryPanel.appendChild(header);
 
     // --- Data Series Table ---
-    // Create stable "Predesign" series using pure original data (never changes)
+    // Create stable baseline series using pure original data (never changes)
     const importedSeries = utils.createImportedDataSeries();
     const allSeries = state.predesignDeleted ? [...state.snapshots] : [importedSeries, ...state.snapshots];
 

@@ -213,7 +213,7 @@ export function renderChart() {
         });
     
     // Create a map of original component values for quick lookup.
-            const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+            const originalPredesignScheme = utils.getBaselineScheme();
             const originalTargetValues = state.originalData.initialTargetValues || [];
             
             // Merge original square footage with original target values
@@ -443,7 +443,7 @@ export function handleSquareFootageCellChange(event) {
 
     if (isNaN(newSF) || newSF < 0) {
         // Find the original value to revert to if input is invalid
-        const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+        const originalPredesignScheme = utils.getBaselineScheme();
         const originalComponent = originalPredesignScheme ? originalPredesignScheme.costOfWork.find(c => c.name === componentName) : null;
         const revertValue = originalComponent ? originalComponent.square_footage : 0;
         // Don't format here - let the blur event handle formatting

@@ -30,7 +30,7 @@ export const state = {
     indirectCostPercentages: [],
     shelledFloors: [],
     activePhases: [1],
-    currentScheme: null, // The currently active scheme (starts with Predesign)
+    currentScheme: null, // The currently active scheme (starts with baseline scheme)
     selectedSchemeName: 'Predesign', // The name of the scheme card that should be highlighted
     previousSquareFootage: {}, // Track previous square footage values for showing changes
     predesignDeleted: false, // Track if the Predesign scheme has been deleted
@@ -89,8 +89,8 @@ export const state = {
         // Set default view to Phase 2 Program
         this.currentView = 'program';
         
-        // Reset to the original Predesign scheme with initial target values
-        const originalPredesignScheme = this.originalData.schemes && this.originalData.schemes.find(s => s.name === 'Predesign');
+        // Reset to the original baseline scheme with initial target values
+        const originalPredesignScheme = utils.getBaselineScheme();
         if (originalPredesignScheme) {
             this.currentScheme = JSON.parse(JSON.stringify(originalPredesignScheme));
             
@@ -108,7 +108,7 @@ export const state = {
                 }
             });
             
-            // Reset shelled floors from the original predesign scheme's floorData
+            // Reset shelled floors from the original baseline scheme's floorData
             if (originalPredesignScheme.floorData && Array.isArray(originalPredesignScheme.floorData)) {
                 this.shelledFloors = originalPredesignScheme.floorData
                     .filter(f => f.phase === 1) // Assuming single phase for initial reset
@@ -117,7 +117,7 @@ export const state = {
                 this.shelledFloors = []; // Clear if no floor data
             }
 
-            this.selectedSchemeName = 'Predesign'; // Set default selected scheme
+            this.selectedSchemeName = utils.getBaselineName(); // Set default selected scheme
             this.activePhases = [1];
             
             // Initialize previous square footage tracking
@@ -158,14 +158,15 @@ export const state = {
      * @param {string} snapshotName - The name of the snapshot to delete.
      */
     deleteSnapshot(snapshotName) {
-        if (snapshotName === 'Predesign') {
-            // Check if there's a user-created snapshot named "Predesign"
-            const predesignSnapshot = this.snapshots.find(s => s.name === 'Predesign');
-            if (predesignSnapshot) {
-                // Delete the user-created Predesign snapshot
+        const baselineName = utils.getBaselineName();
+        if (snapshotName === baselineName) {
+            // Check if there's a user-created snapshot named equal to baseline
+            const baselineSnapshot = this.snapshots.find(s => s.name === baselineName);
+            if (baselineSnapshot) {
+                // Delete the user-created snapshot with baseline name
                 this.snapshots = this.snapshots.filter(s => s.name !== snapshotName);
             } else {
-                // Delete the original imported Predesign series
+                // Hide the imported baseline series from summary
                 this.predesignDeleted = true;
             }
         } else {
@@ -191,7 +192,7 @@ export const state = {
         if (this.currentData.grossSF !== this.originalData.grossSF) return true;
 
         // Check if any component target_value or square_footage has changed
-        const originalPredesignScheme = this.originalData.schemes && this.originalData.schemes.find(s => s.name === 'Predesign');
+        const originalPredesignScheme = utils.getBaselineScheme();
         if (!this.currentScheme || !this.originalData.initialTargetValues || !originalPredesignScheme) return false;
         
         const currentCostOfWork = this.currentScheme.costOfWork;

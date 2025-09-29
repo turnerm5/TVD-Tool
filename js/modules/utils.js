@@ -18,6 +18,26 @@
 import { state } from './state.js';
 
 /**
+ * Returns the baseline scheme from original data, preferring name 'Predesign' if present,
+ * otherwise falling back to the first scheme in the array.
+ * @returns {object|null} baseline scheme object or null
+ */
+export function getBaselineScheme() {
+    if (!state.originalData || !Array.isArray(state.originalData.schemes)) return null;
+    const predesign = state.originalData.schemes.find(s => s.name === 'Predesign');
+    return predesign || state.originalData.schemes[0] || null;
+}
+
+/**
+ * Returns the baseline scheme name for UI labels and series naming.
+ * @returns {string} baseline scheme name
+ */
+export function getBaselineName() {
+    const scheme = getBaselineScheme();
+    return scheme && scheme.name ? scheme.name : 'Baseline';
+}
+
+/**
  * Formats a number into a currency string (e.g., $123.45).
  * @param {number} d - The number to format.
  * @returns {string} The formatted currency string.
@@ -137,7 +157,7 @@ export function calculateComponentValue(component) {
  * @returns {object} The predesign data series object
  */
 export function createImportedDataSeries() {
-    const originalPredesignScheme = state.originalData.schemes && state.originalData.schemes.find(s => s.name === 'Predesign');
+    const originalPredesignScheme = getBaselineScheme();
     const initialTargetValues = state.originalData.initialTargetValues || [];
 
     let costOfWork = [];
@@ -173,7 +193,7 @@ export function createImportedDataSeries() {
     }
     
     return {
-        name: "Predesign",
+        name: getBaselineName(),
         color: "#9ca3af", // gray-400
         costOfWork: costOfWork,
         grossSF: state.originalData.grossSF

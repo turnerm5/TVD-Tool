@@ -15,7 +15,7 @@ const sampleData = {
         "totalProjectBudget": 40000000
     },
     "indirectCosts": [
-        { "Category": "GCs and Insurance", "Subcategory": "Precon and Fee", "Percentage": 0.0686 },
+        { "Category": "GCs and Insurance", "Subcategory": "Design and Fee", "Percentage": 0.0686 },
         { "Category": "Escalation & Contingency", "Subcategory": "Design Contingency", "Percentage": 0.0538 },
         { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Percentage": 0.0538 },
         { "Category": "GCs and Insurance", "Subcategory": "Bonds and Insurance", "Percentage": 0.0437 },

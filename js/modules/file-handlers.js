@@ -80,10 +80,10 @@ export function loadData(data, fileName = 'Sample Data') {
         return;
     }
     
-    // Find the Predesign scheme which contains the initial cost of work data
-    const predesignScheme = data.schemes && data.schemes.find(s => s.name === 'Predesign');
+    // Select baseline scheme: prefer 'Predesign', else first available
+    const predesignScheme = (data.schemes && data.schemes.find(s => s.name === 'Predesign')) || (Array.isArray(data.schemes) ? data.schemes[0] : null);
     if (!predesignScheme || !predesignScheme.costOfWork) {
-        alert("Invalid JSON format. Must contain a 'Predesign' scheme with costOfWork data.");
+        alert("Invalid JSON format. Must contain at least one scheme with costOfWork data.");
         return;
     }
     
@@ -105,8 +105,8 @@ export function loadData(data, fileName = 'Sample Data') {
 
     state.lockedCostOfWork = new Set();
 
-    // Lock components based on Predesign scheme data
-    const processedPredesignScheme = processedData.schemes && processedData.schemes.find(s => s.name === 'Predesign');
+    // Lock components based on baseline scheme data
+    const processedPredesignScheme = (processedData.schemes && processedData.schemes.find(s => s.name === 'Predesign')) || (Array.isArray(processedData.schemes) ? processedData.schemes[0] : null);
     if (processedPredesignScheme && processedPredesignScheme.costOfWork) {
         processedPredesignScheme.costOfWork.forEach(component => {
             const sf = Array.isArray(component.square_footage) ? component.square_footage.reduce((a, b) => a + b, 0) : component.square_footage;
@@ -121,12 +121,13 @@ export function loadData(data, fileName = 'Sample Data') {
     state.originalData.grossSF = predesignScheme.grossSF || 0;
     state.currentData = processedData;
     state.currentData.grossSF = predesignScheme.grossSF || 0;
+    state.selectedSchemeName = predesignScheme.name || utils.getBaselineName();
     // Load interiors target values into state for editing in Interiors view
     state.interiors.targetValues = Array.isArray(processedData.interiorTargetValues)
         ? JSON.parse(JSON.stringify(processedData.interiorTargetValues))
         : [];
     
-    // Initialize the current scheme with the Predesign scheme + target values
+    // Initialize the current scheme with the baseline scheme + target values
     state.currentScheme = JSON.parse(JSON.stringify(predesignScheme));
     
     // Merge initialTargetValues into the current scheme
@@ -151,7 +152,7 @@ export function loadData(data, fileName = 'Sample Data') {
     // Calculate indirect cost percentages now that originalData is set
     state.calculateIndirectCostPercentages();
     
-    // Set shelled floors based on the predesign scheme's floorData
+    // Set shelled floors based on the baseline scheme's floorData
     if (predesignScheme.floorData && Array.isArray(predesignScheme.floorData)) {
         // Assuming single phase for initial setup. Phased logic will be handled elsewhere.
         state.shelledFloors = predesignScheme.floorData
