@@ -40,12 +40,6 @@ const sampleData = {
             "E Equipment and Furnishings": 47.5
         },
         {
-            "name": "Lecture Hall",
-            "C Interiors": 68.2,
-            "D Services": 209,
-            "E Equipment and Furnishings": 33
-        },
-        {
             "name": "Classroom",
             "C Interiors": 77,
             "D Services": 231,
@@ -62,6 +56,12 @@ const sampleData = {
             "C Interiors": 88,
             "D Services": 450,
             "E Equipment and Furnishings": 56.1
+        },
+        {
+            "name": "Lecture Hall",
+            "C Interiors": 68.2,
+            "D Services": 209,
+            "E Equipment and Furnishings": 33
         },
         {
             "name": "Building Support",
