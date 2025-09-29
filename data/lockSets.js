@@ -18,6 +18,10 @@ const LOCK_SETS = [
     {
         "name": "Enclosure & Services",
         "unlocked": ["B20 Enclosure", "D Services"]
+    },
+    {
+        "name": "All Interiors",
+        "unlocked": ["C Interiors", "D Services", "E Equipment and Furnishings"]
     }
 ];
 

@@ -35,7 +35,7 @@ const INTERIOR_TARGET_VALUES = [
     {
         "name": "Student Success Center",
         "C Interiors": 88,
-        "D Services": 450,
+        "D Services": 220,
         "E Equipment and Furnishings": 56.1,
         "includeInNSF": true
     },

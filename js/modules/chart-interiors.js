@@ -103,7 +103,15 @@ export function renderValuesTable() {
             .attr('data-category', d => d[0])
             .attr('value', d => utils.formatCurrency(Number(d[1]) || 0))
             .on('focus', function(event, entry) {
-                const numeric = Number(entry[1]) || 0;
+                const roomName = this.dataset.room;
+                const category = this.dataset.category;
+                const currentRoom = (state.interiors && Array.isArray(state.interiors.targetValues))
+                    ? state.interiors.targetValues.find(r => r.name === roomName)
+                    : null;
+                const latest = (currentRoom && typeof currentRoom[category] === 'number')
+                    ? Number(currentRoom[category])
+                    : utils.parseNumberFromInput(this.value);
+                const numeric = isFinite(latest) ? latest : 0;
                 this.value = numeric.toString();
                 this.select();
             })
@@ -120,6 +128,9 @@ export function renderValuesTable() {
                 if (roomObj) {
                     roomObj[category] = newNumeric;
                 }
+                // Recompute dependent visuals so mix table and graph reflect new $/SF
+                renderClassroomMix();
+                renderInteriorsGraph();
             })
             .on('blur', function(event, entry) {
                 const cleaned = utils.parseNumberFromInput(this.value);
@@ -141,6 +152,9 @@ export function renderValuesTable() {
                     }
                     // Format current cell
                     this.value = utils.formatCurrency(cleaned || 0);
+                    // Update dependent visuals before moving focus
+                    renderClassroomMix();
+                    renderInteriorsGraph();
                     // Move focus
                     const inputs = wrapper.selectAll('input.program-table-input').nodes();
                     const idx = inputs.indexOf(this);
@@ -161,6 +175,9 @@ export function renderValuesTable() {
                         roomObj[category] = cleaned;
                     }
                     this.value = utils.formatCurrency(cleaned || 0);
+                    // Update dependent visuals before moving focus
+                    renderClassroomMix();
+                    renderInteriorsGraph();
                     const inputs = wrapper.selectAll('input.program-table-input').nodes();
                     const idx = inputs.indexOf(this);
                     let nextIdx;
@@ -188,13 +205,7 @@ function cssSafe(str) {
     return String(str).replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
-/**
- * Parses a numeric value from a currency-like input string.
- * Strips currency symbols, commas, and whitespace; returns 0 when parsing fails.
- * @param {string} value
- * @returns {number}
- */
-// Moved to utils.parseNumberFromInput for reuse across modules
+
 
 /**
  * Renders the Classroom Mix inputs and calculations in the middle panel.
