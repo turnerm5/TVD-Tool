@@ -179,7 +179,7 @@ export function computeBlendedInteriorsTargetsFromCurrentMix() {
         const sf = Number(state.interiors?.mixSF?.[rt.name]) || 0;
         return includeInNSF(rt) ? sum + sf : sum;
     }, 0);
-    const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false) && /circulation|support/i.test(rt.name));
+    const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false) && /(grossing|circulation|support)/i.test(rt.name));
     const circulationSF = Math.max(0, totalGSF - programSF);
     const effectiveMixByRoom = new Map();
     roomTypes.forEach(rt => {
@@ -231,12 +231,15 @@ export async function applyInteriorsTargetsUpdateFromBlended(blendedByCategory, 
 
     let keepBudgetSame = false;
     if (askKeepBudgetSame) {
-        keepBudgetSame = await ui.showConfirmDialog(
+        // Note: The confirm button text is the "No" option; invert the boolean so
+        // keepBudgetSame is true only when the user selects "Yes, Keep Budget Same".
+        const userChoseOnlyThree = await ui.showConfirmDialog(
             'Keep Budget the Same?',
             'Update the other categories so the current estimate stays identical?',
             'No, Only Update These Three',
             'Yes, Keep Budget Same'
         );
+        keepBudgetSame = !userChoseOnlyThree;
 
         if (keepBudgetSame) {
             const postCowUnbalanced = calculateTotalCostOfWork(components);

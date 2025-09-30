@@ -552,9 +552,9 @@ export function updateSummary() {
             <th scope="col" class="px-6 py-3 text-right">Indirects</th>
             <th scope="col" class="px-6 py-3 text-right">Total</th>
             <th scope="col" class="px-6 py-3 text-right">GSF</th>
-            <th scope="col" class="px-6 py-3 text-right">ASF</th>
+            <th scope="col" class="px-6 py-3 text-right">NSF</th>
             <th scope="col" class="px-6 py-3 text-right">$/GSF</th>
-            <th scope="col" class="px-6 py-3 text-right">$/ASF</th>
+            <th scope="col" class="px-6 py-3 text-right">$/NSF</th>
             <th scope="col" class="px-6 py-3 text-right">Budget &#x0394;</th>
         </tr>
     `;
