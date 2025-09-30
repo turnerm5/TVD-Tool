@@ -248,6 +248,31 @@ export function exportJSON() {
     } else {
         delete dataToExport.snapshots;
     }
+
+    // Persist current grossSF
+    dataToExport.grossSF = Number(state.currentData?.grossSF) || Number(dataToExport.grossSF) || 0;
+
+    // Persist current target values into initialTargetValues so re-import restores the latest session
+    if (state.currentScheme && Array.isArray(state.currentScheme.costOfWork)) {
+        const originalByName = {};
+        (state.originalData.initialTargetValues || []).forEach(tv => { originalByName[tv.name] = tv; });
+        dataToExport.initialTargetValues = state.currentScheme.costOfWork.map(c => ({
+            name: c.name,
+            target_value: Number(c.target_value) || 0,
+            benchmark_low: Number(originalByName[c.name]?.benchmark_low) || 0,
+            benchmark_high: Number(originalByName[c.name]?.benchmark_high) || 0
+        }));
+    }
+
+    // Persist current Interiors target values (per-room $/SF and flags)
+    if (state.interiors && Array.isArray(state.interiors.targetValues) && state.interiors.targetValues.length > 0) {
+        dataToExport.interiorTargetValues = JSON.parse(JSON.stringify(state.interiors.targetValues));
+    }
+
+    // If interior mix schemes were modified during the session, persist current copy
+    if (state.currentData && Array.isArray(state.currentData.interiorMixSchemes)) {
+        dataToExport.interiorMixSchemes = JSON.parse(JSON.stringify(state.currentData.interiorMixSchemes));
+    }
     
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
     const downloadAnchorNode = document.createElement('a');
