@@ -78,6 +78,11 @@ body {
     border-radius: 3px;
     z-index: 4;
 }
+
+#interiors-graph .current-rom {
+    cursor: default;
+}
+
 .current-rom:hover {
     background-color: #000;
 }
@@ -178,6 +183,27 @@ body {
     background-color: rgba(255,255,255,0.8);
     padding: 1px 4px;
     border-radius: 3px;
+}
+
+/* --- Interiors graph width tweaks (narrow bars to avoid label overflow) --- */
+#interiors-graph .benchmark-range {
+    left: 35%;
+    width: 30%;
+}
+#interiors-graph .benchmark-cap {
+    left: 35%;
+    width: 30%;
+}
+#interiors-graph .current-rom {
+    left: 30%;
+    width: 40%;
+}
+#interiors-graph .ghost-rom {
+    left: 30%;
+    width: 40%;
+}
+#interiors-graph .value-label-group {
+    left: 70%;
 }
 
 .benchmark-indicator-svg {

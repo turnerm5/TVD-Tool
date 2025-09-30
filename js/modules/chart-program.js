@@ -191,8 +191,75 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     d3.select(dom.programView).html('');
     const mainContainer = d3.select(dom.programView);
 
+    // Overall Square Footage card (moved above floors)
+    const overallCard = mainContainer.append('div')
+        .attr('class', 'mb-4 bg-white p-4 rounded-lg shadow-md border border-gray-200');
+
+    overallCard.append('h2')
+        .attr('class', 'text-lg font-bold text-gray-700 mb-2')
+        .text('Overall Square Footage');
+
+    const overallSFContainer = overallCard.append('div')
+        .attr('class', 'flex items-center gap-3');
+
+    const overallSFInputGroup = overallSFContainer.append('div')
+        .attr('class', 'flex flex-col');
+
+    // Keep an accessible label but hide it visually
+    overallSFInputGroup.append('label')
+        .attr('for', 'overall-sf-input')
+        .attr('class', 'sr-only')
+        .text('Overall Square Footage');
+
+    overallSFInputGroup.append('input')
+        .attr('id', 'overall-sf-input')
+        .attr('type', 'text')
+        .attr('inputmode', 'numeric')
+        .attr('pattern', '[0-9,]*')
+        .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
+        .attr('value', `${utils.formatNumber(state.currentData?.grossSF || 0)} sf`)
+        .on('focus', function() {
+            const numericValue = Number(state.currentData?.grossSF) || 0;
+            this.value = numericValue.toString();
+            this.select();
+        })
+        .on('change', async function() {
+            const newGross = Number(String(this.value).replace(/,/g, '')) || 0;
+            const oldGross = Number(state.currentData?.grossSF) || 0;
+            state.currentData.grossSF = newGross;
+
+            if (oldGross > 0 && newGross >= 0 && newGross !== oldGross) {
+                const scaleRatio = newGross / oldGross;
+                const confirmed = await ui.showConfirmDialog(
+                    'Scale Square Footages',
+                    `Would you like to scale all component square footages by ${(scaleRatio * 100).toFixed(1)}% to match the new Overall SF? Note: Keeping the square footage values as-is can result in misalignment with the overall $/SF calculations.`,
+                    'Scale',
+                    'Keep As-Is'
+                );
+                // Whether scaling or keeping as-is, recompute based on the new inputs
+                updateProgramSF();
+                render();
+                renderProgramEstimate();
+                return;
+            }
+            // Set display with unit when not re-rendering above
+            this.value = `${utils.formatNumber(newGross)} sf`;
+            // Always recompute in case oldGross was 0 previously
+            updateProgramSF();
+            render();
+            renderProgramEstimate();
+        })
+        .on('blur', function() {
+            const numeric = Number(String(this.value).replace(/,/g, '')) || 0;
+            state.currentData.grossSF = numeric;
+            this.value = `${utils.formatNumber(numeric)} sf`;
+            updateProgramSF();
+            render();
+            renderProgramEstimate();
+        });
+
     const schemesContainer = mainContainer.append('div')
-        .attr('class', 'schemes-container mb-4 pb-4 bg-gray-50 rounded-lg');
+        .attr('class', 'schemes-container mb-4 bg-white p-4 rounded-lg shadow-md border border-gray-200');
     
     // Create header with title, estimate display, and button
     const headerContainer = schemesContainer.append('div')
@@ -271,66 +338,10 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             ui.renderGlobalEstimate();
         });
 
-    // Overall Square Footage input above the main table
-    const overallSFContainer = mainContainer.append('div')
-        .attr('class', 'mb-3 flex items-center gap-3');
+    const tableCard = mainContainer.append('div')
+        .attr('class', 'bg-white p-4 rounded-lg shadow-md border border-gray-200');
 
-    const overallSFInputGroup = overallSFContainer.append('div')
-        .attr('class', 'flex flex-col');
-
-    overallSFInputGroup.append('label')
-        .attr('for', 'overall-sf-input')
-        .attr('class', 'text-xs font-semibold text-gray-700 mb-1')
-        .text('Overall Square Footage');
-
-    overallSFInputGroup.append('input')
-        .attr('id', 'overall-sf-input')
-        .attr('type', 'text')
-        .attr('inputmode', 'numeric')
-        .attr('pattern', '[0-9,]*')
-        .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
-        .attr('value', `${utils.formatNumber(state.currentData?.grossSF || 0)} sf`)
-        .on('focus', function() {
-            const numericValue = Number(state.currentData?.grossSF) || 0;
-            this.value = numericValue.toString();
-            this.select();
-        })
-        .on('change', async function() {
-            const newGross = Number(String(this.value).replace(/,/g, '')) || 0;
-            const oldGross = Number(state.currentData?.grossSF) || 0;
-            state.currentData.grossSF = newGross;
-
-            if (oldGross > 0 && newGross >= 0 && newGross !== oldGross) {
-                const scaleRatio = newGross / oldGross;
-                const confirmed = await ui.showConfirmDialog(
-                    'Scale Square Footages',
-                    `Would you like to scale all component square footages by ${(scaleRatio * 100).toFixed(1)}% to match the new Overall SF? Note: Keeping the square footage values as-is can result in misalignment with the overall $/SF calculations.`,
-                    'Scale',
-                    'Keep As-Is'
-                );
-                // Whether scaling or keeping as-is, recompute based on the new inputs
-                updateProgramSF();
-                render();
-                renderProgramEstimate();
-                return;
-            }
-            // Set display with unit when not re-rendering above
-            this.value = `${utils.formatNumber(newGross)} sf`;
-            // Always recompute in case oldGross was 0 previously
-            updateProgramSF();
-            render();
-            renderProgramEstimate();
-        })
-        .on('blur', function() {
-            const numeric = Number(String(this.value).replace(/,/g, '')) || 0;
-            state.currentData.grossSF = numeric;
-            this.value = `${utils.formatNumber(numeric)} sf`;
-            updateProgramSF();
-            render();
-            renderProgramEstimate();
-        });
-
-    const tableContainer = mainContainer.append('div')
+    const tableContainer = tableCard.append('div')
         .attr('class', 'program-table-container');
     updatePhase2ProgramTable(tableContainer, render, handleSquareFootageCellChange);
     

@@ -303,9 +303,9 @@ function renderProgramComparison(allSeriesData) {
     const color = d3.scaleOrdinal().domain(displayedRoomTypes).range(palette);
 
     // Layout
-    const margin = { top: 30, right: 30, bottom: 40, left: 20 };
+    const margin = { top: 10, right: 30, bottom: 40, left: 20 };
     const width = barsContainer.node().getBoundingClientRect().width - margin.left - margin.right;
-    const height = 480 - margin.top - margin.bottom;
+    const height = 640 - margin.top - margin.bottom;
 
     const x = d3.scaleBand().domain(seriesData.map(d => d.name)).range([0, width]).padding(0.3);
     const yMax = d3.max(seriesData, d => d.total) || 1;
