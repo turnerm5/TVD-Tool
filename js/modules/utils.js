@@ -16,6 +16,7 @@
  */
 
 import { state } from './state.js';
+import * as persistence from './persistence.js';
 
 /**
  * Returns the baseline scheme from original data, preferring name 'Predesign' if present,
@@ -441,6 +442,7 @@ export async function takeSnapshot(state, ui, renderCallback) {
         };
         
         state.addSnapshot(snapshot);
+        persistence.save(state);
         console.log('All snapshots:', state.snapshots);
         renderCallback(); // Re-render to update the summary view
     }

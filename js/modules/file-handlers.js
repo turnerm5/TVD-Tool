@@ -18,6 +18,7 @@
 import { state } from './state.js';
 import * as ui from './ui.js';
 import * as utils from './utils.js';
+import * as persistence from './persistence.js';
 
 // Forward-declare the main render function to be injected later.
 let render;
@@ -185,13 +186,25 @@ export function loadData(data, fileName = 'Workshop 1') {
     
     // Set default view to Phase 2 Program
     state.currentView = 'program';
-    
+
+    // Apply persisted session if available (overrides file snapshots/view)
+    const persisted = persistence.load();
+    if (persisted) {
+        if (Array.isArray(persisted.snapshots)) {
+            state.snapshots = JSON.parse(JSON.stringify(persisted.snapshots));
+        }
+        if (persisted.currentView) {
+            state.currentView = persisted.currentView;
+        }
+    }
+
     ui.showMainContent();
     
     // Update Reset button state since we just loaded fresh data
     state.updateResetButtonState();
     
     render();
+    persistence.save(state);
 }
 
 /**

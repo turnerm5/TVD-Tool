@@ -28,6 +28,7 @@ import * as program from './modules/chart-program.js';
 import * as interiors from './modules/chart-interiors.js';
 import * as benchmarks from './modules/chart-benchmarks.js';
 import * as utils from './modules/utils.js';
+import * as persistence from './modules/persistence.js';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);
@@ -138,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Cancel"
         );
         if (confirmed) {
+            persistence.clear();
             ui.showSplashScreen();
         }
     });
@@ -162,12 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // --- View Selector Handlers ---
-    dom.chartViewBtn.addEventListener('click', () => { state.currentView = 'chart'; state.currentPhase = 'phase2'; render(); });
-    dom.programViewBtn.addEventListener('click', () => { state.currentView = 'program'; render(); });
+    dom.chartViewBtn.addEventListener('click', () => { state.currentView = 'chart'; state.currentPhase = 'phase2'; render(); persistence.save(state); });
+    dom.programViewBtn.addEventListener('click', () => { state.currentView = 'program'; render(); persistence.save(state); });
     
-    dom.benchmarksViewBtn.addEventListener('click', () => { state.currentView = 'benchmarks'; state.selectedBenchmark = null; render(); });
-    dom.summaryViewBtn.addEventListener('click', () => { state.currentView = 'summary'; state.currentPhase = 'phase2'; render(); });
-    dom.interiorsViewBtn.addEventListener('click', () => { state.currentView = 'interiors'; render(); });
+    dom.benchmarksViewBtn.addEventListener('click', () => { state.currentView = 'benchmarks'; state.selectedBenchmark = null; render(); persistence.save(state); });
+    dom.summaryViewBtn.addEventListener('click', () => { state.currentView = 'summary'; state.currentPhase = 'phase2'; render(); persistence.save(state); });
+    dom.interiorsViewBtn.addEventListener('click', () => { state.currentView = 'interiors'; render(); persistence.save(state); });
 
     // --- File Drop Zone Handlers ---
     dom.fileInput.addEventListener('change', (e) => fileHandlers.handleFile(e.target.files[0]));
@@ -181,4 +183,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial load
     ui.initializeHelpModal();
+    // If a prior session exists, auto-load sample data to bootstrap state, then persistence will re-apply view/snapshots.
+    try {
+        if (persistence.hasSession() && typeof sampleData !== 'undefined') {
+            fileHandlers.loadData(sampleData, 'Restored Session');
+        }
+    } catch (e) {
+        console.warn('Failed to auto-restore session:', e);
+    }
 });

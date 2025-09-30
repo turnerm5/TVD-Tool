@@ -18,6 +18,7 @@ import { state } from './state.js';
 import * as dom from './dom.js';
 import * as ui from './ui.js';
 import * as utils from './utils.js';
+import * as persistence from './persistence.js';
 
 let render;
 export function setRender(fn) {
@@ -243,6 +244,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
             );
             if (confirmed) {
                 state.deleteSnapshot(d);
+                persistence.save(state);
                 render();
             }
         });
