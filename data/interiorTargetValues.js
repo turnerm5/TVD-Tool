@@ -47,7 +47,7 @@ const INTERIOR_TARGET_VALUES = [
         "includeInNSF": true
     },
     {
-        "name": "Circulation and Support (Auto-Calculated)",
+        "name": "Grossing Factor (Auto-Calculated)",
         "C Interiors": 30,
         "D Services": 200,
         "E Equipment and Furnishings": 20,
