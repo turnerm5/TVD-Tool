@@ -191,9 +191,13 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     d3.select(dom.programView).html('');
     const mainContainer = d3.select(dom.programView);
 
-    // Overall Square Footage card (moved above floors)
-    const overallCard = mainContainer.append('div')
-        .attr('class', 'mb-4 bg-white p-4 rounded-lg shadow-md border border-gray-200');
+    // Top layout: Overall SF (1/6) on the left, Floors (5/6) on the right
+    const topLayout = mainContainer.append('div')
+        .attr('class', 'grid grid-cols-6 gap-4 mb-4');
+
+    // Overall Square Footage card (left 1/6)
+    const overallCard = topLayout.append('div')
+        .attr('class', 'col-span-1 bg-white p-4 rounded-lg shadow-md border border-gray-200');
 
     overallCard.append('h2')
         .attr('class', 'text-lg font-bold text-gray-700 mb-2')
@@ -258,8 +262,9 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             renderProgramEstimate();
         });
 
-    const schemesContainer = mainContainer.append('div')
-        .attr('class', 'schemes-container mb-4 bg-white p-4 rounded-lg shadow-md border border-gray-200');
+    // Floors card (right 5/6)
+    const schemesContainer = topLayout.append('div')
+        .attr('class', 'col-span-5 schemes-container bg-white p-4 rounded-lg shadow-md border border-gray-200');
     
     // Create header with title, estimate display, and button
     const headerContainer = schemesContainer.append('div')
@@ -277,7 +282,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         
     const schemeGrid = schemesContainer.append('div')
         .attr('class', 'grid grid-cols-6 gap-4')
-        .style('height', '180px');
+        .style('height', '108px');
 
     // Five floor cards (1-5)
     const floorCardsData = [1, 2, 3, 4, 5];
@@ -300,8 +305,8 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         });
 
     floorCards.append('div')
-        .attr('class', 'p-2 text-center font-semibold text-white')
-        .text(d => `Floor ${d}`);
+        .attr('class', 'p-2 text-center font-semibold text-white text-xl flex items-center justify-center h-full')
+        .text(d => `${d}`);
 
     // Sixth card for shelled floors count
     const shellCard = schemeGrid.append('div')
