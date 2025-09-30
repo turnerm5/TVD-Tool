@@ -27,7 +27,9 @@ export const state = {
         mixSF: {},
         selectedMixScheme: null,
         // Flag indicating Interiors Classroom Mix or $/SF values changed without updating targets
-        unsavedMix: false
+        unsavedMix: false,
+        // Flag indicating any Interiors SF has been assigned (manual entry or preset)
+        hasAssignedSF: false
     },
     lockedCostOfWork: new Set(),
     currentView: 'splash-screen', // 'summary', 'slider', 'program'
@@ -132,6 +134,14 @@ export const state = {
             // Initialize previous square footage tracking
             this.previousSquareFootage = {};
             this.updatePreviousSquareFootage();
+
+            // Reset interiors flags
+            if (this.interiors) {
+                this.interiors.unsavedMix = false;
+                this.interiors.hasAssignedSF = false;
+                this.interiors.selectedMixScheme = null;
+                this.interiors.mixSF = {};
+            }
         }
     },
 

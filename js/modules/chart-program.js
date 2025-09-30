@@ -336,8 +336,21 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     shellControls.append('button')
         .attr('class', 'px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 transition')
         .text('+')
-        .on('click', () => {
-            state.shelledFloorsCount = Math.min(state.numFloors || 1, (state.shelledFloorsCount || 0) + 1);
+        .on('click', async () => {
+            const nextCount = Math.min(state.numFloors || 1, (state.shelledFloorsCount || 0) + 1);
+            const willIncrease = nextCount > (state.shelledFloorsCount || 0);
+            if (willIncrease && state.interiors?.hasAssignedSF) {
+                const confirmed = await ui.showConfirmDialog(
+                    'Shelling Floors With Assigned Program SF',
+                    'You have room square footage assigned in Interiors. Shelling floors reduces finished area and may not fit the assigned program SF. Do you want to proceed?',
+                    'Proceed',
+                    'Cancel'
+                );
+                if (!confirmed) {
+                    return;
+                }
+            }
+            state.shelledFloorsCount = nextCount;
             updateProgramSF();
             render();
             ui.renderGlobalEstimate();

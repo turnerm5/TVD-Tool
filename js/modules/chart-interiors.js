@@ -84,6 +84,8 @@ export function renderValuesTable() {
             });
             state.interiors.mixSF = next;
             state.interiors.unsavedMix = true;
+            // Set hasAssignedSF true if any assigned
+            state.interiors.hasAssignedSF = Object.values(next).some(v => Number(v) > 0);
             state.interiors.selectedMixScheme = d.key;
             renderClassroomMix();
             renderInteriorsGraph();
@@ -126,6 +128,7 @@ export function renderValuesTable() {
             if (!state.currentData) return;
             state.currentData.grossSF = numeric;
             state.interiors.unsavedMix = true;
+            // Changing gross SF alone does not imply assigned mix; leave hasAssignedSF unchanged
             this.value = `${utils.formatNumber(numeric)} sf`;
             renderClassroomMix();
             renderInteriorsGraph();
@@ -181,6 +184,8 @@ export function renderValuesTable() {
             const numeric = Number(cleaned) || 0;
             state.interiors.mixSF[d.name] = numeric;
             state.interiors.unsavedMix = true;
+            // Update hasAssignedSF based on any positive SF across mixSF
+            state.interiors.hasAssignedSF = Object.values(state.interiors.mixSF).some(v => Number(v) > 0);
             this.value = `${numeric.toLocaleString('en-US')} sf`;
             renderClassroomMix();
             renderInteriorsGraph();
