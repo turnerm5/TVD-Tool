@@ -372,7 +372,7 @@ export function renderClassroomMix() {
             .attr('class', 'text-right program-table-input editable-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
             .attr('data-room', d => d.name)
             .attr('data-category', 'C Interiors')
-            .attr('value', d => utils.formatCurrency(Number(d.rateInteriors) || 0))
+            .attr('value', d => utils.formatCurrency(Number(d.rateInteriors) || 0, 0))
             .on('focus', function(event, row) {
                 const roomName = this.dataset.room;
                 const category = this.dataset.category;
@@ -401,13 +401,13 @@ export function renderClassroomMix() {
                     roomObj[category] = newNumeric;
                 }
                 state.interiors.unsavedMix = true;
-                this.value = utils.formatCurrency(newNumeric || 0);
+                this.value = utils.formatCurrency(newNumeric || 0, 0);
                 renderMixTable();
                 renderInteriorsGraph();
             })
             .on('blur', function() {
                 const cleaned = utils.parseNumberFromInput(this.value);
-                this.value = utils.formatCurrency(cleaned || 0);
+                this.value = utils.formatCurrency(cleaned || 0, 0);
                 this.classList.remove('border-red-500');
                 this.classList.remove('ring-red-500');
             });
@@ -419,7 +419,7 @@ export function renderClassroomMix() {
             .attr('class', 'text-right program-table-input editable-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
             .attr('data-room', d => d.name)
             .attr('data-category', 'D Services')
-            .attr('value', d => utils.formatCurrency(Number(d.rateServices) || 0))
+            .attr('value', d => utils.formatCurrency(Number(d.rateServices) || 0, 0))
             .on('focus', function(event, row) {
                 const roomName = this.dataset.room;
                 const category = this.dataset.category;
@@ -448,13 +448,13 @@ export function renderClassroomMix() {
                     roomObj[category] = newNumeric;
                 }
                 state.interiors.unsavedMix = true;
-                this.value = utils.formatCurrency(newNumeric || 0);
+                this.value = utils.formatCurrency(newNumeric || 0, 0);
                 renderMixTable();
                 renderInteriorsGraph();
             })
             .on('blur', function() {
                 const cleaned = utils.parseNumberFromInput(this.value);
-                this.value = utils.formatCurrency(cleaned || 0);
+                this.value = utils.formatCurrency(cleaned || 0, 0);
                 this.classList.remove('border-red-500');
                 this.classList.remove('ring-red-500');
             });
@@ -466,7 +466,7 @@ export function renderClassroomMix() {
             .attr('class', 'text-right program-table-input editable-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
             .attr('data-room', d => d.name)
             .attr('data-category', 'E Equipment and Furnishings')
-            .attr('value', d => utils.formatCurrency(Number(d.rateEquipment) || 0))
+            .attr('value', d => utils.formatCurrency(Number(d.rateEquipment) || 0, 0))
             .on('focus', function(event, row) {
                 const roomName = this.dataset.room;
                 const category = this.dataset.category;
@@ -495,17 +495,17 @@ export function renderClassroomMix() {
                     roomObj[category] = newNumeric;
                 }
                 state.interiors.unsavedMix = true;
-                this.value = utils.formatCurrency(newNumeric || 0);
+                this.value = utils.formatCurrency(newNumeric || 0, 0);
                 renderMixTable();
                 renderInteriorsGraph();
             })
             .on('blur', function() {
                 const cleaned = utils.parseNumberFromInput(this.value);
-                this.value = utils.formatCurrency(cleaned || 0);
+                this.value = utils.formatCurrency(cleaned || 0, 0);
                 this.classList.remove('border-red-500');
                 this.classList.remove('ring-red-500');
             });
-        tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => utils.formatCurrencySmall(d.rateInteriors + d.rateServices + d.rateEquipment));
+        tr.append('td').attr('class', 'px-4 py-2 text-right font-semibold').text(d => utils.formatCurrency(d.rateInteriors + d.rateServices + d.rateEquipment, 0));
 
         // Totals row with highlighting reflecting Building Efficiency thresholds
         const tfoot = table.append('tfoot');
@@ -542,10 +542,10 @@ export function renderClassroomMix() {
             const pct = totalGSF > 0 ? (totals.sf / totalGSF) * 100 : 0;
             return `${pct.toFixed(1)}%`;
         });
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrencySmall(blendedInteriors));
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrencySmall(blendedServices));
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrencySmall(blendedEquipment));
-        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrencySmall(blendedTotal));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrency(blendedInteriors, 0));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrency(blendedServices, 0));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrency(blendedEquipment, 0));
+        totalRow.append('td').attr('class', 'px-4 py-2 text-right font-bold text-blue-900').text(() => sumSFForBlend === 0 ? '-' : utils.formatCurrency(blendedTotal, 0));
 
         // Building Efficiency row (NSF / GSF)
         const beRow = tfoot.append('tr').attr('class', 'border-t');
@@ -747,7 +747,7 @@ export function renderInteriorsGraph() {
         .append('div')
         .attr('class', 'current-value-label')
         .style('color', '#9ca3af')
-        .text(d => utils.formatCurrency(d.currentTarget));
+        .text(d => utils.formatCurrency(d.currentTarget, 0));
     currentValueGroup
         .style('top', d => (yScale(d.currentTarget) - paddingTop - 10) + 'px')
         .style('bottom', null);
@@ -756,7 +756,7 @@ export function renderInteriorsGraph() {
     blendedValueGroup
         .append('div')
         .attr('class', 'current-value-label')
-        .text(d => utils.formatCurrency(d.blendedTarget));
+        .text(d => utils.formatCurrency(d.blendedTarget, 0));
     blendedValueGroup
         .style('top', d => (yScale(d.blendedTarget) - paddingTop - 10) + 'px')
         .style('bottom', null);
