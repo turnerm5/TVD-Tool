@@ -161,6 +161,115 @@ export function calculateTotalCostOfWork(costOfWorkItems) {
 }
 
 /**
+ * Computes blended target $/SF for Interiors categories based on the current Classroom Mix.
+ * Includes auto-calculated Circulation/Support to fill to Gross SF.
+ * @returns {{ blendedByCategory: Record<string, number>, totalEffectiveSf: number }}
+ */
+export function computeBlendedInteriorsTargetsFromCurrentMix() {
+    const categories = ['C Interiors', 'D Services', 'E Equipment and Furnishings'];
+    const roomTypes = state.interiors && Array.isArray(state.interiors.targetValues)
+        ? state.interiors.targetValues
+        : [];
+    const totalGSF = Number(state.currentData?.grossSF) || 0;
+
+    // Build effective SF by room (include Circulation/Support as the remainder to GSF)
+    const includeInNSF = (rt) => (rt.includeInNSF !== false);
+    const programSF = roomTypes.reduce((sum, rt) => {
+        const sf = Number(state.interiors?.mixSF?.[rt.name]) || 0;
+        return includeInNSF(rt) ? sum + sf : sum;
+    }, 0);
+    const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false) && /circulation|support/i.test(rt.name));
+    const circulationSF = Math.max(0, totalGSF - programSF);
+    const effectiveMixByRoom = new Map();
+    roomTypes.forEach(rt => {
+        let sf = 0;
+        if (includeInNSF(rt)) {
+            sf = Number(state.interiors?.mixSF?.[rt.name]) || 0;
+        } else if (circulationRoomType && rt.name === circulationRoomType.name) {
+            sf = circulationSF;
+        }
+        effectiveMixByRoom.set(rt.name, sf);
+    });
+
+    const totalEffectiveSf = Array.from(effectiveMixByRoom.values()).reduce((a, b) => a + b, 0);
+    const blendedByCategory = {};
+    if (totalEffectiveSf > 0) {
+        categories.forEach(cat => {
+            const weighted = roomTypes.reduce((sum, rt) => {
+                const sf = effectiveMixByRoom.get(rt.name) || 0;
+                const rate = Number(rt[cat]) || 0;
+                return sum + (sf * rate);
+            }, 0);
+            blendedByCategory[cat] = weighted / totalEffectiveSf;
+        });
+    } else {
+        categories.forEach(cat => { blendedByCategory[cat] = 0; });
+    }
+
+    return { blendedByCategory, totalEffectiveSf };
+}
+
+/**
+ * Applies blended Interiors targets to the current scheme and optionally keeps budget constant.
+ * Prompts the user whether to keep the budget the same.
+ * @param {Record<string, number>} blendedByCategory - Map of category name to blended $/SF
+ * @param {Array} components - state.currentScheme.costOfWork array
+ * @param {object} ui - UI module for confirmations
+ * @param {boolean} [askKeepBudgetSame=true] - Whether to prompt to keep budget constant
+ * @returns {Promise<boolean>} - Resolves to whether "Keep Budget Same" was chosen
+ */
+export async function applyInteriorsTargetsUpdateFromBlended(blendedByCategory, components, ui, askKeepBudgetSame = true) {
+    const toUpdate = ['C Interiors', 'D Services', 'E Equipment and Furnishings'];
+    const preCow = calculateTotalCostOfWork(components);
+
+    components.forEach(c => {
+        if (toUpdate.includes(c.name)) {
+            c.target_value = Math.max(0, Number(blendedByCategory[c.name]) || 0);
+        }
+    });
+
+    let keepBudgetSame = false;
+    if (askKeepBudgetSame) {
+        keepBudgetSame = await ui.showConfirmDialog(
+            'Keep Budget the Same?',
+            'Update the other categories so the current estimate stays identical?',
+            'Yes, Keep Budget Same',
+            'No, Only Update These Three'
+        );
+
+        if (keepBudgetSame) {
+            const postCowUnbalanced = calculateTotalCostOfWork(components);
+            const deltaCow = postCowUnbalanced - preCow;
+            if (Math.abs(deltaCow) > 0.01) {
+                const others = components.filter(c => !toUpdate.includes(c.name) && Number(c.square_footage) > 0);
+                const othersCow = others.reduce((sum, c) => sum + ((Number(c.target_value) || 0) * (Number(c.square_footage) || 0)), 0);
+                if (othersCow > 0) {
+                    let factor = (othersCow - deltaCow) / othersCow;
+                    if (!isFinite(factor)) factor = 1;
+                    if (factor < 0) factor = 0;
+                    others.forEach(c => {
+                        const newTv = (Number(c.target_value) || 0) * factor;
+                        c.target_value = Math.max(0, newTv);
+                    });
+                }
+            }
+        }
+    }
+
+    clearUnsavedMixFlag();
+    return keepBudgetSame;
+}
+
+/**
+ * Marks Interiors mix as saved by clearing the unsaved flag.
+ */
+function clearUnsavedMixFlag() {
+    if (state && state.interiors) {
+        state.interiors.unsavedMix = false;
+    }
+}
+
+/**
  * Calculates the value for a single component using the same logic as calculateTotalCostOfWork.
  * @param {object} component - A cost of work component object.
  * @returns {number} The calculated value for this component.
@@ -262,6 +371,7 @@ export function calculateSeriesTotal(series, indirectCostPercentages) {
  * @param {object} ui - The UI module for dialogs and alerts
  * @param {function} renderCallback - Callback function to re-render after snapshot
  */
+
 export async function takeSnapshot(state, ui, renderCallback) {
     if (state.snapshots.length >= 4) {
         ui.showAlert(
@@ -270,7 +380,24 @@ export async function takeSnapshot(state, ui, renderCallback) {
         );
         return;
     }
-    
+    // If the user is on the Interiors view and has unsaved mix changes, warn and offer to update
+    if (state.currentView === 'interiors' && state.interiors?.unsavedMix) {
+        const confirmUpdate = await ui.showConfirmDialog(
+            'Unsaved Classroom Mix',
+            'You have changed the Classroom Mix but have not updated the Target Values. Update them now before taking a snapshot?',
+            'Yes, Update',
+            'No, Continue'
+        );
+
+        if (confirmUpdate) {
+            const { blendedByCategory, totalEffectiveSf } = computeBlendedInteriorsTargetsFromCurrentMix();
+            if (totalEffectiveSf > 0) {
+                const components = state.currentScheme?.costOfWork || [];
+                await applyInteriorsTargetsUpdateFromBlended(blendedByCategory, components, ui, true);
+            }
+        }
+    }
+
     const snapshotName = await ui.showDialog({
         title: "Take Snapshot",
         placeholder: "Enter a name for this snapshot",
