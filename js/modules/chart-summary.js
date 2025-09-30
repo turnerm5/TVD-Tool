@@ -67,6 +67,16 @@ export function renderSummaryCharts() {
         return;
     }
     
+    // Remove any lingering empty-state placeholders while preserving chart containers
+    const summaryGrid = d3.select("#summary-chart-container");
+    summaryGrid
+        .selectAll(':scope > *')
+        .filter(function() {
+            const id = this.id;
+            return id !== 'summary-bar-chart-container' && id !== 'summary-stacked-chart-container';
+        })
+        .remove();
+    
     const seriesNames = allSeriesData.map(d => d.name);
             const originalPredesignScheme = utils.getBaselineScheme();
             // Prefer names from the snapshot data; fallback to initialTargetValues if needed
@@ -96,9 +106,10 @@ function renderEmptyState() {
     const legendContainer = d3.select(dom.summaryLegend);
     legendContainer.html("");
     
-    // Render empty state message in the left chart container
+    // Render empty state message spanning the full grid width (top area)
     const container = d3.select("#summary-chart-container");
     container.append("div")
+        .attr("id", "summary-empty-state")
         .attr("class", "w-full flex col-span-5 items-center justify-center h-96 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg")
         .append("div")
         .attr("class", "text-center w-full")
@@ -366,6 +377,20 @@ export function updateSummary() {
 
     const gmp = state.originalData.phase2.totalProjectBudget;
 
+    // If there are no snapshots, do not render the summary panel (avoid bottom placeholder)
+    const allSeries = [...state.snapshots];
+    if (allSeries.length === 0) {
+        // Hide the summary panel when no snapshots exist
+        if (summaryPanel && !summaryPanel.classList.contains('hidden')) {
+            summaryPanel.classList.add('hidden');
+        }
+        return;
+    }
+    // Ensure the summary panel is visible when snapshots exist
+    if (summaryPanel && summaryPanel.classList.contains('hidden')) {
+        summaryPanel.classList.remove('hidden');
+    }
+
     // --- Header ---
     const header = document.createElement('div');
     header.className = 'text-center mb-4';
@@ -376,26 +401,6 @@ export function updateSummary() {
 
     // --- Data Series Table ---
     // Do not include a baseline series in the table; only show snapshots
-    const allSeries = [...state.snapshots];
-
-    // Check if no schemes are present (empty state)
-    if (allSeries.length === 0) {
-        const emptyStateDiv = document.createElement('div');
-        emptyStateDiv.className = 'flex items-center justify-center py-12';
-        emptyStateDiv.innerHTML = `
-            <div class="text-center">
-                <div class="text-gray-400 mb-4">
-                    <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No Snapshots Available</h3>
-                <p class="text-gray-500">Please take a snapshot to begin.</p>
-            </div>
-        `;
-        summaryPanel.appendChild(emptyStateDiv);
-        return;
-    }
 
     console.log('Rendering summary table. All series data:', allSeries);
 
@@ -412,6 +417,7 @@ export function updateSummary() {
             <th scope="col" class="px-6 py-3 text-right">GSF</th>
             <th scope="col" class="px-6 py-3 text-right">ASF</th>
             <th scope="col" class="px-6 py-3 text-right">$/GSF</th>
+            <th scope="col" class="px-6 py-3 text-right">$/ASF</th>
             <th scope="col" class="px-6 py-3 text-right">Budget &#x0394;</th>
         </tr>
     `;
@@ -422,12 +428,26 @@ export function updateSummary() {
         const { cowTotal, indirectTotal, totalProjectCost } = totals;
 
         const grossSF = series.grossSF || 0;
-        
-        // Assignable SF is calculated from the 'C Interiors' component's square footage
-        const cInteriorsComponent = series.costOfWork.find(c => c.name === 'C Interiors');
-        const assignedSF = cInteriorsComponent ? Math.round(cInteriorsComponent.square_footage) : 0;
+
+        // Assignable SF (ASF) = sum of Interiors Classroom Mix SF for NSF-included types
+        const assignedSF = (() => {
+            const interiors = series.interiors || {};
+            const mixSF = interiors.mixSF || {};
+            const targetValues = Array.isArray(interiors.targetValues) ? interiors.targetValues : [];
+            if (targetValues.length === 0) {
+                // Fallback: sum all mixSF values if targetValues not available
+                return Math.round(Object.values(mixSF).reduce((sum, v) => sum + (Number(v) || 0), 0));
+            }
+            const nsfSum = targetValues.reduce((sum, rt) => {
+                const include = (rt.includeInNSF !== false);
+                const sf = Number(mixSF[rt.name]) || 0;
+                return include ? sum + sf : sum;
+            }, 0);
+            return Math.round(nsfSum);
+        })();
 
         const costPerGSF = grossSF > 0 ? totalProjectCost / grossSF : 0;
+        const costPerASF = assignedSF > 0 ? totalProjectCost / assignedSF : 0;
         const variance = totalProjectCost - gmp;
         
         const row = tbody.insertRow();
@@ -440,6 +460,7 @@ export function updateSummary() {
             <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(assignedSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerGSF)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerASF)}</td>
             <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
                 ${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}
             </td>

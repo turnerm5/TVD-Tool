@@ -38,11 +38,11 @@ export function getBaselineName() {
 }
 
 /**
- * Formats a number into a currency string (e.g., $123.45).
+ * Formats a number into a currency string with commas as thousands separators (e.g., $1,234.56).
  * @param {number} d - The number to format.
  * @returns {string} The formatted currency string.
  */
-export const formatCurrency = (d) => `$${d.toFixed(2)}`;
+export const formatCurrency = (d) => `$${d.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 /**
  * Formats a large number into a currency string with no decimal places (e.g., $1,234,567).

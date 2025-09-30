@@ -74,6 +74,7 @@ function processData(data) {
  * @param {object} data - The project data object.
  * @param {string} [fileName='Sample Data'] - The name of the file being loaded.
  */
+
 export function loadData(data, fileName = 'Workshop 1') {
     if (!data.phase2) {
         alert("Invalid JSON format. Must contain a 'phase2' object at the top level.");
@@ -91,8 +92,8 @@ export function loadData(data, fileName = 'Workshop 1') {
     state.clearSnapshots();
     if (data.snapshots && Array.isArray(data.snapshots)) {
         data.snapshots.forEach(snapshot => {
-            const processedSnapshot = processData({ ...data, phases: { phase2: snapshot } });
-            state.addSnapshot(processedSnapshot.phase2);
+            // Snapshots in saved files are already full snapshot objects; add them directly
+            state.addSnapshot(snapshot);
         });
     }
 
