@@ -59,7 +59,12 @@ export function renderValuesTable() {
 
     // Program scheme quick-select buttons (Max Lab, Mix, Max Student Success)
     const schemesBar = wrapper.append('div')
-        .attr('class', 'mb-3 flex flex-wrap items-center gap-2');
+        .attr('class', 'mb-6 flex flex-wrap items-center gap-2');
+
+    schemesBar.append('label')
+        .attr('for', 'overall-sf-input')
+        .attr('class', 'text-xs font-semibold text-gray-700 mb-1')
+        .text('Interiors Mix');
 
     const schemes = Array.isArray(state.currentData?.interiorMixSchemes)
         ? state.currentData.interiorMixSchemes
@@ -87,7 +92,7 @@ export function renderValuesTable() {
 
     // Overall SF input
     const overallSFContainer = wrapper.append('div')
-        .attr('class', 'mb-3');
+        .attr('class', 'mb-6');
 
     const overallSFInputGroup = overallSFContainer.append('div')
         .attr('class', 'flex flex-col');
