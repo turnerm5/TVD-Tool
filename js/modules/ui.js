@@ -65,11 +65,11 @@ export function renderGlobalEstimate() {
         <div class="flex items-baseline gap-3">
             <div>
                 <span class="text-gray-600">Total Estimate: </span>
-                <span class="text-gray-900">${utils.formatCurrencyBig(totalProjectCost)}</span>
+                <span class="text-gray-900">${utils.formatCurrency(totalProjectCost, 0)}</span>
             </div>
             <div class="text-xs font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
                 <span>Δ: </span>
-                <span>${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}</span>
+                <span>${variance >= 0 ? '+' : ''}${utils.formatCurrency(variance, 0)}</span>
             </div>
         </div>
     `;

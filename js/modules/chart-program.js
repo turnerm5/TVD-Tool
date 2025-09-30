@@ -140,19 +140,19 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
 
     cowRows.append('td')
         .attr('class', 'px-6 py-4')
-        .text(d => utils.formatCurrency(d.target_value));
+        .text(d => utils.formatCurrency(d.target_value, 0));
 
     cowRows.append('td')
         .attr('class', 'px-6 py-4')
-        .html(d => utils.formatCurrencyBig(utils.calculateComponentValue(d)));
+        .html(d => utils.formatCurrency(utils.calculateComponentValue(d), 0));
 
     const grossSFForCalcs = Number(state.currentData?.grossSF) || 0;
-    const cowPerSFDisplay = grossSFForCalcs > 0 ? utils.formatCurrency(cowTotalTargetValue / grossSFForCalcs) : '-';
+    const cowPerSFDisplay = grossSFForCalcs > 0 ? utils.formatCurrency(cowTotalTargetValue / grossSFForCalcs, 2) : '-';
     const cowSubtotalRow = tbody.append('tr').attr('class', 'bg-blue-100 border-t border-blue-300 font-semibold');
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text('Cost of Work Subtotal');
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text('-');
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(cowPerSFDisplay);
-    cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(utils.formatCurrencyBig(cowTotalTargetValue));
+    cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(utils.formatCurrency(cowTotalTargetValue, 0));
 
     const totalCow = utils.calculateTotalCostOfWork(phaseCostOfWork);
     let indirectsTotal = 0;
@@ -174,17 +174,17 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         indirectRows.append('td').attr('class', 'px-6 py-4').html(d => {
             const value = utils.calculateComponentValue(d);
             indirectsTotal += value;
-            return utils.formatCurrencyBig(value);
+            return utils.formatCurrency(value, 0);
         });
     }
 
     const grandTotal = totalCow + indirectsTotal;
-    const grandPerSFDisplay = grossSFForCalcs > 0 ? utils.formatCurrency(grandTotal / grossSFForCalcs) : '-';
+    const grandPerSFDisplay = grossSFForCalcs > 0 ? utils.formatCurrency(grandTotal / grossSFForCalcs, 2) : '-';
     const grandTotalRow = tbody.append('tr').attr('class', 'bg-gray-200 border-t-2 border-gray-400 font-bold');
     grandTotalRow.append('td').attr('class', 'px-6 py-4 font-bold text-gray-900 uppercase').text('Grand Total');
     grandTotalRow.append('td').attr('class', 'px-6 py-4').text('-');
     grandTotalRow.append('td').attr('class', 'px-6 py-4').text(grandPerSFDisplay);
-    grandTotalRow.append('td').attr('class', 'px-6 py-4 font-bold text-gray-900').text(utils.formatCurrencyBig(grandTotal));
+    grandTotalRow.append('td').attr('class', 'px-6 py-4 font-bold text-gray-900').text(utils.formatCurrency(grandTotal, 0));
 }
 
 export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {

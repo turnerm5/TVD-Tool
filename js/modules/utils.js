@@ -39,18 +39,20 @@ export function getBaselineName() {
 }
 
 /**
- * Formats a number into a currency string with commas as thousands separators (e.g., $1,234.56).
- * @param {number} d - The number to format.
+ * Formats a number into a currency string with commas as thousands separators.
+ * Allows specifying decimal places.
+ * Examples: formatCurrency(1234.56) => "$1,234.56", formatCurrency(1234.56, 0) => "$1,235"
+ * @param {number} value - The number to format.
+ * @param {number} [decimals=2] - Number of decimal places to show.
  * @returns {string} The formatted currency string.
  */
-export const formatCurrency = (d) => `$${d.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-/**
- * Formats a large number into a currency string with no decimal places (e.g., $1,234,567).
- * @param {number} d - The number to format.
- * @returns {string} The formatted currency string.
- */
-export const formatCurrencyBig = (d) => `$${Math.round(d).toLocaleString('en-US')}`;
+export const formatCurrency = (value, decimals = 2) => {
+    const safeNumber = Number(value);
+    if (!isFinite(safeNumber)) return '$0.00';
+    const fractionDigits = Math.max(0, Math.floor(Number(decimals)) || 0);
+    const roundedValue = fractionDigits === 0 ? Math.round(safeNumber) : safeNumber;
+    return `$${roundedValue.toLocaleString('en-US', { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits })}`;
+};
 
 /**
  * Formats a large number into a smallcurrency string with no decimal places (e.g., $1.2M or $200k).

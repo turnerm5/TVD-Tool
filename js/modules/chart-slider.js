@@ -243,7 +243,7 @@ export function renderChart() {
         
         // Always update the current value label and position it to the right of the black bar
         const valueGroup = d3.select(this).select(".value-label-group");
-        valueGroup.select(".current-value-label").text(utils.formatCurrency(d.target_value));
+        valueGroup.select(".current-value-label").text(utils.formatCurrency(d.target_value, 0));
         valueGroup.style("top", yScale(d.target_value) - 10 + "px").style("bottom", null);
 
         const ghostBar = d3.select(this).select(".ghost-rom");

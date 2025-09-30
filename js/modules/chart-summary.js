@@ -364,7 +364,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
         .attr("stroke-dasharray", d => d.isIndirect ? "3, 3" : "none")
         .attr("fill-opacity", d => d.isIndirect ? 0.7 : 1.0)
         .append("title")
-        .text(d => `${d.name}: ${utils.formatCurrency(d.value)}`);
+        .text(d => `${d.name}: ${utils.formatCurrency(d.value, 2)}`);
 
     // --- GMP Line ---
     g.append("line")
@@ -591,15 +591,15 @@ export function updateSummary() {
         row.className = 'bg-white border-b';
         row.innerHTML = `
             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${series.name}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(cowTotal)}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrencyBig(indirectTotal)}</td>
-            <td class="px-6 py-4 text-right font-semibold">${utils.formatCurrencyBig(totalProjectCost)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrency(cowTotal, 0)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrency(indirectTotal, 0)}</td>
+            <td class="px-6 py-4 text-right font-semibold">${utils.formatCurrency(totalProjectCost, 0)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(grossSF)}</td>
             <td class="px-6 py-4 text-right">${utils.formatNumber(assignedSF)}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerGSF)}</td>
-            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerASF)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerGSF, 0)}</td>
+            <td class="px-6 py-4 text-right">${utils.formatCurrency(costPerASF, 0)}</td>
             <td class="px-6 py-4 text-right font-medium ${variance > 0 ? 'text-red-600' : 'text-green-600'}">
-                ${variance >= 0 ? '+' : ''}${utils.formatCurrencyBig(variance)}
+                ${variance >= 0 ? '+' : ''}${utils.formatCurrency(variance, 0)}
             </td>
         `;
     });

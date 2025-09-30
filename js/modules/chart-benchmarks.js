@@ -60,7 +60,7 @@ export function render(render) {
                 const caption = leftCol.append('div').attr('class', 'benchmark-caption');
                 caption.append('p')
                     .attr('class', 'text-gray-600 text-base font-bold')
-                    .text(d => `${utils.formatCurrency(d.overall_sf_cost)} / SF`);
+                    .text(d => `${utils.formatCurrency(d.overall_sf_cost, 0)} / SF`);
                 caption.append('p')
                     .attr('class', 'text-gray-600 text-base')
                     .html(d => `<b>${utils.formatNumber(d.grossSF)} SF</b>`);
@@ -82,7 +82,7 @@ export function render(render) {
                 caption.selectAll('p').remove();
                 caption.append('p')
                     .attr('class', 'text-gray-600 font-bold')
-                    .text(d => `${utils.formatCurrency(d.overall_sf_cost)} / SF`);
+                    .text(d => `${utils.formatCurrency(d.overall_sf_cost, 0)} / SF`);
                 caption.append('p')
                     .attr('class', 'text-gray-600 text-base')
                     .html(d => `<b>${utils.formatNumber(d.grossSF)} SF</b>`);
@@ -161,7 +161,7 @@ export function render(render) {
             .append('tr');
 
         rows.append('td').text(d => d.name);
-        rows.append('td').text(d => utils.formatCurrency(d.cost));
+        rows.append('td').text(d => utils.formatCurrency(d.cost, 0));
         rows.append('td').text(d => d.systemDetail || '-');
 
     } else {
