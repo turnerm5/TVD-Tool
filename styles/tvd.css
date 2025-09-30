@@ -12,7 +12,7 @@ body {
     padding-bottom: 6rem; /* Increased padding */
     width: 100%;
     height: 700px;
-    background-color: #f8fafc;
+    background-color: #ffffff;
 }
 
 .y-axis-labels {
@@ -47,15 +47,15 @@ body {
 /* New Benchmark Range Styling */
 .benchmark-range {
     position: absolute;
-    left: 25%;
-    width: 50%;
+    left: 32.5%;
+    width: 35%;
     background-color: #dbeafe; /* light blue */
     z-index: 1;
 }
 .benchmark-cap {
     position: absolute;
-    left: 25%;
-    width: 50%;
+    left: 32.5%;
+    width: 35%;
     height: 2px;
     background-color: #38bdf8;
     z-index: 1;
@@ -63,15 +63,15 @@ body {
 .target-value {
     position: absolute;
     left: 20%;
-    width: 60%;
+    width: 40%;
     background-color: #16a34a; /* Green */
     height: 3px;
     z-index: 2;
 }
 .current-rom {
     position: absolute;
-    left: 20%;
-    width: 60%;
+    left: 27.5%;
+    width: 45%;
     background-color: #1f2937;
     height: 6px;
     cursor: ns-resize;
@@ -88,8 +88,8 @@ body {
 }
 .ghost-rom {
     position: absolute;
-    left: 20%;
-    width: 60%;
+    left: 27.5%;
+    width: 45%;
     background-color: #1f2937;
     height: 6px;
     opacity: 0.15;
@@ -162,7 +162,7 @@ body {
 .value-label-group {
     position: absolute;
     width: max-content;
-    left: 80%; /* Align with the right edge of the ROM bar */
+    left: 72.5%; /* Align with the right edge of the ROM bar */
     margin-left: 8px; /* Add a small, consistent gap */
     font-size: 0.8rem;
     font-weight: 600;
