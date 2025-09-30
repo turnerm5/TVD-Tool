@@ -407,7 +407,27 @@ export async function takeSnapshot(state, ui, renderCallback) {
         isConfirmation: false
     });
     
-    if (snapshotName) {
+    let finalSnapshotName = snapshotName;
+    while (finalSnapshotName) {
+        // Check for duplicate snapshot name
+        const nameExists = state.snapshots.some(s => s.name === finalSnapshotName);
+        if (nameExists) {
+            await ui.showAlert(
+                "Duplicate Snapshot Name",
+                `A snapshot named "${finalSnapshotName}" already exists. Please choose a different name.`
+            );
+            // Prompt again for a new name
+            finalSnapshotName = await ui.showDialog({
+                title: "Take Snapshot",
+                placeholder: "Enter a name for this snapshot",
+                confirmText: "Create Snapshot",
+                cancelText: "Cancel",
+                isConfirmation: false
+            });
+            continue;
+        }
+
+        // Proceed to create the snapshot
         const phase2CostOfWork = state.currentScheme.costOfWork;
         const snapshotCostOfWork = phase2CostOfWork.map(c => ({
             name: c.name,
@@ -426,7 +446,7 @@ export async function takeSnapshot(state, ui, renderCallback) {
         }));
 
         const snapshot = {
-            name: snapshotName,
+            name: finalSnapshotName,
             grossSF: state.currentData.grossSF,
             costOfWork: snapshotCostOfWork,
             floorData,
@@ -445,5 +465,6 @@ export async function takeSnapshot(state, ui, renderCallback) {
         persistence.save(state);
         console.log('All snapshots:', state.snapshots);
         renderCallback(); // Re-render to update the summary view
+        break;
     }
 }
