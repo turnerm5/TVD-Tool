@@ -115,8 +115,11 @@ function renderEmptyState() {
         dom.programComparison.classList.add('hidden');
     }
     
-    // Render empty state message spanning the full grid width (top area)
+    // Ensure we do not duplicate the empty-state placeholder on re-renders
     const container = d3.select("#summary-chart-container");
+    container.select('#summary-empty-state').remove();
+    
+    // Render empty state message spanning the full grid width (top area)
     container.append("div")
         .attr("id", "summary-empty-state")
         .attr("class", "w-full flex col-span-5 items-center justify-center h-96 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg")
