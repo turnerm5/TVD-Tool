@@ -59,7 +59,7 @@ export function renderValuesTable() {
 
     // Program scheme quick-select buttons (Max Lab, Mix, Max Student Success)
     const schemesBar = wrapper.append('div')
-        .attr('class', 'mb-6 flex flex-wrap items-center gap-2');
+        .attr('class', 'mb-10 flex flex-wrap items-center gap-2');
 
     schemesBar.append('label')
         .attr('for', 'overall-sf-input')
@@ -92,7 +92,7 @@ export function renderValuesTable() {
 
     // Overall SF input
     const overallSFContainer = wrapper.append('div')
-        .attr('class', 'mb-6');
+        .attr('class', 'mb-10');
 
     const overallSFInputGroup = overallSFContainer.append('div')
         .attr('class', 'flex flex-col');

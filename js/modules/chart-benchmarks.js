@@ -47,7 +47,7 @@ export function render(render) {
                 const header = content.append('div')
                     .attr('class', 'card-header flex items-center gap-3 col-span-1 md:col-span-2');
                 header.append('div').attr('class', 'benchmark-label-inline').text(d => d.id);
-                header.append('h4').attr('class', 'font-semibold text-lg').text(d => d.name);
+                header.append('h3').attr('class', 'font-semibold').text(d => d.name);
 
                 const leftCol = content.append('div').attr('class', 'left-col');
                 const relativeDiv = leftCol.append('div').attr('class', 'relative');

@@ -199,8 +199,8 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     const overallCard = topLayout.append('div')
         .attr('class', 'col-span-1 bg-white p-4 rounded-lg shadow-md border border-gray-200');
 
-    overallCard.append('h2')
-        .attr('class', 'text-lg font-bold text-gray-700 mb-2')
+    overallCard.append('h3')
+        .attr('class', 'font-semibold text-gray-700 mb-3')
         .text('Overall Square Footage');
 
     const overallSFContainer = overallCard.append('div')
@@ -271,7 +271,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
         .attr('class', 'flex justify-between items-center mb-3');
     
     headerContainer.append('h3')
-        .attr('class', 'text-lg font-bold text-gray-800')
+        .attr('class', 'font-semibold text-gray-800')
         .text('Floors');
     
     // Add estimate display and button container

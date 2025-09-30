@@ -545,17 +545,20 @@ function renderLockControls() {
     // --- Lock Set Buttons ---
     if (lockSets.length > 0) {
         const lockSetContainer = dom.lockControls.append('div')
-            .attr('class', 'mb-4 p-2 bg-gray-100 rounded');
+            .attr('class', 'mb-4');
 
         lockSetContainer.append('h4')
             .attr('class', 'font-bold text-sm mb-2')
             .text('TVD Decision Examples');
 
-        lockSetContainer.selectAll('.lock-set-btn')
+        lockSetContainer.selectAll('button.lock-set-btn')
             .data(lockSets)
             .enter()
             .append('button')
-            .attr('class', 'lock-set-btn w-full text-left text-sm p-1.5 rounded hover:bg-gray-300 transition mb-1')
+            .attr('class', d => {
+                const isSelected = state.selectedLockSetName === d.name;
+                return `lock-set-btn w-full text-left text-sm px-3 py-1.5 rounded-md font-medium border mb-1 ${isSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`;
+            })
             .text(d => d.name)
             .on('click', (event, d) => {
                 const allComponentNames = costOfWork.map(c => c.name);
@@ -569,6 +572,8 @@ function renderLockControls() {
                         state.lockedCostOfWork.add(key);
                     }
                 });
+
+                state.selectedLockSetName = d.name;
                 render();
             });
     }
@@ -589,10 +594,10 @@ function renderLockControls() {
         .attr('class', d => {
             const key = `${phaseKey}-${d.name}`;
             const isLocked = state.lockedCostOfWork.has(key);
-            return `component-btn w-full text-left text-sm p-2 rounded mb-1 transition ${
-                isLocked 
-                    ? 'bg-red-200 border-2 border-red-400 text-red-800' 
-                    : 'bg-gray-100 hover:bg-gray-200 border-2 border-transparent'
+            return `component-btn w-full text-left text-sm px-3 py-1.5 rounded-md font-medium border mb-1 ${
+                isLocked
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
             }`;
         })
         .text(d => d.name)
@@ -603,6 +608,8 @@ function renderLockControls() {
             } else {
                 state.lockedCostOfWork.add(key);
             }
+            // Manual toggles clear any selected lock set highlight
+            state.selectedLockSetName = null;
             render();
         });
 
@@ -612,7 +619,7 @@ function renderLockControls() {
     dom.lockControls.append('div')
         .attr('class', 'mt-4') // Add some space above the button
         .append('button')
-        .attr('class', 'w-full text-sm p-1.5 rounded bg-gray-200 hover:bg-gray-300 transition')
+        .attr('class', 'w-full text-sm px-3 py-1.5 rounded-md font-medium border bg-white text-gray-700 border-gray-300 hover:bg-gray-50 transition')
         .text(anyLocked ? 'Unlock All' : 'Lock All')
         .on('click', () => {
             const currentlyAnyLocked = costOfWork.some(c => state.lockedCostOfWork.has(`${phaseKey}-${c.name}`));
@@ -624,6 +631,8 @@ function renderLockControls() {
                 // Lock all components
                 costOfWork.forEach(c => state.lockedCostOfWork.add(`${phaseKey}-${c.name}`));
             }
+            // Clear selected lock set when bulk toggling
+            state.selectedLockSetName = null;
             render(); // Re-render the chart and controls
         });
 }

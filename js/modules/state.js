@@ -19,6 +19,8 @@ import * as utils from './utils.js';
 export const state = {
     currentData: null,
     originalData: null,
+    // Currently selected lock set in the Slider view (for UI highlighting only)
+    selectedLockSetName: null,
     interiors: {
         targetValues: [],
         // Stores user-entered square footage by room/classroom type name
@@ -89,6 +91,7 @@ export const state = {
         this.currentData = JSON.parse(JSON.stringify(this.originalData));
         this.snapshots = [];
         this.lockedCostOfWork.clear();
+        this.selectedLockSetName = null;
         this.predesignDeleted = false;
         this.calculateIndirectCostPercentages();
         
