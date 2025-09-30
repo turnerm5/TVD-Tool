@@ -74,7 +74,7 @@ function processData(data) {
  * @param {object} data - The project data object.
  * @param {string} [fileName='Sample Data'] - The name of the file being loaded.
  */
-export function loadData(data, fileName = 'Sample Data') {
+export function loadData(data, fileName = 'Workshop 1') {
     if (!data.phase2) {
         alert("Invalid JSON format. Must contain a 'phase2' object at the top level.");
         return;
