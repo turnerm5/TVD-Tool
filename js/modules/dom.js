@@ -54,6 +54,11 @@ export const takeSnapshotBtn = document.getElementById('take-snapshot-btn');
 export const totalEstimateDisplay = document.getElementById('total-estimate-display');
 export const globalEstimate = document.getElementById('global-estimate');
 
+// Program Comparison (Summary)
+export const programComparison = document.getElementById('program-comparison');
+export const programComparisonBars = document.getElementById('program-comparison-bars');
+export const programComparisonLegend = document.getElementById('program-comparison-legend');
+
 // Help Modal Elements
 export const helpButton = document.getElementById('help-button');
 export const helpModal = document.getElementById('help-modal');

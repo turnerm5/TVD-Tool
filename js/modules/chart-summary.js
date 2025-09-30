@@ -67,13 +67,13 @@ export function renderSummaryCharts() {
         return;
     }
     
-    // Remove any lingering empty-state placeholders while preserving chart containers
+    // Remove any lingering empty-state placeholders while preserving chart containers and title
     const summaryGrid = d3.select("#summary-chart-container");
     summaryGrid
         .selectAll(':scope > *')
         .filter(function() {
             const id = this.id;
-            return id !== 'summary-bar-chart-container' && id !== 'summary-stacked-chart-container';
+            return id !== 'summary-bar-chart-container' && id !== 'summary-stacked-chart-container' && id !== 'summary-chart-title';
         })
         .remove();
     
@@ -90,8 +90,11 @@ export function renderSummaryCharts() {
     // --- Render Left Chart ---
     renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames);
 
-    // --- Render Right Chart (will be implemented next) ---
+    // --- Render Right Chart ---
     renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpValue);
+
+    // --- Render Program Comparison ---
+    renderProgramComparison(allSeriesData);
 }
 
 /**
@@ -105,6 +108,11 @@ function renderEmptyState() {
     // Clear legend
     const legendContainer = d3.select(dom.summaryLegend);
     legendContainer.html("");
+
+    // Hide Program Comparison section if present
+    if (dom.programComparison) {
+        dom.programComparison.classList.add('hidden');
+    }
     
     // Render empty state message spanning the full grid width (top area)
     const container = d3.select("#summary-chart-container");
@@ -259,6 +267,110 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
 }
 
 /**
+ * Renders Program Comparison stacked bars per snapshot with Interiors donut colors and legend.
+ * Shows total SF label on top of each bar.
+ */
+function renderProgramComparison(allSeriesData) {
+    if (!dom.programComparison || !dom.programComparisonBars) return;
+
+    // Show or hide container based on snapshots presence
+    if (!allSeriesData || allSeriesData.length === 0) {
+        dom.programComparison.classList.add('hidden');
+        return;
+    }
+    dom.programComparison.classList.remove('hidden');
+
+    const barsContainer = d3.select(dom.programComparisonBars);
+    barsContainer.html('');
+
+    // Determine room types from first snapshot's saved interiors (fallback to its mix keys)
+    const first = allSeriesData[0] || {};
+    const firstTargets = Array.isArray(first?.interiors?.targetValues) ? first.interiors.targetValues : [];
+    let displayedRoomTypes = firstTargets.length > 0
+        ? firstTargets.filter(rt => rt.includeInNSF !== false).map(rt => rt.name)
+        : Object.keys(first?.interiors?.mixSF || {});
+
+    // Build data for each snapshot; values are SF per room type
+    const seriesData = allSeriesData.map(series => {
+        const mixSF = (series.interiors && series.interiors.mixSF) ? series.interiors.mixSF : {};
+        const items = displayedRoomTypes.map(name => ({ name, value: Number(mixSF[name]) || 0 }));
+        const total = d3.sum(items, d => d.value);
+        return { name: series.name, items, total };
+    });
+
+    // Color palette identical to Interiors donuts
+    const palette = (d3.schemeTableau10 || d3.schemeCategory10);
+    const color = d3.scaleOrdinal().domain(displayedRoomTypes).range(palette);
+
+    // Layout
+    const margin = { top: 30, right: 30, bottom: 40, left: 20 };
+    const width = barsContainer.node().getBoundingClientRect().width - margin.left - margin.right;
+    const height = 480 - margin.top - margin.bottom;
+
+    const x = d3.scaleBand().domain(seriesData.map(d => d.name)).range([0, width]).padding(0.3);
+    const yMax = d3.max(seriesData, d => d.total) || 1;
+    const y = d3.scaleLinear().domain([0, yMax * 1.1]).range([height, 0]).nice();
+
+    const svg = barsContainer.append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Axes
+    svg.append('g')
+        .attr('transform', `translate(0,${height})`)
+        .call(d3.axisBottom(x))
+        .selectAll('text')
+        .style('font-size', '14px');
+
+    // Stacks per series
+    const seriesGroups = svg.selectAll('.series-group')
+        .data(seriesData)
+        .enter()
+        .append('g')
+        .attr('class', 'series-group')
+        .attr('transform', d => `translate(${x(d.name)},0)`);
+
+    seriesGroups.each(function(d) {
+        let cumulative = 0;
+        const g = d3.select(this);
+        d.items.forEach(item => {
+            const start = cumulative;
+            const end = cumulative + item.value;
+            const yStart = y(start);
+            const yEnd = y(end);
+            const segHeight = Math.max(0, yStart - yEnd);
+
+            // Segment rect
+            g.append('rect')
+                .attr('x', 0)
+                .attr('y', yEnd)
+                .attr('width', x.bandwidth())
+                .attr('height', segHeight)
+                .attr('fill', color(item.name))
+                .append('title')
+                .text(`${item.name}: ${d3.format(',')(Math.round(item.value))} sf`);
+
+            // Per-segment label: single line "Name: X,XXX sf"
+            const placeInside = segHeight >= 18;
+            const labelY = placeInside ? (yEnd + segHeight / 2 + 4) : (yEnd - 6);
+            g.append('text')
+                .attr('x', x.bandwidth() / 2)
+                .attr('y', labelY)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('fill', placeInside ? '#ffffff' : '#000000')
+                .text(`${item.name}: ${d3.format(',')(Math.round(item.value))} sf`);
+
+            cumulative = end;
+        });
+    });
+
+    // Legend removed per request
+}
+
+/**
  * Renders the stacked bar chart (right side).
  * @param {Array} allSeriesData - The array of all data series (original + snapshots).
  * @param {Array} seriesNames - The names of the series.
@@ -395,14 +507,12 @@ export function updateSummary() {
     const header = document.createElement('div');
     header.className = 'text-center mb-4';
     header.innerHTML = `
-        <h2 class="text-lg font-bold text-gray-700">Phase 2 Summary: ${utils.formatCurrencyBig(gmp)} Budget</span></h2>
+        <h2 class="text-lg text-left font-bold text-gray-700">Cost Per Square Foot Comparison</span></h2>
     `;
     summaryPanel.appendChild(header);
 
     // --- Data Series Table ---
     // Do not include a baseline series in the table; only show snapshots
-
-    console.log('Rendering summary table. All series data:', allSeries);
 
     const table = document.createElement('table');
     table.className = 'w-full text-base text-left text-gray-500';
