@@ -15,9 +15,9 @@
  * @description Renders the Benchmarks view.
  */
 
-import { state } from './state.js';
-import * as dom from './dom.js';
-import * as utils from './utils.js';
+import { state } from './state.js?v=2.0.1';
+import * as dom from './dom.js?v=2.0.1';
+import * as utils from './utils.js?v=2.0.1';
 
 /**
  * Renders the Benchmarks view.
@@ -52,7 +52,7 @@ export function render(render) {
                 const leftCol = content.append('div').attr('class', 'left-col');
                 const relativeDiv = leftCol.append('div').attr('class', 'relative');
                 relativeDiv.append('img')
-                    .attr('src', d => d.image)
+                    .attr('src', d => utils.withVersion(d.image))
                     .attr('alt', d => d.name)
                     .attr('class', 'w-full h-auto rounded-md');
                 // No over-image label; we show the inline label in the header above the image
@@ -76,7 +76,7 @@ export function render(render) {
                     .attr('class', 'benchmark-card bg-white p-4 rounded-lg shadow-md border border-gray-200 cursor-pointer transition hover:shadow-lg');
                 // Update header title text
                 update.select('.card-header h4').text(d => d.name);
-                update.select('img').attr('src', d => d.image).attr('alt', d => d.name);
+                update.select('img').attr('src', d => utils.withVersion(d.image)).attr('alt', d => d.name);
                 // Clear and re-append only the caption paragraphs
                 const caption = update.select('.benchmark-caption');
                 caption.selectAll('p').remove();

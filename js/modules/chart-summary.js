@@ -14,11 +14,11 @@
  * @file chart-summary.js
  * @description Renders the summary chart view.
  */
-import { state } from './state.js';
-import * as dom from './dom.js';
-import * as ui from './ui.js';
-import * as utils from './utils.js';
-import * as persistence from './persistence.js';
+import { state } from './state.js?v=2.0.1';
+import * as dom from './dom.js?v=2.0.1';
+import * as ui from './ui.js?v=2.0.1';
+import * as utils from './utils.js?v=2.0.1';
+import * as persistence from './persistence.js?v=2.0.1';
 
 let render;
 export function setRender(fn) {

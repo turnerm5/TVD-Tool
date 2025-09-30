@@ -18,17 +18,17 @@
  */
 
 // --- MODULE IMPORTS ---
-import { state } from './modules/state.js';
-import * as dom from './modules/dom.js';
-import * as ui from './modules/ui.js';
-import * as fileHandlers from './modules/file-handlers.js';
-import * as slider from './modules/chart-slider.js';
-import * as summary from './modules/chart-summary.js';
-import * as program from './modules/chart-program.js';
-import * as interiors from './modules/chart-interiors.js';
-import * as benchmarks from './modules/chart-benchmarks.js';
-import * as utils from './modules/utils.js';
-import * as persistence from './modules/persistence.js';
+import { state } from './modules/state.js?v=2.0.1';
+import * as dom from './modules/dom.js?v=2.0.1';
+import * as ui from './modules/ui.js?v=2.0.1';
+import * as fileHandlers from './modules/file-handlers.js?v=2.0.1';
+import * as slider from './modules/chart-slider.js?v=2.0.1';
+import * as summary from './modules/chart-summary.js?v=2.0.1';
+import * as program from './modules/chart-program.js?v=2.0.1';
+import * as interiors from './modules/chart-interiors.js?v=2.0.1';
+import * as benchmarks from './modules/chart-benchmarks.js?v=2.0.1';
+import * as utils from './modules/utils.js?v=2.0.1';
+import * as persistence from './modules/persistence.js?v=2.0.1';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);

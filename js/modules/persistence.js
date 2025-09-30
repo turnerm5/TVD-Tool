@@ -15,8 +15,23 @@
  * @description Lightweight session persistence for current view and snapshots.
  */
 
-const STORAGE_KEY = 'tvd_tool_session_v1';
-const COOKIE_NAME = 'tvd_session';
+const STORAGE_KEY = 'tvd_tool_session_v2';
+const COOKIE_NAME = 'tvd_session_v2';
+const PREVIOUS_STORAGE_KEYS = ['tvd_tool_session_v1'];
+const PREVIOUS_COOKIE_NAMES = ['tvd_session'];
+
+// On module load, if an old session key exists and new one doesn't, clear the old keys to avoid stale state
+try {
+    const hasNew = localStorage.getItem(STORAGE_KEY);
+    if (!hasNew) {
+        PREVIOUS_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
+        PREVIOUS_COOKIE_NAMES.forEach(name => {
+            document.cookie = `${name}=; Max-Age=0; path=/; samesite=lax`;
+        });
+    }
+} catch (e) {
+    // ignore storage errors
+}
 
 /**
  * Saves the minimal session state to localStorage and sets a presence cookie.

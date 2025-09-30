@@ -15,9 +15,9 @@
  * @description Handles general UI updates and view management for the TVD Tool.
  */
 
-import * as dom from './dom.js';
-import { state } from './state.js';
-import * as utils from './utils.js';
+import * as dom from './dom.js?v=2.0.1';
+import { state } from './state.js?v=2.0.1';
+import * as utils from './utils.js?v=2.0.1';
 import { helpTopics } from '../../data/help-topics.js';
 
 // Forward declare render function to avoid circular dependencies

@@ -15,8 +15,22 @@
  * @description Utility and helper functions for the TVD Tool.
  */
 
-import { state } from './state.js';
-import * as persistence from './persistence.js';
+import { state } from './state.js?v=2.0.1';
+import * as persistence from './persistence.js?v=2.0.1';
+
+// Cache-busting version string used for asset and module URLs
+export const APP_VERSION = '2.0.1';
+
+export function withVersion(url) {
+    try {
+        const u = new URL(url, window.location.href);
+        u.searchParams.set('v', APP_VERSION);
+        return u.pathname + u.search + u.hash;
+    } catch (e) {
+        const hasQuery = url.includes('?');
+        return url + (hasQuery ? '&' : '?') + 'v=' + encodeURIComponent(APP_VERSION);
+    }
+}
 
 /**
  * Returns the baseline scheme from original data, preferring name 'Predesign' if present,

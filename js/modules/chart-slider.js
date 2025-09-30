@@ -15,10 +15,10 @@
  * @description Renders the main interactive slider chart and handles its interactions.
  */
 
-import { state } from './state.js';
-import * as dom from './dom.js';
-import * as utils from './utils.js';
-import * as ui from './ui.js';
+import { state } from './state.js?v=2.0.1';
+import * as dom from './dom.js?v=2.0.1';
+import * as utils from './utils.js?v=2.0.1';
+import * as ui from './ui.js?v=2.0.1';
 
 let render, yScale;
 
@@ -342,7 +342,8 @@ function showBenchmarkTooltip(event, benchmarkData, componentData) {
         .attr('class', 'benchmark-tooltip');
 
     // Use component-specific image if available, otherwise fall back to general project image
-    const imageSource = (benchmarkComponent && benchmarkComponent.image) ? benchmarkComponent.image : benchmarkData.image;
+    const baseImage = (benchmarkComponent && benchmarkComponent.image) ? benchmarkComponent.image : benchmarkData.image;
+    const imageSource = utils.withVersion(baseImage);
     
     tooltip.append('img')
         .attr('src', imageSource);

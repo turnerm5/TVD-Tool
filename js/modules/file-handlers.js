@@ -15,10 +15,10 @@
  * @description Manages file loading, parsing, and exporting for the TVD Tool.
  */
 
-import { state } from './state.js';
-import * as ui from './ui.js';
-import * as utils from './utils.js';
-import * as persistence from './persistence.js';
+import { state } from './state.js?v=2.0.1';
+import * as ui from './ui.js?v=2.0.1';
+import * as utils from './utils.js?v=2.0.1';
+import * as persistence from './persistence.js?v=2.0.1';
 
 // Forward-declare the main render function to be injected later.
 let render;

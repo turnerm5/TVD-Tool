@@ -30,10 +30,10 @@
  *   - Inputs validate and sanitize on the fly; values are formatted on blur for a clean UI.
  */
 
-import * as dom from './dom.js';
-import { state } from './state.js';
-import * as utils from './utils.js';
-import * as ui from './ui.js';
+import * as dom from './dom.js?v=2.0.1';
+import { state } from './state.js?v=2.0.1';
+import * as utils from './utils.js?v=2.0.1';
+import * as ui from './ui.js?v=2.0.1';
 
 /**
  * Renders a simple placeholder inside the Interiors view.
@@ -856,7 +856,8 @@ export function renderInteriorsGraph() {
         hideBenchmarkTooltipForInteriors();
         const benchmarkComponent = benchmarkData.costOfWork.find(c => c.name === componentData.name);
         const tooltip = d3.select('body').append('div').attr('class', 'benchmark-tooltip');
-        const imageSource = (benchmarkComponent && benchmarkComponent.image) ? benchmarkComponent.image : benchmarkData.image;
+        const baseImage = (benchmarkComponent && benchmarkComponent.image) ? benchmarkComponent.image : benchmarkData.image;
+        const imageSource = utils.withVersion(baseImage);
         tooltip.append('img').attr('src', imageSource);
         const content = tooltip.append('div').attr('class', 'benchmark-tooltip-content');
         content.append('div').attr('class', 'benchmark-tooltip-name').text(benchmarkData.name);
