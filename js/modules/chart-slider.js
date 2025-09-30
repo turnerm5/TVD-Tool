@@ -45,6 +45,7 @@ function getEffectiveSf(component) {
  * @param {number} newValue - The new `target_value` value for the changed component.
  * @param {string} phaseKey - The key for the current phase ('phase2').
  */
+
 function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
     // For phase2, use the current scheme data
     const phase = { costOfWork: state.currentScheme.costOfWork };
@@ -557,7 +558,11 @@ function renderLockControls() {
             .append('button')
             .attr('class', d => {
                 const isSelected = state.selectedLockSetName === d.name;
-                return `lock-set-btn w-full text-left text-sm px-3 py-1.5 rounded-md font-medium border mb-1 ${isSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`;
+                return `lock-set-btn w-full text-left text-sm px-2 py-1 rounded-md font-medium border mb-1 ${
+                    isSelected
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`;
             })
             .text(d => d.name)
             .on('click', (event, d) => {
@@ -579,7 +584,7 @@ function renderLockControls() {
     }
 
 
-    // Create locked components section
+    // Locked Components Buttons
     const lockedSection = dom.lockControls.append('div')
         .attr('class', 'mb-4');
 
@@ -594,7 +599,7 @@ function renderLockControls() {
         .attr('class', d => {
             const key = `${phaseKey}-${d.name}`;
             const isLocked = state.lockedCostOfWork.has(key);
-            return `component-btn w-full text-left text-sm px-3 py-1.5 rounded-md font-medium border mb-1 ${
+            return `component-btn w-full text-left text-sm px-2 py-1 rounded-md font-medium border mb-1 ${
                 isLocked
                     ? 'bg-blue-600 text-white border-blue-600'
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -619,7 +624,7 @@ function renderLockControls() {
     dom.lockControls.append('div')
         .attr('class', 'mt-4') // Add some space above the button
         .append('button')
-        .attr('class', 'w-full text-sm px-3 py-1.5 rounded-md font-medium border bg-white text-gray-700 border-gray-300 hover:bg-gray-50 transition')
+        .attr('class', 'w-full text-sm px-2 py-1 rounded-md font-medium border bg-white text-gray-700 border-gray-300 hover:bg-gray-50 transition')
         .text(anyLocked ? 'Unlock All' : 'Lock All')
         .on('click', () => {
             const currentlyAnyLocked = costOfWork.some(c => state.lockedCostOfWork.has(`${phaseKey}-${c.name}`));

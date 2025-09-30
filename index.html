@@ -102,17 +102,31 @@
         </div>
         
         <main>
+            <!-- BENCHMARKS VIEW -->
+            <div id="benchmarks-view" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 benchmark-grid">
+                    <!-- Benchmark cards will be dynamically rendered here -->
+                </div>
+                <div id="benchmark-detail-container" class="hidden">
+                     <!-- Detailed view will be rendered here by JS -->
+                </div>
+            </div>
+
+            <!-- TARGET VALUES VIEW -->
             <div id="main-chart" class="relative flex">
-                <div class="flex-shrink-0 w-64 flex">
-                    <div id="lock-controls" class="flex-grow pr-4"></div>
-                    <div id="y-axis-labels-container" class="y-axis-labels w-16 text-right pr-6"></div>
+                <div class="flex-shrink-0 w-56 flex">
+                    <div id="lock-controls" class="flex-grow pr-3"></div>
+                    <div id="y-axis-labels-container" class="y-axis-labels w-16 text-right pr-4"></div>
                 </div>
                 <div id="chart-container" class="chart-container flex-grow"></div>
             </div>
             
+            <!-- MASSING VIEW -->
             <div id="program-view" class="hidden">
                 <!-- Table will be rendered here by D3 -->
             </div>
+            
+            <!-- INTERIORS VIEW -->
             <div id="interiors-view" class="hidden">
                 <div id="interiors-layout" class="grid gap-4" style="grid-template-columns: 15% 55% 30%;">
                     <div id="interiors-values" class="bg-white p-6 rounded-lg shadow-md border border-gray-200"></div>
@@ -122,6 +136,8 @@
                     </div>
                 </div>
             </div>
+
+            <!-- SUMMARY VIEW -->
             <div id="summary-view" class="hidden">
                 <div id="summary-chart-container" class="grid grid-cols-5 gap-4 bg-white p-4 rounded-lg shadow-md border border-gray-200">
                     <h2 id="summary-chart-title" class="col-span-5 text-lg font-bold text-gray-700">Snapshot Cost Comparison</h2>
@@ -141,14 +157,7 @@
                     <!-- Summary content will be dynamically generated here -->
                 </div>
             </div>
-            <div id="benchmarks-view" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 benchmark-grid">
-                    <!-- Benchmark cards will be dynamically rendered here -->
-                </div>
-                <div id="benchmark-detail-container" class="hidden">
-                     <!-- Detailed view will be rendered here by JS -->
-                </div>
-            </div>
+
         </main>
 
         <footer id="summary-panel-container" class="mt-8">

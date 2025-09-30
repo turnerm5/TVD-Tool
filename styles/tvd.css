@@ -10,6 +10,7 @@ body {
     gap: 0.5rem;
     padding-top: 1rem;
     padding-bottom: 6rem; /* Increased padding */
+    padding-right: 2.0rem; /* Reserve space so right-side value labels don't overflow */
     width: 100%;
     height: 700px;
     background-color: #ffffff;

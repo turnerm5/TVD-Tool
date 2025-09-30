@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // If a prior session exists, auto-load sample data to bootstrap state, then persistence will re-apply view/snapshots.
     try {
         if (persistence.hasSession() && typeof sampleData !== 'undefined') {
-            fileHandlers.loadData(sampleData, 'Restored Session');
+            fileHandlers.loadData(sampleData, 'Saved Session');
         }
     } catch (e) {
         console.warn('Failed to auto-restore session:', e);
