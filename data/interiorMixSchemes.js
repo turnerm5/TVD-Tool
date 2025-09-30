@@ -19,8 +19,7 @@ const INTERIOR_MIX_SCHEMES = [
             "Classroom": 6060,
             "Offices": 1500,
             "Student Success Center": 4660,
-            "Collaborative Space": 1470,
-            "Building Support": 13700
+            "Collaborative Space": 1470
         }
     },
     {
@@ -31,8 +30,7 @@ const INTERIOR_MIX_SCHEMES = [
             "Classroom": 8152,
             "Offices": 1200,
             "Student Success Center": 6126,
-            "Collaborative Space": 1590,
-            "Building Support": 13700
+            "Collaborative Space": 1590
         }
     },
     {
@@ -43,8 +41,7 @@ const INTERIOR_MIX_SCHEMES = [
             "Classroom": 6700,
             "Offices": 1200,
             "Student Success Center": 8100,
-            "Collaborative Space": 4500,
-            "Building Support": 13700
+            "Collaborative Space": 4500
         }
     }
 ];

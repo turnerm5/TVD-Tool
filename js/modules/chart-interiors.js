@@ -55,169 +55,10 @@ export function renderPlaceholder() {
 export function renderValuesTable() {
     if (!dom.interiorsValues) return;
     const wrapper = d3.select(dom.interiorsValues);
-    // Clear previous table content but keep header
-    wrapper.selectAll('table').remove();
-
-    const data = state.interiors?.targetValues || [];
-    if (!Array.isArray(data) || data.length === 0) return;
-
-    const table = wrapper.append('table')
-        .attr('class', 'w-full text-sm text-left text-gray-600 border border-gray-200 rounded-lg overflow-hidden');
-
-    // Header
-    const thead = table.append('thead');
-    const headerRow = thead.append('tr').attr('class', 'bg-gray-50 text-xs uppercase text-gray-700');
-    headerRow.append('th').attr('class', 'px-4 py-2 w-4/5').text('Name');
-    headerRow.append('th').attr('class', 'px-4 py-2 w-1/5').text('$/SF');
-
-    const tbody = table.append('tbody');
-
-    // For each room type (by 'name'), render a subhead and rows for each category key
-    data.forEach(room => {
-        // Subhead row for this room type
-        const subhead = tbody.append('tr').attr('class', 'bg-blue-50 border-b');
-        subhead.append('td')
-            .attr('class', 'px-4 py-2 font-bold text-blue-900 uppercase text-xs')
-            .attr('colspan', 2)
-            .text(room.name);
-
-        // Extract value keys dynamically (exclude 'name')
-        const valueEntries = Object.entries(room).filter(([k, v]) => k !== 'name' && typeof v === 'number');
-
-        const tr = tbody.selectAll(`tr.row-${utils.cssSafe(room.name)}`)
-            .data(valueEntries, d => room.name + '-' + d[0])
-            .enter()
-            .append('tr')
-            .attr('class', 'bg-white border-b hover:bg-gray-50');
-
-        tr.append('td')
-            .attr('class', 'px-4 py-2 text-xs text-gray-900')
-            .text(d => d[0]);
-        const valueCells = tr.append('td').attr('class', 'font-xs px-4 py-2');
-        valueCells.append('input')
-            .attr('type', 'text')
-            .attr('inputmode', 'decimal')
-            .attr('pattern', '[0-9,\\.]*')
-            .attr('class', 'text-left program-table-input editable-input w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500')
-            .attr('data-room', room.name)
-            .attr('data-category', d => d[0])
-            .attr('value', d => utils.formatCurrency(Number(d[1]) || 0))
-            .on('focus', function(event, entry) {
-                const roomName = this.dataset.room;
-                const category = this.dataset.category;
-                const currentRoom = (state.interiors && Array.isArray(state.interiors.targetValues))
-                    ? state.interiors.targetValues.find(r => r.name === roomName)
-                    : null;
-                const latest = (currentRoom && typeof currentRoom[category] === 'number')
-                    ? Number(currentRoom[category])
-                    : utils.parseNumberFromInput(this.value);
-                const numeric = isFinite(latest) ? latest : 0;
-                this.value = numeric.toString();
-                this.select();
-            })
-            .on('input', function(event, entry) {
-                const current = utils.parseNumberFromInput(this.value);
-                const isValid = !isNaN(current) && isFinite(current) && current >= 0;
-                this.classList.toggle('border-red-500', !isValid);
-                this.classList.toggle('ring-red-500', !isValid);
-            })
-            .on('change', function(event, entry) {
-                const [category] = entry;
-                const newNumeric = utils.parseNumberFromInput(this.value);
-                const roomObj = state.interiors.targetValues.find(r => r.name === room.name);
-                if (roomObj) {
-                    roomObj[category] = newNumeric;
-                }
-                // Recompute dependent visuals so mix table and graph reflect new $/SF
-                renderClassroomMix();
-                renderInteriorsGraph();
-            })
-            .on('blur', function(event, entry) {
-                const cleaned = utils.parseNumberFromInput(this.value);
-                this.value = utils.formatCurrency(cleaned || 0);
-                this.classList.remove('border-red-500');
-                this.classList.remove('ring-red-500');
-            })
-            .on('keydown', function(event) {
-                const key = event.key;
-                if (key === 'Enter' || key === 'ArrowDown' || key === 'ArrowUp') {
-                    event.preventDefault();
-                    // Commit current value to state
-                    const roomName = this.dataset.room;
-                    const category = this.dataset.category;
-                    const cleaned = utils.parseNumberFromInput(this.value);
-                    const roomObj = state.interiors.targetValues.find(r => r.name === roomName);
-                    if (roomObj && category) {
-                        roomObj[category] = cleaned;
-                    }
-                    // Format current cell
-                    this.value = utils.formatCurrency(cleaned || 0);
-                    // Update dependent visuals before moving focus
-                    renderClassroomMix();
-                    renderInteriorsGraph();
-                    // Move focus
-                    const inputs = wrapper.selectAll('input.program-table-input').nodes();
-                    const idx = inputs.indexOf(this);
-                    let nextIdx = idx;
-                    if (key === 'Enter' || key === 'ArrowDown') nextIdx = Math.min(inputs.length - 1, idx + 1);
-                    if (key === 'ArrowUp') nextIdx = Math.max(0, idx - 1);
-                    if (inputs[nextIdx]) {
-                        inputs[nextIdx].focus();
-                        inputs[nextIdx].select();
-                    }
-                } else if (key === 'Tab') {
-                    // Commit and cycle focus within the table
-                    const roomName = this.dataset.room;
-                    const category = this.dataset.category;
-                    const cleaned = utils.parseNumberFromInput(this.value);
-                    const roomObj = state.interiors.targetValues.find(r => r.name === roomName);
-                    if (roomObj && category) {
-                        roomObj[category] = cleaned;
-                    }
-                    this.value = utils.formatCurrency(cleaned || 0);
-                    // Update dependent visuals before moving focus
-                    renderClassroomMix();
-                    renderInteriorsGraph();
-                    const inputs = wrapper.selectAll('input.program-table-input').nodes();
-                    const idx = inputs.indexOf(this);
-                    let nextIdx;
-                    if (event.shiftKey) {
-                        nextIdx = idx === 0 ? inputs.length - 1 : idx - 1;
-                    } else {
-                        nextIdx = idx === inputs.length - 1 ? 0 : idx + 1;
-                    }
-                    event.preventDefault();
-                    if (inputs[nextIdx]) {
-                        inputs[nextIdx].focus();
-                        inputs[nextIdx].select();
-                    }
-                }
-            });
-    });
-}
-
-/**
- * Renders the Classroom Mix inputs and calculations in the middle panel.
- * UI Sections:
- * - Scheme buttons: quick-apply presets to populate `state.interiors.mixSF`
- * - Overall SF input: edits `state.currentData.grossSF`
- * - Per-room-type SF inputs: control `state.interiors.mixSF`
- * - Calculation table: per-type SF, %GSF, category costs, and totals
- * - Donut charts: % by Space and % by Cost
- *
- * Notes:
- * - If a "Circulation/Support" row exists and is flagged `includeInNSF === false`, it is auto-filled
- *   to absorb the difference between total GSF and the sum of program SF.
- * - Building Efficiency is computed as NSF / GSF using only types with `includeInNSF !== false`.
- */
-
-export function renderClassroomMix() {
-    if (!dom.interiorsBreakouts) return;
-    const container = d3.select(dom.interiorsBreakouts);
-    container.html('');
+    wrapper.html('');
 
     // Program scheme quick-select buttons (Max Lab, Mix, Max Student Success)
-    const schemesBar = container.append('div')
+    const schemesBar = wrapper.append('div')
         .attr('class', 'mb-3 flex flex-wrap items-center gap-2');
 
     const schemes = Array.isArray(state.currentData?.interiorMixSchemes)
@@ -228,10 +69,9 @@ export function renderClassroomMix() {
         .data(schemes, d => d.key)
         .enter()
         .append('button')
-        .attr('class', d => `scheme-btn px-3 py-1.5 text-xs rounded-md font-medium border ${state.interiors.selectedMixScheme === d.key ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`)
+        .attr('class', d => `scheme-btn flex-1 min-w-32 px-3 py-1.5 text-xs rounded-md font-medium border ${state.interiors.selectedMixScheme === d.key ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`)
         .text(d => d.label)
         .on('click', (event, d) => {
-            // Build a complete `mixSF` map from the selected preset, defaulting missing entries to 0
             const roomTypes = state.interiors?.targetValues || [];
             const next = {};
             roomTypes.forEach(rt => {
@@ -239,13 +79,13 @@ export function renderClassroomMix() {
             });
             state.interiors.mixSF = next;
             state.interiors.selectedMixScheme = d.key;
-            // Re-render dependent visuals that rely on the current Mix
             renderClassroomMix();
             renderInteriorsGraph();
+            renderValuesTable();
         });
 
-    // Ensure we have a container for the Overall SF input
-    const overallSFContainer = container.append('div')
+    // Overall SF input
+    const overallSFContainer = wrapper.append('div')
         .attr('class', 'mb-3');
 
     const overallSFInputGroup = overallSFContainer.append('div')
@@ -263,30 +103,26 @@ export function renderClassroomMix() {
         .attr('pattern', '[0-9,]*')
         .attr('class', 'w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 editable-input')
         .attr('value', `${utils.formatNumber(state.currentData?.grossSF || 0)} sf`)
-        // Show raw numeric for easier editing and select text
         .on('focus', function() {
             const current = Number(state.currentData?.grossSF || 0);
             this.value = current.toString();
             this.select();
         })
-        // Live-validate numeric characters only; mark visibly if invalid
         .on('input', function() {
             const cleaned = this.value.replace(/[^0-9]/g, '');
             const isValid = cleaned === '' || !isNaN(Number(cleaned));
             this.classList.toggle('border-red-500', !isValid);
             this.classList.toggle('ring-red-500', !isValid);
         })
-        // Commit to state and re-render dependent sections
         .on('change', function() {
             const cleaned = this.value.replace(/[^0-9]/g, '');
             const numeric = Number(cleaned) || 0;
             if (!state.currentData) return;
             state.currentData.grossSF = numeric;
             this.value = `${utils.formatNumber(numeric)} sf`;
-            renderMixTable();
+            renderClassroomMix();
             renderInteriorsGraph();
         })
-        // Format on blur and clear invalid styling
         .on('blur', function() {
             const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
             this.value = `${utils.formatNumber(numeric)} sf`;
@@ -294,15 +130,17 @@ export function renderClassroomMix() {
             this.classList.remove('ring-red-500');
         });
 
+    // Per-room-type SF inputs (stacked)
     const roomTypes = state.interiors?.targetValues || [];
     if (!Array.isArray(roomTypes) || roomTypes.length === 0) return;
 
-    // Inputs for SF per classroom type
-    const inputsWrapper = container.append('div')
-        .attr('class', 'grid grid-cols-2 gap-3 mb-4');
+    const inputsWrapper = wrapper.append('div')
+        .attr('class', 'grid grid-cols-1 gap-3');
+
+    const filteredRoomTypes = roomTypes.filter(rt => rt.includeInNSF !== false);
 
     const inputCards = inputsWrapper.selectAll('.mix-input')
-        .data(roomTypes, d => d.name)
+        .data(filteredRoomTypes, d => d.name)
         .enter()
         .append('div')
         .attr('class', 'mix-input');
@@ -320,36 +158,31 @@ export function renderClassroomMix() {
             const v = state.interiors.mixSF[d.name] || 0;
             return `${Number(v).toLocaleString('en-US')} sf`;
         })
-        // Show raw numeric for easier editing and select text
         .on('focus', function(event, d) {
             const current = Number(state.interiors.mixSF[d.name] || 0) || 0;
             this.value = current.toString();
             this.select();
         })
-        // Live-validate numeric characters only; mark visibly if invalid
         .on('input', function() {
             const cleaned = this.value.replace(/[^0-9]/g, '');
             const isValid = cleaned === '' || !isNaN(Number(cleaned));
             this.classList.toggle('border-red-500', !isValid);
             this.classList.toggle('ring-red-500', !isValid);
         })
-        // Commit to state and refresh dependent visuals
         .on('change', function(event, d) {
             const cleaned = this.value.replace(/[^0-9]/g, '');
             const numeric = Number(cleaned) || 0;
             state.interiors.mixSF[d.name] = numeric;
             this.value = `${numeric.toLocaleString('en-US')} sf`;
-            renderMixTable();
+            renderClassroomMix();
             renderInteriorsGraph();
         })
-        // Format on blur and clear invalid styling
         .on('blur', function(event, d) {
             const numeric = Number(this.value.replace(/[^0-9]/g, '')) || 0;
             this.value = `${numeric.toLocaleString('en-US')} sf`;
             this.classList.remove('border-red-500');
             this.classList.remove('ring-red-500');
         })
-        // On Tab, commit and wrap focus among inputs for smooth data entry
         .on('keydown', function(event, d) {
             if (event.key === 'Tab') {
                 const cleaned = this.value.replace(/[^0-9]/g, '');
@@ -371,8 +204,30 @@ export function renderClassroomMix() {
                 }
             }
         });
+}
 
-    // Calculation table
+/**
+ * Renders the Classroom Mix inputs and calculations in the middle panel.
+ * UI Sections:
+ * - Scheme buttons: quick-apply presets to populate `state.interiors.mixSF`
+ * - Overall SF input: edits `state.currentData.grossSF`
+ * - Per-room-type SF inputs: control `state.interiors.mixSF`
+ * - Calculation table: per-type SF, %GSF, category costs, and totals
+ * - Donut charts: % by Space and % by Cost
+ *
+ * Notes:
+ * - If a "Circulation/Support" row exists and is flagged `includeInNSF === false`, it is auto-filled
+ *   to absorb the difference between total GSF and the sum of program SF.
+ * - Building Efficiency is computed as NSF / GSF using only types with `includeInNSF !== false`.
+ */
+
+export function renderClassroomMix() {
+    if (!dom.interiorsBreakouts) return;
+    const container = d3.select(dom.interiorsBreakouts);
+    container.html('');
+    const roomTypes = state.interiors?.targetValues || [];
+
+    // Calculation table (only)
     const tableContainer = container.append('div');
     const messageContainer = container.append('div').attr('class', 'mt-2');
     const donutsContainer = container.append('div').attr('id', 'interiors-donuts');
@@ -766,14 +621,36 @@ export function renderInteriorsGraph() {
     const currentComponents = (state.currentScheme?.costOfWork || []).filter(c => categories.includes(c.name));
 
     const roomTypes = state.interiors?.targetValues || [];
-    const totalMixSf = roomTypes.reduce((sum, rt) => sum + (Number(state.interiors.mixSF[rt.name]) || 0), 0);
+    // Compute effective Mix SF including auto-calculated Circulation/Support to fill up to Gross SF
+    const totalGSF = Number(state.currentData?.grossSF) || 0;
+    const programSF = roomTypes.reduce((sum, rt) => {
+        const include = (rt.includeInNSF !== false);
+        const sf = Number(state.interiors.mixSF[rt.name]) || 0;
+        return include ? sum + sf : sum;
+    }, 0);
+    const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false) && /circulation|support/i.test(rt.name));
+    const circulationSF = Math.max(0, totalGSF - programSF);
+    const effectiveMixByRoom = new Map();
+    roomTypes.forEach(rt => {
+        let sf = 0;
+        if (rt.includeInNSF !== false) {
+            sf = Number(state.interiors.mixSF[rt.name]) || 0;
+        } else if (circulationRoomType && rt.name === circulationRoomType.name) {
+            sf = circulationSF;
+        }
+        effectiveMixByRoom.set(rt.name, sf);
+    });
+    const totalEffectiveSf = Array.from(effectiveMixByRoom.values()).reduce((a, b) => a + b, 0);
 
     const blendedByCategory = {};
     categories.forEach(cat => {
-        if (totalMixSf > 0) {
-            // Weighted average $/SF by category based on Mix SF weights
-            const weighted = roomTypes.reduce((sum, rt) => sum + ((Number(state.interiors.mixSF[rt.name]) || 0) * (Number(rt[cat]) || 0)), 0);
-            blendedByCategory[cat] = weighted / totalMixSf;
+        if (totalEffectiveSf > 0) {
+            const weighted = roomTypes.reduce((sum, rt) => {
+                const sf = effectiveMixByRoom.get(rt.name) || 0;
+                const rate = Number(rt[cat]) || 0;
+                return sum + (sf * rate);
+            }, 0);
+            blendedByCategory[cat] = weighted / totalEffectiveSf;
         } else {
             blendedByCategory[cat] = 0;
         }
@@ -847,6 +724,26 @@ export function renderInteriorsGraph() {
         .attr('class', 'current-rom')
         .style('top', d => (yScale(d.blendedTarget) - paddingTop - 3) + 'px');
 
+    // Value labels to the right of bars (match slider style)
+    const currentValueGroup = cols.append('div').attr('class', 'value-label-group');
+    currentValueGroup
+        .append('div')
+        .attr('class', 'current-value-label')
+        .style('color', '#9ca3af')
+        .text(d => utils.formatCurrency(d.currentTarget));
+    currentValueGroup
+        .style('top', d => (yScale(d.currentTarget) - paddingTop - 10) + 'px')
+        .style('bottom', null);
+
+    const blendedValueGroup = cols.append('div').attr('class', 'value-label-group');
+    blendedValueGroup
+        .append('div')
+        .attr('class', 'current-value-label')
+        .text(d => utils.formatCurrency(d.blendedTarget));
+    blendedValueGroup
+        .style('top', d => (yScale(d.blendedTarget) - paddingTop - 10) + 'px')
+        .style('bottom', null);
+
     // Labels
     cols.append('div')
         .attr('class', 'component-label')
@@ -907,8 +804,8 @@ export function renderInteriorsGraph() {
     actions
         .attr('class', 'mt-2');
 
-    // Disable action button until there is a non-zero Mix total
-    const disabled = totalMixSf === 0;
+    // Disable action button until there is a non-zero effective Mix total
+    const disabled = totalEffectiveSf === 0;
     actions.html('');
     actions.append('button')
         .attr('class', `w-full px-3 py-2 text-sm rounded-md font-medium ${disabled ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 transition'}`)
@@ -916,7 +813,7 @@ export function renderInteriorsGraph() {
         .property('disabled', disabled)
         .text('Update Target Values')
         .on('click', async function() {
-            if (totalMixSf === 0) return;
+            if (totalEffectiveSf === 0) return;
             const confirmed = await ui.showConfirmDialog(
                 'Update Target Values',
                 'Would you like to update the overall target values to match this new room type mix?',
