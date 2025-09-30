@@ -234,8 +234,8 @@ export async function applyInteriorsTargetsUpdateFromBlended(blendedByCategory, 
         keepBudgetSame = await ui.showConfirmDialog(
             'Keep Budget the Same?',
             'Update the other categories so the current estimate stays identical?',
-            'Yes, Keep Budget Same',
-            'No, Only Update These Three'
+            'No, Only Update These Three',
+            'Yes, Keep Budget Same'
         );
 
         if (keepBudgetSame) {
