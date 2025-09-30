@@ -253,6 +253,15 @@ body {
     object-fit: cover; /* Ensures the image covers the area without distortion */
 }
 
+/* When a benchmark card is expanded, allow the image to grow in height
+   so its aspect ratio is preserved instead of being cropped wider */
+#benchmarks-view.detail-active .benchmark-card.selected img {
+    height: auto;
+}
+
+/* Remove the floating over-image circle label entirely since header provides it */
+.left-col .benchmark-label { display: none; }
+
 .benchmark-caption {
     padding-top: 0.75rem;
 }
@@ -277,6 +286,21 @@ body {
     border: 2px solid #fff;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 } 
+
+/* Inline version of the benchmark label for expanded header */
+.benchmark-label-inline {
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    background-color: #1d4ed8;
+    color: #fff;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
 
 /* --- Benchmark View Specific --- */
 /* Keep the same 4-column grid always - no layout changes */
@@ -312,6 +336,12 @@ body {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     border: 1px solid #e5e7eb;
     margin-top: 1rem;
+}
+
+/* When embedded inside the card's detail slot, remove extra top margin
+   so the table aligns to the image top */
+.detail-slot .benchmark-detail-table {
+    margin-top: 0;
 }
 
 .benchmark-detail-table th,

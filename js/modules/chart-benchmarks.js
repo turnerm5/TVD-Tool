@@ -36,31 +36,56 @@ export function render(render) {
         .join(
             enter => {
                 const card = enter.append('div')
-                    .attr('class', 'benchmark-card')
+                    .attr('class', 'benchmark-card bg-white p-4 rounded-lg shadow-md border border-gray-200 cursor-pointer transition hover:shadow-lg')
                     .attr('id', d => `benchmark-card-${d.id}`);
 
-                const relativeDiv = card.append('div').attr('class', 'relative');
+                // Wrapper to allow expanding layout inside a single card
+                const content = card.append('div')
+                    .attr('class', 'card-content grid grid-cols-1 gap-4 items-start');
+
+                // Header row that spans both columns when expanded; always visible
+                const header = content.append('div')
+                    .attr('class', 'card-header flex items-center gap-3 col-span-1 md:col-span-2');
+                header.append('div').attr('class', 'benchmark-label-inline').text(d => d.id);
+                header.append('h4').attr('class', 'font-semibold text-lg').text(d => d.name);
+
+                const leftCol = content.append('div').attr('class', 'left-col');
+                const relativeDiv = leftCol.append('div').attr('class', 'relative');
                 relativeDiv.append('img')
                     .attr('src', d => d.image)
                     .attr('alt', d => d.name)
-                    .attr('class', 'w-full h-auto rounded-lg shadow-md');
-                relativeDiv.append('div').attr('class', 'benchmark-label').text(d => d.id);
+                    .attr('class', 'w-full h-auto rounded-md');
+                // No over-image label; we show the inline label in the header above the image
 
-                const caption = card.append('div').attr('class', 'benchmark-caption');
-                caption.append('h4').attr('class', 'font-semibold').text(d => d.name);
-                caption.append('p').attr('class', 'text-gray-600 text-base').text(d => `${utils.formatCurrency(d.overall_sf_cost)} /SF`);
-                caption.append('p').attr('class', 'text-gray-600 text-base').text(d => `${utils.formatNumber(d.grossSF)} SF`);
+                const caption = leftCol.append('div').attr('class', 'benchmark-caption');
+                caption.append('p')
+                    .attr('class', 'text-gray-600 text-base font-bold')
+                    .text(d => `${utils.formatCurrency(d.overall_sf_cost)} / SF`);
+                caption.append('p')
+                    .attr('class', 'text-gray-600 text-base')
+                    .html(d => `<b>${utils.formatNumber(d.grossSF)} SF</b>`);
+                
+                // Empty slot that will hold the detail view when selected
+                content.append('div').attr('class', 'detail-slot');
                 
                 return card;
             },
             update => {
                 // Update existing cards if necessary (e.g., if data changes)
-                update.select('h4').text(d => d.name);
+                update
+                    .attr('class', 'benchmark-card bg-white p-4 rounded-lg shadow-md border border-gray-200 cursor-pointer transition hover:shadow-lg');
+                // Update header title text
+                update.select('.card-header h4').text(d => d.name);
                 update.select('img').attr('src', d => d.image).attr('alt', d => d.name);
-                update.selectAll('p').remove(); // Clear and re-append to be simple
+                // Clear and re-append only the caption paragraphs
                 const caption = update.select('.benchmark-caption');
-                caption.append('p').attr('class', 'text-gray-600 text-base').text(d => `${utils.formatCurrency(d.overall_sf_cost)} /SF`);
-                caption.append('p').attr('class', 'text-gray-600 text-base').text(d => `${utils.formatNumber(d.grossSF)} SF`);
+                caption.selectAll('p').remove();
+                caption.append('p')
+                    .attr('class', 'text-gray-600 font-bold')
+                    .text(d => `${utils.formatCurrency(d.overall_sf_cost)} / SF`);
+                caption.append('p')
+                    .attr('class', 'text-gray-600 text-base')
+                    .html(d => `<b>${utils.formatNumber(d.grossSF)} SF</b>`);
                 return update;
             }
         );
@@ -80,24 +105,35 @@ export function render(render) {
         // --- Show Detail View ---
         dom.benchmarksView.classList.add('detail-active');
         detailContainer.classList.remove('hidden');
-
-        // Move the detail container inside the grid to become a flex item
-        benchmarkGrid.node().appendChild(detailContainer);
+        // Ensure detail container visually integrates with the card
+        detailContainer.classList.add('p-0'); // reset padding (card already has it)
 
         // Highlight the selected card and fade others
         benchmarkCards.classed('selected', d => d.id === state.selectedBenchmark);
-
+        // Make the selected card span full width
+        benchmarkCards.classed('md:col-span-3', d => d.id === state.selectedBenchmark);
+        // Only selected card becomes 2-column inside content; others stay single column
+        benchmarkCards.select('.card-content').classed('md:grid-cols-2', d => d.id === state.selectedBenchmark);
+        // Header is always visible now and provides consistent layout
 
         // Find data for the selected project
         const projectData = state.currentData.benchmarks.find(p => p.id === state.selectedBenchmark);
         if (!projectData) return;
 
-        // --- Render the detail table ---
-        const detailContainerD3 = d3.select(detailContainer);
-        detailContainerD3.html(''); // Clear previous content
+        // Move the detail container inside the selected card's detail slot
+        const selectedCard = document.getElementById(`benchmark-card-${state.selectedBenchmark}`);
+        const detailSlot = selectedCard?.querySelector('.detail-slot');
+        if (detailSlot && detailContainer.parentElement !== detailSlot) {
+            detailSlot.appendChild(detailContainer);
+        }
 
+        // --- Render the detail table/content ---
+        const detailContainerD3 = d3.select(detailContainer);
+        detailContainerD3.html('');
+
+        // Title is already shown on the left; keep a visually hidden heading for accessibility
         detailContainerD3.append('h3')
-            .attr('class', 'text-2xl font-bold text-gray-800')
+            .attr('class', 'sr-only')
             .text(projectData.name);
 
         detailContainerD3.append('button')
@@ -133,6 +169,9 @@ export function render(render) {
         dom.benchmarksView.classList.remove('detail-active');
         detailContainer.classList.add('hidden');
         benchmarkCards.classed('selected', false);
+        benchmarkCards.classed('md:col-span-3', false);
+        benchmarkCards.select('.card-content').classed('md:grid-cols-2', false);
+        // Header remains visible in grid view as well
 
         // Move the detail container back to its original position
         dom.benchmarksView.appendChild(detailContainer);

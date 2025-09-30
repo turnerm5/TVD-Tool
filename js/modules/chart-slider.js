@@ -143,6 +143,10 @@ function applyChangeAndBalance(changedComponent, newValue, phaseKey) {
  * This function uses the D3 enter/update/exit pattern to create and update the component columns.
  */
 export function renderChart() {
+    // Ensure the main slider area is wrapped in a white card like the rest of the app
+    if (dom.mainChart) {
+        dom.mainChart.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'border', 'border-gray-200');
+    }
             const phaseCostOfWork = state.currentScheme.costOfWork;
     // Set the number of columns in the CSS grid layout.
     dom.chartContainer.style("grid-template-columns", `repeat(${phaseCostOfWork.length}, 1fr)`);
