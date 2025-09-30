@@ -12,70 +12,83 @@
 
 export const helpTopics = {
     'benchmarks': {
-        title: 'Benchmarks View',
+        title: 'Benchmarks',
         content: `
-            <p>This view compares the Integrated Sciences Building against historical data from other contemporary laboratory buildings in the region. Each card represents a past project with key metrics, providing a basis for cost comparison.</p>
-            <p>We selected benchmarks like the <strong>University of Washington Nano-engineering Sciences</strong>, <strong>University of Oregon Knight Campus</strong>, and <strong>Washington State University Spark</strong> because they share similar program types, structural systems, and research-intensive functions. These projects provide relevant cost data for enclosure, services, and superstructure systems that are comparable to the Integrated Sciences Building.</p>
+            <p>Browse comparable projects to ground your targets in real data. The grid shows one card per project with an image, overall $/SF, and GSF. Clicking a card expands in place and reveals a per-system table with $/SF and system details.</p>
+            <p>Benchmark indicators also appear inside the <strong>Target Values</strong> and <strong>Interiors</strong> charts as blue markers at each system's $/SF. Hover them there for project-specific context.</p>
             <p><strong>👉 Actions:</strong></p>
             <ul>
-                <li>Click on a benchmark card to see a detailed breakdown of its costs by building system.</li>
-                <li>Use this information to inform the initial target values for the Integrated Sciences Building.</li>
+                <li>Click a card to toggle its detailed system table.</li>
+                <li>Use the per-system values to sanity-check and tune your targets.</li>
             </ul>
         `
     },
     'program': {
-        title: 'Phase 2 Program',
+        title: 'Massing',
         content: `
-            <p>This view is for defining and adjusting the programmatic requirements of the Integrated Sciences Building to develop a more detailed cost estimate. The table shows different space types, their sizes, and their costs.</p>
-            <p>The team can test different scenarios by adjusting the square footage for various programs. For example, you can explore the cost implications of adding a <strong>shell floor</strong> for future expansion or modifying the allocation between lab and office space. The schemes available (e.g., Pavilion, Hub, Max Floor) will auto-populate the table with different starting configurations based on design studies.</p>
+            <p>Set the gross building size and massing assumptions that drive square footage by system. Use the controls at the top to set <strong>Overall Square Footage</strong>, choose the number of <strong>Floors (1–5)</strong>, and specify <strong>Shelled Floors</strong>.</p>
+            <p>The table below updates each component's SF based on these choices (e.g., <em>Roofing</em> uses footprint, <em>Enclosure</em> scales with perimeter × floors, <em>Interiors/Equipment</em> track finished floors). You can also edit per-component SF directly.</p>
+            <p>Indirect costs are calculated from imported percentages. The Grand Total reflects Cost of Work + Indirects, and the header shows the variance to GMP.</p>
             <p><strong>👉 Actions:</strong></p>
             <ul>
-                <li>Adjust the values in the table to reflect the desired program areas and quantities. The chart will update to show the impact of your changes on the overall project cost.</li>
-                <li>Once you have a scenario you like, take a <strong>snapshot</strong> to save it. This allows you to compare different program options in the Summary view.</li>
+                <li>Enter Overall SF. If you change it after data is loaded, you’ll be prompted to recompute dependent SF.</li>
+                <li>Select Floors and adjust Shelled Floors to test finished vs. shelled area.</li>
+                <li>Edit individual component SF cells when needed.</li>
+            </ul>
+        `
+    },
+    'interiors': {
+        title: 'Interiors',
+        content: `
+            <p>Define classroom and lab program mix and the per-room-type $/SF that roll up into <em>C Interiors</em>, <em>D Services</em>, and <em>E Equipment and Furnishings</em>.</p>
+            <p><strong>👉 Actions:</strong></p>
+            <ul>
+                <li>Edit $/SF rates for each room type in the <strong>Values</strong> table.</li>
+                <li>Use <strong>Interiors Mix</strong> presets to quickly assign room SF.</li>
+                <li>Enter or adjust SF for each room type in the <strong>Classroom Mix</strong> table.</li>
+                <li>Review calculated totals, %GSF, and Building Efficiency.</li>
+                <li>Check the donut charts for % by Space and % by Cost.</li>
+                <li>Compare your blended mix to current targets and benchmarks in the graph.</li>
+                <li>Click <strong>Update Target Values</strong> to push the blended mix into the main budget (optionally balancing to keep the estimate stable).</li>
             </ul>
         `
     },
     'chart': {
         title: 'Target Values',
         content: `
-            <p>This is the primary view for setting and adjusting the target values for the Integrated Sciences Building's different systems. This interactive chart is where the team collaborates to align the project budget with the design.</p>
-            <p>You can use the sliders to adjust cost targets for each system. The total cost of the current scenario will always remain the same; adjusting one slider will automatically balance the costs across the other unlocked systems. This feature allows for real-time "what-if" analysis. For example, if the team decides to invest more in the building enclosure, you can see the immediate impact on funds available for interior finishes or mechanical systems.</p>
+            <p>Interactively set $/SF targets per system. Drag the dark bar to change a system; unlocked systems auto-balance to maintain the overall budget. A light gray bar shows the imported baseline. Blue caps show the benchmark range, and blue markers label specific projects.</p>
+            <p>Use the left sidebar to toggle locks or apply <strong>TVD Decision Examples</strong> (preset lock sets). The <strong>Balance to GMP</strong> button proportionally distributes the variance across unlocked systems considering indirects.</p>
             <p><strong>👉 Actions:</strong></p>
             <ul>
-                <li>Use the sliders to adjust the cost targets for each system.</li>
-                <li><strong>Lock</strong> values when you receive firm pricing from a trade partner or want to exclude a system from automatic balancing. Locked values will not change when other sliders are adjusted.</li>
-                <li>Click <strong>'Balance to GMP'</strong> to automatically distribute any budget variance across all unlocked values to meet the Guaranteed Maximum Price (GMP).</li>
-                <li>Take a <strong>snapshot</strong> to save the current scenario. This is crucial for comparing different cost strategies in the Summary view.</li>
+                <li>Drag a system’s bar to adjust $/SF; review delta and benchmark context.</li>
+                <li><strong>Lock</strong> systems or apply a preset; then fine-tune others.</li>
+                <li>Click <strong>Balance to GMP</strong> to meet the budget using unlocked systems.</li>
+                <li>Click <strong>Take Snapshot</strong> in the header to compare scenarios later.</li>
             </ul>
         `
     },
     'summary': {
-        title: 'Summary View',
+        title: 'Summary',
         content: `
-            <p>This view provides a high-level overview of the cost scenarios developed for the Integrated Sciences Building. It's designed to compare different budget strategies the team has saved as snapshots.</p>
-            <p>The charts at the top offer two ways to visualize the data:
-                <ul>
-                    <li>The <strong>side-by-side bar chart</strong> allows for a direct comparison of the cost of each building system across different scenarios.</li>
-                    <li>The <strong>stacked bar chart</strong> shows the total project cost for each scenario and how the different systems contribute to that total.</li>
-                </ul>
-            </p>
-            <p>Below the charts, a detailed <strong>summary table</strong> provides the precise cost data for each system in every scenario, allowing for a granular analysis of the differences. This view is essential for decision-making and for communicating the financial status of the project to stakeholders.</p>
+            <p>Compare only the scenarios you’ve saved as <em>Snapshots</em>. The left chart groups by system, the right shows stacked totals (including indirects) with a GMP line. A Program Comparison below summarizes Interiors mix by room type.</p>
+            <p>The legend lists your snapshots; click a name to delete it (with confirmation). The table summarizes COW, indirects, total, GSF/NSF, $/GSF, $/NSF, and budget variance.</p>
             <p><strong>👉 Actions:</strong></p>
             <ul>
-                <li>Compare different saved scenarios to evaluate cost strategies.</li>
-                <li>Export your data and summary reports for presentations and records.</li>
+                <li>Use <strong>Take Snapshot</strong> in other views; then compare here.</li>
+                <li>Click a legend item to remove a snapshot you no longer need.</li>
+                <li>Use <strong>Save</strong> in the header to persist your current work.</li>
             </ul>
         `
     },
     'splash-screen': {
         title: 'Welcome to the Target Value Design Tool',
         content: `
-            <p>This tool helps manage the Integrated Sciences Building's budget by visualizing cost distribution and allowing the team to set and adjust target values for various building systems.</p>
+            <p>Load data to begin budgeting with targets, massing, interiors, and comparisons. You’ll land in <strong>Massing</strong> after import, and can switch views with the navigation bar.</p>
             <p><strong>👉 Actions:</strong></p>
             <ul>
-                <li>Upload project data in JSON format.</li>
-                <li>Use the sample data for the Integrated Sciences Building to explore the tool's features.</li>
-                <li>Download a JSON template to structure new project data.</li>
+                <li>Drag & drop a JSON file or click <strong>Select File</strong>.</li>
+                <li>Click <strong>Workshop 1</strong> to load sample data.</li>
+                <li>Click <strong>Download JSON Template</strong> to start a new dataset.</li>
             </ul>
         `
     }

@@ -256,3 +256,20 @@ export const state = {
         }
     }
 };
+
+// Centralized logging for view changes: wrap currentView with a getter/setter
+(() => {
+    let currentViewInternal = state.currentView;
+    Object.defineProperty(state, 'currentView', {
+        get() { return currentViewInternal; },
+        set(newView) {
+            const previousView = currentViewInternal;
+            currentViewInternal = newView;
+            if (previousView !== newView) {
+                console.log(`[view] ${previousView} -> ${newView}`);
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+})();
