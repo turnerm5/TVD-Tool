@@ -14,7 +14,7 @@
  * @file state.js
  * @description Manages the global state for the TVD Tool application.
  */
-import * as utils from './utils.js?v=2.0.1';
+import * as utils from 'app/utils';
 
 export const state = {
     currentData: null,

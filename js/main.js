@@ -18,17 +18,17 @@
  */
 
 // --- MODULE IMPORTS ---
-import { state } from './modules/state.js?v=2.0.1';
-import * as dom from './modules/dom.js?v=2.0.1';
-import * as ui from './modules/ui.js?v=2.0.1';
-import * as fileHandlers from './modules/file-handlers.js?v=2.0.1';
-import * as slider from './modules/chart-slider.js?v=2.0.1';
-import * as summary from './modules/chart-summary.js?v=2.0.1';
-import * as program from './modules/chart-program.js?v=2.0.1';
-import * as interiors from './modules/chart-interiors.js?v=2.0.1';
-import * as benchmarks from './modules/chart-benchmarks.js?v=2.0.1';
-import * as utils from './modules/utils.js?v=2.0.1';
-import * as persistence from './modules/persistence.js?v=2.0.1';
+import { state } from 'app/state';
+import * as dom from 'app/dom';
+import * as ui from 'app/ui';
+import * as fileHandlers from 'app/file-handlers';
+import * as slider from 'app/chart-slider';
+import * as summary from 'app/chart-summary';
+import * as program from 'app/chart-program';
+import * as interiors from 'app/chart-interiors';
+import * as benchmarks from 'app/chart-benchmarks';
+import * as utils from 'app/utils';
+import * as persistence from 'app/persistence';
 
 // --- D3 SCALES ---
 const yScale = d3.scaleLinear().domain([0, state.yDomainMax]);

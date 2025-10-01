@@ -10,10 +10,10 @@
  * Author: Marshall Turner
  */
 
-import { state } from './state.js?v=2.0.1';
-import * as dom from './dom.js?v=2.0.1';
-import * as utils from './utils.js?v=2.0.1';
-import * as ui from './ui.js?v=2.0.1';
+import { state } from 'app/state';
+import * as dom from 'app/dom';
+import * as utils from 'app/utils';
+import * as ui from 'app/ui';
 
 export function updateProgramSF() {
     if (!state.currentScheme || !Array.isArray(state.currentScheme.costOfWork)) return;

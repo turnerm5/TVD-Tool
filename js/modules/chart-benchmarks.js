@@ -15,9 +15,9 @@
  * @description Renders the Benchmarks view.
  */
 
-import { state } from './state.js?v=2.0.1';
-import * as dom from './dom.js?v=2.0.1';
-import * as utils from './utils.js?v=2.0.1';
+import { state } from 'app/state';
+import * as dom from 'app/dom';
+import * as utils from 'app/utils';
 
 /**
  * Renders the Benchmarks view.
