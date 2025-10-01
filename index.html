@@ -18,85 +18,11 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <script>
-        // Single source of truth for app version
-        window.APP_VERSION = '2.0.3';
-
-        // Import map to version bare module specifiers
-        (function(v){
-            const imports = {
-                "app/state": `./js/modules/state.js?v=${v}`,
-                "app/dom": `./js/modules/dom.js?v=${v}`,
-                "app/ui": `./js/modules/ui.js?v=${v}`,
-                "app/file-handlers": `./js/modules/file-handlers.js?v=${v}`,
-                "app/chart-slider": `./js/modules/chart-slider.js?v=${v}`,
-                "app/chart-summary": `./js/modules/chart-summary.js?v=${v}`,
-                "app/chart-program": `./js/modules/chart-program.js?v=${v}`,
-                "app/chart-interiors": `./js/modules/chart-interiors.js?v=${v}`,
-                "app/chart-benchmarks": `./js/modules/chart-benchmarks.js?v=${v}`,
-                "app/utils": `./js/modules/utils.js?v=${v}`,
-                "app/persistence": `./js/modules/persistence.js?v=${v}`,
-                "data/help-topics": `./data/help-topics.js?v=${v}`
-            };
-            const im = document.createElement('script');
-            im.type = 'importmap';
-            im.textContent = JSON.stringify({ imports });
-            document.currentScript.after(im);
-
-            // Version and inject styles
-            const addCss = (href) => { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = `${href}?v=${v}`; document.head.appendChild(l); };
-            addCss('styles/tvd.css');
-            addCss('styles/help.css');
-
-            // Ensure favicon exists and is versioned
-            const ensureIcon = () => {
-                let link = document.querySelector('link[rel="icon"]');
-                if (!link) {
-                    link = document.createElement('link');
-                    link.rel = 'icon';
-                    link.type = 'image/svg+xml';
-                    document.head.appendChild(link);
-                }
-                link.href = `img/logos/wsu.svg?v=${v}`;
-            };
-            ensureIcon();
-
-            // Load vendor scripts and data sequentially, then main module
-            const loadScript = (src) => new Promise((resolve, reject) => {
-                const s = document.createElement('script');
-                s.src = `${src}${src.includes('?') ? '&' : '?'}v=${v}`;
-                s.onload = () => resolve();
-                s.onerror = (e) => reject(e);
-                document.head.appendChild(s);
-            });
-
-            const loadDataScripts = () => {
-                const files = [
-                    'data/phase2.js',
-                    'data/indirectCosts.js',
-                    'data/initialTargetValues.js',
-                    'data/interiorTargetValues.js',
-                    'data/interiorMixSchemes.js',
-                    'data/lockSets.js',
-                    'data/benchmarks.js',
-                    'data/sampleData.js'
-                ];
-                return files.reduce((p, f) => p.then(() => loadScript(f)), Promise.resolve());
-            };
-
-            // Chain loads to preserve order and availability
-            loadScript('js/tailwind.js')
-                .then(() => loadScript('js/d3.v7.min.js'))
-                .then(() => loadDataScripts())
-                .then(() => {
-                    const m = document.createElement('script');
-                    m.type = 'module';
-                    m.src = 'js/main.js'; // sub-imports will be versioned via import map
-                    document.head.appendChild(m);
-                })
-                .catch((e) => console.error('Asset load failed:', e));
-        })(window.APP_VERSION);
-    </script>
+    <script src="js/tailwind.js?v=2.0.1"></script>
+    <script type="module" src="js/d3.v7.min.js?v=2.0.1"></script>
+    <link rel="stylesheet" href="styles/tvd.css?v=2.0.1">
+    <link rel="stylesheet" href="styles/help.css?v=2.0.1">
+    <link rel="icon" href="img/logos/wsu.svg?v=2.0.1" type="image/svg+xml">
 </head>
 <body class="bg-gray-50 text-gray-800">
 
@@ -104,9 +30,9 @@
     <div id="splash-screen" class="relative flex flex-col justify-center items-center min-h-screen p-8">
         <div class="w-full max-w-2xl text-center">
             <div class="flex justify-center gap-4 mb-6">
-                <img data-versioned src="img/logos/wsu.svg" alt="WSU Logo" style="width:75px; max-width:100%; height:auto;" />
-                <img data-versioned src="img/logos/hoffman.svg" alt="Hoffman Logo" style="width:125px; max-width:100%; height:auto;" />
-                <img data-versioned src="img/logos/zgf.svg" alt="ZGF Logo" style="width:100px; max-width:100%; height:auto;" />
+                <img src="img/logos/wsu.svg?v=2.0.1" alt="WSU Logo" style="width:75px; max-width:100%; height:auto;" />
+                <img src="img/logos/hoffman.svg?v=2.0.1" alt="Hoffman Logo" style="width:125px; max-width:100%; height:auto;" />
+                <img src="img/logos/zgf.svg?v=2.0.1" alt="ZGF Logo" style="width:100px; max-width:100%; height:auto;" />
             </div>
             <h1 class="text-4xl font-bold text-gray-900">Integrated Science Building</h1>
             <h2 class="text-3xl font-bold text-gray-700">Target Value Design Tool</h2>
@@ -125,7 +51,7 @@
         </div>
         <div class="absolute bottom-0 left-0 right-0 w-full p-6 text-xs text-gray-500 font-medium">
             <div class="relative text-center max-w-7xl mx-auto">
-                <span class="absolute left-0" id="app-version-label">Version </span>
+                <span class="absolute left-0">Version 2.0.1 - For Workshop 1</span>
                 <a href="mailto:marshall-turner@hoffmancorp.com" class="hover:text-gray-800 transition underline">Get Assistance</a>
                 <span class="absolute right-0">&copy; 2025 Hoffman Construction Company</span>
             </div>
@@ -137,9 +63,9 @@
         <header class="mb-2 flex justify-between items-center flex-wrap gap-4">
             <div class="flex items-center gap-6">
                 <div class="flex gap-4">
-                    <img data-versioned src="img/logos/wsu.svg" alt="WSU Logo" style="width:55px; max-width:100%; height:auto;" />
-                    <img data-versioned src="img/logos/hoffman.svg" alt="Hoffman Logo" style="width:105px; max-width:100%; height:auto;" />
-                    <img data-versioned src="img/logos/zgf.svg" alt="ZGF Logo" style="width:85px; max-width:100%; height:auto;" />
+                    <img src="img/logos/wsu.svg?v=2.0.1" alt="WSU Logo" style="width:55px; max-width:100%; height:auto;" />
+                    <img src="img/logos/hoffman.svg?v=2.0.1" alt="Hoffman Logo" style="width:105px; max-width:100%; height:auto;" />
+                    <img src="img/logos/zgf.svg?v=2.0.1" alt="ZGF Logo" style="width:85px; max-width:100%; height:auto;" />
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">WSU Integrated Science Building</h1>
@@ -265,21 +191,14 @@
         </div>
     </div>
 
-    <script>
-        // Enhance images and footer label with unified version after DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            var v = window.APP_VERSION || '';
-            var imgs = document.querySelectorAll('img[data-versioned]');
-            imgs.forEach(function(img){
-                var url = new URL(img.getAttribute('src'), window.location.href);
-                url.searchParams.set('v', v);
-                img.setAttribute('src', url.pathname + url.search + url.hash);
-            });
-            var label = document.getElementById('app-version-label');
-            if (label) {
-                label.textContent = 'Version ' + v + ' - For Workshop 1';
-            }
-        });
-    </script>
+    <script src="data/phase2.js?v=2.0.1"></script>
+    <script src="data/indirectCosts.js?v=2.0.1"></script>
+    <script src="data/initialTargetValues.js?v=2.0.1"></script>
+    <script src="data/interiorTargetValues.js?v=2.0.1"></script>
+    <script src="data/interiorMixSchemes.js?v=2.0.1"></script>
+    <script src="data/lockSets.js?v=2.0.1"></script>
+    <script src="data/benchmarks.js?v=2.0.1"></script>
+    <script src="data/sampleData.js?v=2.0.1"></script>
+    <script type="module" src="js/main.js?v=2.0.1"></script>
 </body>
 </html>

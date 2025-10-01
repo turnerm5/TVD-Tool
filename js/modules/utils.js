@@ -15,11 +15,11 @@
  * @description Utility and helper functions for the TVD Tool.
  */
 
-import { state } from 'app/state';
-import * as persistence from 'app/persistence';
+import { state } from './state.js?v=2.0.1';
+import * as persistence from './persistence.js?v=2.0.1';
 
 // Cache-busting version string used for asset and module URLs
-export const APP_VERSION = (typeof window !== 'undefined' && window.APP_VERSION) ? window.APP_VERSION : '0.0.0';
+export const APP_VERSION = '2.0.1';
 
 export function withVersion(url) {
     try {
