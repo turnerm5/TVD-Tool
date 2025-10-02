@@ -231,25 +231,45 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .data(seriesNames)
         .enter()
         .append("div")
-        .attr("class", "legend-item flex items-center gap-2 relative p-1 rounded")
-        .on('mouseenter', function(event, d) {
-            d3.select(this).classed('hover-delete', true);
-        })
-        .on('mouseleave', function(event, d) {
-            d3.select(this).classed('hover-delete', false);
-        })
+        .attr("class", "legend-item flex items-center gap-2 relative p-1 rounded cursor-pointer")
         .on('click', async (event, d) => {
-            const confirmed = await ui.showConfirmDialog(
-                "Delete Snapshot",
-                `Are you sure you want to delete the "${d}" snapshot?`,
-                "Delete",
-                "Cancel"
-            );
-            if (confirmed) {
-                state.deleteSnapshot(d);
-                persistence.save(state);
-                render();
+            // If there are unsaved changes, warn user before restore
+            const hasChanges = state.hasDataChanged && state.hasDataChanged();
+            const choice = await ui.showDialog({
+                title: `Snapshot: ${d}`,
+                message: hasChanges ? 'You have unsaved changes. Restoring will overwrite the working state.' : 'Choose an action for this snapshot.',
+                confirmText: 'Restore',
+                cancelText: 'Delete'
+            });
+            if (choice === null) {
+                // Dismissed
+                return;
             }
+            if (choice === true) {
+                // Restore
+                const restored = state.restoreSnapshotByName(d);
+                if (restored) {
+                    persistence.save(state);
+                    render();
+                }
+                return;
+            }
+            if (choice === false) {
+                // Delete path via separate confirmation
+                const confirmed = await ui.showConfirmDialog(
+                    "Delete Snapshot",
+                    `Are you sure you want to delete the "${d}" snapshot?`,
+                    "Delete",
+                    "Cancel"
+                );
+                if (confirmed) {
+                    state.deleteSnapshot(d);
+                    persistence.save(state);
+                    render();
+                }
+                return;
+            }
+            // Otherwise (string or unexpected), no-op
         });
     
     legendItems.classed('cursor-pointer', true);
@@ -265,10 +285,7 @@ function renderGroupedBarChart(allSeriesData, seriesNames, costOfWorkNames) {
         .attr("class", "font-medium")
         .text(d => d);
 
-    legendItems
-        .append('div')
-        .attr('class', 'delete-overlay absolute inset-0 flex items-center justify-center font-bold text-white')
-        .text('DELETE');
+    // Remove old hover delete overlay
 }
 
 /**
@@ -295,7 +312,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
 
     // --- Data Transformation for Stacking ---
     const stackedData = allSeriesData.map(series => {
-        const cowTotal = utils.calculateTotalCostOfWork(series.costOfWork);
+        const cowTotal = utils.calculateTotalCostOfWork(series.costOfWork, series.costOfWorkFixedAdditions);
         
         let cumulative = 0;
         // 1. Direct Cost of Work Components
@@ -307,7 +324,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
         });
 
         // 1b. Fixed COW additions (from state)
-        const fixedCowItems = (state.costOfWorkFixedAdditions || []).map(item => {
+        const fixedCowItems = (series.costOfWorkFixedAdditions || state.costOfWorkFixedAdditions || []).map(item => {
             const value = Number(item.amount) || 0;
             const start = cumulative;
             cumulative += value;
@@ -323,7 +340,7 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
         });
 
         // 2b. Fixed-dollar indirects
-        const fixedIndirectItems = (state.indirectCostFixed || []).map(ind => {
+        const fixedIndirectItems = ((series.indirectCostFixed) || state.indirectCostFixed || []).map(ind => {
             const value = Number(ind.amount) || 0;
             const start = cumulative;
             cumulative += value;

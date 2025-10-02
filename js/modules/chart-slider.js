@@ -664,7 +664,7 @@ export function balanceToGmp() {
     }
 
     const totalIndirectPercentage = d3.sum(state.indirectCostPercentages, p => p.percentage);
-    const totalCow = utils.calculateTotalCostOfWork(phase.costOfWork);
+    const totalCow = utils.calculateTotalCostOfWork(phase.costOfWork, state.costOfWorkFixedAdditions);
     const fixedIndirects = d3.sum((state.indirectCostFixed || []), i => Number(i.amount) || 0);
     const currentIndirectCosts = totalCow * totalIndirectPercentage + fixedIndirects;
     const currentTotalCost = totalCow + currentIndirectCosts;

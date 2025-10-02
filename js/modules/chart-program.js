@@ -322,7 +322,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(cowPerSFDisplay);
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(utils.formatCurrency(cowSubtotalTotal, 0));
 
-    const totalCow = utils.calculateTotalCostOfWork(phaseCostOfWork);
+    const totalCow = utils.calculateTotalCostOfWork(phaseCostOfWork, state.costOfWorkFixedAdditions);
     let indirectsTotal = 0;
     const indirectsSubheadRow = tbody.append('tr').attr('class', 'bg-orange-50 border-b');
     indirectsSubheadRow.append('td')
@@ -451,7 +451,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
                 // Whether scaling or keeping as-is, recompute based on the new inputs
                 updateProgramSF();
                 render();
-                renderProgramEstimate();
+                ui.renderGlobalEstimate();
                 return;
             }
             // Set display with unit when not re-rendering above
@@ -459,7 +459,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             // Always recompute in case oldGross was 0 previously
             updateProgramSF();
             render();
-            renderProgramEstimate();
+            ui.renderGlobalEstimate();
         })
         .on('blur', function() {
             const numeric = Number(String(this.value).replace(/,/g, '')) || 0;
@@ -467,7 +467,7 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             this.value = `${utils.formatNumber(numeric)} sf`;
             updateProgramSF();
             render();
-            renderProgramEstimate();
+            ui.renderGlobalEstimate();
         });
 
     // Add Maximize button under the input

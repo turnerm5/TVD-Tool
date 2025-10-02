@@ -172,9 +172,9 @@ export const state = {
      * @param {string|object} snapshotOrName - The name for the new snapshot, or a snapshot object.
      */
     addSnapshot(snapshotOrName) {
-        if (this.snapshots.length >= 3) {
+        if (this.snapshots.length > 5) {
             // Maybe show a user notification here in a real app
-            console.warn("Maximum number of snapshots (3) reached.");
+            console.warn("Maximum number of snapshots (5) reached.");
             return;
         }
         let snapshot;
@@ -184,6 +184,7 @@ export const state = {
                 costOfWork: JSON.parse(JSON.stringify(this.currentScheme.costOfWork)),
                 grossSF: this.currentData.grossSF,
                 floorData: [],
+                numFloors: Number(this.numFloors) || 1,
                 shelledFloorsCount: Number(this.shelledFloorsCount) || 0,
                 penthouse: this.penthouse
                     ? {
@@ -200,6 +201,56 @@ export const state = {
             return;
         }
         this.snapshots.push(snapshot);
+    },
+
+    /**
+     * Restores a snapshot by name into the working state.
+     * @param {string} snapshotName
+     * @returns {boolean} True if restored
+     */
+    restoreSnapshotByName(snapshotName) {
+        const snap = this.snapshots.find(s => s.name === snapshotName);
+        if (!snap) return false;
+        // Restore core values
+        this.currentData.grossSF = Number(snap.grossSF) || 0;
+        if (Array.isArray(snap.costOfWork)) {
+            this.currentScheme.costOfWork = JSON.parse(JSON.stringify(snap.costOfWork));
+        }
+        if (typeof snap.numFloors === 'number' && isFinite(snap.numFloors)) {
+            this.numFloors = Math.max(1, Math.min(5, Math.round(snap.numFloors)));
+        } else if (Array.isArray(snap.floorData) && snap.floorData.length > 0) {
+            this.numFloors = Math.max(1, Math.min(5, snap.floorData.length));
+        }
+        if (typeof snap.shelledFloorsCount === 'number' && isFinite(snap.shelledFloorsCount)) {
+            this.shelledFloorsCount = Math.max(0, Math.min(this.numFloors, Number(snap.shelledFloorsCount)));
+        } else if (Array.isArray(snap.floorData) && snap.floorData.length > 0) {
+            const shelled = snap.floorData.filter(f => f.shelled).length;
+            this.shelledFloorsCount = Math.max(0, Math.min(this.numFloors, shelled));
+        }
+        if (snap.penthouse && typeof snap.penthouse === 'object') {
+            this.penthouse = {
+                width: Number(snap.penthouse.width) || 0,
+                length: Number(snap.penthouse.length) || 0,
+                height: Number(snap.penthouse.height) || 0
+            };
+        }
+        if (Array.isArray(snap.costOfWorkFixedAdditions)) {
+            this.costOfWorkFixedAdditions = JSON.parse(JSON.stringify(snap.costOfWorkFixedAdditions));
+        }
+        if (Array.isArray(snap.indirectCostFixed)) {
+            this.indirectCostFixed = JSON.parse(JSON.stringify(snap.indirectCostFixed));
+        }
+        if (snap.interiors) {
+            if (snap.interiors.mixSF) {
+                this.interiors.mixSF = JSON.parse(JSON.stringify(snap.interiors.mixSF));
+                this.interiors.hasAssignedSF = Object.values(this.interiors.mixSF).some(v => Number(v) > 0);
+            }
+            if (Array.isArray(snap.interiors.targetValues)) {
+                this.interiors.targetValues = JSON.parse(JSON.stringify(snap.interiors.targetValues));
+            }
+        }
+        this.updatePreviousSquareFootage();
+        return true;
     },
 
     /**
