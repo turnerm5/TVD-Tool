@@ -46,6 +46,12 @@ export const state = {
     // New floor-based program inputs
     numFloors: 3,
     shelledFloorsCount: 0,
+    // Penthouse dimensions (ft); when all are > 0, contributes to enclosure
+    penthouse: {
+        width: 0,
+        length: 0,
+        height: 0
+    },
 
     /**
      * Stores current square footage values as the new "previous" values for change tracking.
@@ -176,7 +182,16 @@ export const state = {
             snapshot = {
                 name: snapshotOrName,
                 costOfWork: JSON.parse(JSON.stringify(this.currentScheme.costOfWork)),
-                grossSF: this.currentData.grossSF
+                grossSF: this.currentData.grossSF,
+                floorData: [],
+                shelledFloorsCount: Number(this.shelledFloorsCount) || 0,
+                penthouse: this.penthouse
+                    ? {
+                        width: Number(this.penthouse.width) || 0,
+                        length: Number(this.penthouse.length) || 0,
+                        height: Number(this.penthouse.height) || 0
+                      }
+                    : { width: 0, length: 0, height: 0 }
             };
         } else if (typeof snapshotOrName === 'object' && snapshotOrName !== null) {
             snapshot = snapshotOrName;

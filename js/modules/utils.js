@@ -472,6 +472,14 @@ export async function takeSnapshot(state, ui, renderCallback) {
             grossSF: state.currentData.grossSF,
             costOfWork: snapshotCostOfWork,
             floorData,
+            shelledFloorsCount: Number(state.shelledFloorsCount) || 0,
+            penthouse: state.penthouse
+                ? {
+                    width: Number(state.penthouse.width) || 0,
+                    length: Number(state.penthouse.length) || 0,
+                    height: Number(state.penthouse.height) || 0
+                  }
+                : { width: 0, length: 0, height: 0 },
             interiors: {
                 // Persist the user's Interiors SF inputs and $/SF categories
                 mixSF: state.interiors && state.interiors.mixSF
