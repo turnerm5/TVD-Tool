@@ -166,8 +166,8 @@ export function calculateUsableSF(grossSF, costOfWorkItems) {
  * @param {Array} costOfWorkItems - Array of cost of work objects.
  * @returns {number} The total cost of work.
  */
-export function calculateTotalCostOfWork(costOfWorkItems) {
-    return d3.sum(costOfWorkItems, c => {
+export function calculateTotalCostOfWork(costOfWorkItems, fixedAdditions) {
+    const directCow = d3.sum(costOfWorkItems, c => {
         // Ensure we only sum items that have a target_value and square_footage,
         // effectively excluding indirect costs which are calculated differently.
         if (c.target_value && c.square_footage) {
@@ -175,6 +175,9 @@ export function calculateTotalCostOfWork(costOfWorkItems) {
         }
         return 0;
     });
+    const sourceFixed = Array.isArray(fixedAdditions) ? fixedAdditions : (state.costOfWorkFixedAdditions || []);
+    const fixedCow = d3.sum(sourceFixed, i => Number(i.amount) || 0);
+    return directCow + fixedCow;
 }
 
 /**
@@ -374,13 +377,15 @@ export function createImportedDataSeries() {
  * @returns {object} Object with cowTotal, indirectTotal, and totalProjectCost
  */
 export function calculateSeriesTotal(series, indirectCostPercentages) {
-    const cowTotal = calculateTotalCostOfWork(series.costOfWork);
-    const indirectTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
-    const totalProjectCost = cowTotal + indirectTotal;
+    const cowTotal = calculateTotalCostOfWork(series.costOfWork, series.costOfWorkFixedAdditions);
+    const indirectPercentTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
+    const sourceFixedIndirects = Array.isArray(series.indirectCostFixed) ? series.indirectCostFixed : (state.indirectCostFixed || []);
+    const indirectFixedTotal = d3.sum(sourceFixedIndirects, i => Number(i.amount) || 0);
+    const totalProjectCost = cowTotal + indirectPercentTotal + indirectFixedTotal;
     
     return {
         cowTotal,
-        indirectTotal,
+        indirectTotal: indirectPercentTotal + indirectFixedTotal,
         totalProjectCost
     };
 }
@@ -393,10 +398,10 @@ export function calculateSeriesTotal(series, indirectCostPercentages) {
  */
 
 export async function takeSnapshot(state, ui, renderCallback) {
-    if (state.snapshots.length >= 4) {
+    if (state.snapshots.length >= 5) {
         ui.showAlert(
             "Snapshot Limit Reached",
-            "You can only save up to 4 snapshots. Please delete an existing snapshot to save a new one."
+            "You can only save up to 5 snapshots. Please delete an existing snapshot to save a new one."
         );
         return;
     }
@@ -469,6 +474,20 @@ export async function takeSnapshot(state, ui, renderCallback) {
             grossSF: state.currentData.grossSF,
             costOfWork: snapshotCostOfWork,
             floorData,
+            shelledFloorsCount: Number(state.shelledFloorsCount) || 0,
+            penthouse: state.penthouse
+                ? {
+                    width: Number(state.penthouse.width) || 0,
+                    length: Number(state.penthouse.length) || 0,
+                    height: Number(state.penthouse.height) || 0
+                  }
+                : { width: 0, length: 0, height: 0 },
+            costOfWorkFixedAdditions: Array.isArray(state.costOfWorkFixedAdditions)
+                ? JSON.parse(JSON.stringify(state.costOfWorkFixedAdditions))
+                : [],
+            indirectCostFixed: Array.isArray(state.indirectCostFixed)
+                ? JSON.parse(JSON.stringify(state.indirectCostFixed))
+                : [],
             interiors: {
                 // Persist the user's Interiors SF inputs and $/SF categories
                 mixSF: state.interiors && state.interiors.mixSF

@@ -11,11 +11,15 @@
  */
 
 const INDIRECT_COSTS = [
-    { "Category": "GCs and Insurance", "Subcategory": "SGCs, CA, and Fee", "Percentage": 0.094 },
-    { "Category": "Escalation & Contingency", "Subcategory": "Design and Escalation Contingency", "Percentage": 0.076 },
-    { "Category": "Escalation & Contingency", "Subcategory": "Construction Contingency", "Percentage": 0.04 },
-    { "Category": "GCs and Insurance", "Subcategory": "Insurance", "Percentage": 0.022 },
-    { "Category": "Permits", "Subcategory": "Building Permit", "Percentage": 0.003 }
+    // Percentage-based indirects (applied to total Cost of Work)
+    { "Type": "Indirect", "Category": "Design", "Subcategory": "Design and Preconstruction", "Amount": 7200000 },
+    { "Type": "Indirect", "Category": "GCs and Insurance", "Subcategory": "Fee", "Amount": 2307653 },
+    { "Type": "Indirect", "Category": "GCs and Insurance", "Subcategory": "General Conditions", "Amount": 3240000 },
+    { "Type": "Indirect", "Category": "GCs and Insurance", "Subcategory": "Insurance and Bonding", "Amount": 1287000 },
+    { "Type": "Indirect", "Category": "Escalation & Contingency", "Subcategory": "Contingency and Escalation", "Amount": 4600000 },
+    // Fixed-dollar Cost of Work additions (direct costs)
+    { "Type": "CostOfWork", "Category": "Demolition", "Subcategory": "Demo", "Amount": 5350000 },
+    { "Type": "CostOfWork", "Category": "Site", "Subcategory": "Site Infrastructure", "Amount": 3000000 }
 ];
 
 
