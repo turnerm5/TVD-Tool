@@ -306,6 +306,14 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
             return { name: comp.name, value, start, end: cumulative, isIndirect: false };
         });
 
+        // 1b. Fixed COW additions (from state)
+        const fixedCowItems = (state.costOfWorkFixedAdditions || []).map(item => {
+            const value = Number(item.amount) || 0;
+            const start = cumulative;
+            cumulative += value;
+            return { name: item.name, value, start, end: cumulative, isIndirect: false };
+        });
+
         // 2. Indirect Cost Components - use original percentages applied to this series' COW
         const indirectCostItems = state.indirectCostPercentages.map(indirect => {
             const value = indirect.percentage * cowTotal;
@@ -314,9 +322,17 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
             return { name: indirect.name, value, start, end: cumulative, isIndirect: true };
         });
 
+        // 2b. Fixed-dollar indirects
+        const fixedIndirectItems = (state.indirectCostFixed || []).map(ind => {
+            const value = Number(ind.amount) || 0;
+            const start = cumulative;
+            cumulative += value;
+            return { name: ind.name, value, start, end: cumulative, isIndirect: true };
+        });
+
         return { 
             name: series.name, 
-            components: [...directCostItems, ...indirectCostItems],
+            components: [...directCostItems, ...fixedCowItems, ...indirectCostItems, ...fixedIndirectItems],
             total: cumulative 
         };
     });
@@ -332,8 +348,8 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
         .domain([0, yMax * 1.1]).nice()
         .range([height, 0]);
 
-    const directColor = d3.scaleOrdinal(d3.schemeTableau10).domain(costOfWorkNames);
-    const indirectColor = d3.scaleOrdinal(d3.schemeSet3).domain(state.indirectCostPercentages.map(d => d.name));
+    const directColor = d3.scaleOrdinal(d3.schemeTableau10).domain([...costOfWorkNames, ...(state.costOfWorkFixedAdditions || []).map(d => d.name)]);
+    const indirectColor = d3.scaleOrdinal(d3.schemeSet3).domain([...state.indirectCostPercentages.map(d => d.name), ...(state.indirectCostFixed || []).map(d => d.name)]);
 
     // --- D3 Axes ---
     g.append("g")

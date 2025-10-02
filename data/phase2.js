@@ -11,7 +11,7 @@
  */
 
 const SAMPLE_PHASE2 = {
-    "totalProjectBudget": 40000000
+    "totalProjectBudget": 60000000
 };
 
 

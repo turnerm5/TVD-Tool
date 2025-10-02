@@ -35,6 +35,8 @@ export const state = {
     currentView: 'splash-screen', // 'summary', 'slider', 'program'
     snapshots: [],
     indirectCostPercentages: [],
+    indirectCostFixed: [],
+    costOfWorkFixedAdditions: [],
     shelledFloors: [],
     activePhases: [1],
     currentScheme: null, // The currently active scheme (starts with baseline scheme)
@@ -72,18 +74,31 @@ export const state = {
     },
 
     /**
-     * Calculates the indirect cost percentages based on the original data.
-     * This establishes a baseline for how indirect costs relate to COW.
+     * Parses indirect and fixed-dollar costs from original data.
+     * Supports legacy format where only percentage indirects were present.
      */
     calculateIndirectCostPercentages() {
-        if (!this.originalData.indirectCosts) {
-            this.indirectCostPercentages = [];
-            return;
-        }
-        this.indirectCostPercentages = this.originalData.indirectCosts.map(item => ({
-            name: item.Subcategory,
-            percentage: item.Percentage || 0
-        }));
+        this.indirectCostPercentages = [];
+        this.indirectCostFixed = [];
+        this.costOfWorkFixedAdditions = [];
+        const items = Array.isArray(this.originalData?.indirectCosts) ? this.originalData.indirectCosts : [];
+        items.forEach(item => {
+            const type = item.Type || 'Indirect';
+            const name = item.Subcategory || item.name || '';
+            const hasPercentage = typeof item.Percentage === 'number';
+            const hasAmount = typeof item.Amount === 'number';
+            if (type === 'Indirect') {
+                if (hasPercentage) {
+                    this.indirectCostPercentages.push({ name, percentage: item.Percentage });
+                } else if (hasAmount) {
+                    this.indirectCostFixed.push({ name, amount: item.Amount });
+                }
+            } else if (type === 'CostOfWork') {
+                if (hasAmount) {
+                    this.costOfWorkFixedAdditions.push({ name, amount: item.Amount });
+                }
+            }
+        });
     },
 
     /**

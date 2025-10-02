@@ -167,7 +167,7 @@ export function calculateUsableSF(grossSF, costOfWorkItems) {
  * @returns {number} The total cost of work.
  */
 export function calculateTotalCostOfWork(costOfWorkItems) {
-    return d3.sum(costOfWorkItems, c => {
+    const directCow = d3.sum(costOfWorkItems, c => {
         // Ensure we only sum items that have a target_value and square_footage,
         // effectively excluding indirect costs which are calculated differently.
         if (c.target_value && c.square_footage) {
@@ -175,6 +175,8 @@ export function calculateTotalCostOfWork(costOfWorkItems) {
         }
         return 0;
     });
+    const fixedCow = d3.sum((state.costOfWorkFixedAdditions || []), i => Number(i.amount) || 0);
+    return directCow + fixedCow;
 }
 
 /**
@@ -375,12 +377,13 @@ export function createImportedDataSeries() {
  */
 export function calculateSeriesTotal(series, indirectCostPercentages) {
     const cowTotal = calculateTotalCostOfWork(series.costOfWork);
-    const indirectTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
-    const totalProjectCost = cowTotal + indirectTotal;
+    const indirectPercentTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
+    const indirectFixedTotal = d3.sum((state.indirectCostFixed || []), i => Number(i.amount) || 0);
+    const totalProjectCost = cowTotal + indirectPercentTotal + indirectFixedTotal;
     
     return {
         cowTotal,
-        indirectTotal,
+        indirectTotal: indirectPercentTotal + indirectFixedTotal,
         totalProjectCost
     };
 }

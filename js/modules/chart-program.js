@@ -146,13 +146,62 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('class', 'px-6 py-4')
         .html(d => utils.formatCurrency(utils.calculateComponentValue(d), 0));
 
+    // Render fixed COW additions below the other components but above the subtotal
+    const fixedCowAdditions = state.costOfWorkFixedAdditions || [];
+    let fixedCowAmountTotal = 0;
+    if (fixedCowAdditions.length > 0) {
+        const fixedCowHeader = tbody.append('tr').attr('class', 'bg-blue-50 border-b');
+        fixedCowHeader.append('td')
+            .attr('class', 'px-6 py-3 font-bold text-blue-900 uppercase text-sm')
+            .attr('colspan', 4)
+            .text('Cost of Work – Fixed Additions');
+
+        const fixedCowRows = tbody.selectAll('tr.fixed-cow-row')
+            .data(fixedCowAdditions)
+            .enter()
+            .append('tr')
+            .attr('class', 'fixed-cow-row bg-white border-b hover:bg-gray-50');
+        fixedCowRows.append('td').attr('class', 'px-6 py-4 font-medium text-gray-900 whitespace-nowrap').text(d => d.name);
+        fixedCowRows.append('td').attr('class', 'px-6 py-4 text-gray-400').text('-');
+        fixedCowRows.append('td').attr('class', 'px-6 py-4 text-gray-400').text('-');
+        // Value column with editable input for amount
+        fixedCowRows.append('td')
+            .attr('class', 'px-6 py-4')
+            .each(function(d) {
+                const input = d3.select(this)
+                    .append('input')
+                    .attr('type', 'text')
+                    .attr('inputmode', 'numeric')
+                    .attr('pattern', '[0-9,]*')
+                    .attr('class', 'text-right program-table-input editable-input')
+                    .attr('value', utils.formatCurrency(Number(d.amount) || 0, 0))
+                    .on('focus', function() {
+                        const numeric = Number(d.amount) || 0;
+                        this.value = numeric.toLocaleString('en-US');
+                        this.select();
+                    })
+                    .on('change', function() {
+                        const parsed = utils.parseNumberFromInput(String(this.value));
+                        d.amount = Math.max(0, parsed);
+                        render();
+                        ui.renderGlobalEstimate();
+                    })
+                    .on('blur', function() {
+                        const numeric = Number(d.amount) || 0;
+                        this.value = utils.formatCurrency(numeric, 0);
+                    });
+            });
+        fixedCowAmountTotal = d3.sum(fixedCowAdditions, i => Number(i.amount) || 0);
+    }
+
     const grossSFForCalcs = Number(state.currentData?.grossSF) || 0;
-    const cowPerSFDisplay = grossSFForCalcs > 0 ? utils.formatCurrency(cowTotalTargetValue / grossSFForCalcs, 2) : '-';
+    const cowSubtotalTotal = cowTotalTargetValue + fixedCowAmountTotal;
+    const cowPerSFDisplay = grossSFForCalcs > 0 ? utils.formatCurrency(cowSubtotalTotal / grossSFForCalcs, 2) : '-';
     const cowSubtotalRow = tbody.append('tr').attr('class', 'bg-blue-100 border-t border-blue-300 font-semibold');
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text('Cost of Work Subtotal');
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text('-');
     cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(cowPerSFDisplay);
-    cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(utils.formatCurrency(cowTotalTargetValue, 0));
+    cowSubtotalRow.append('td').attr('class', 'px-6 py-3 font-bold text-blue-900').text(utils.formatCurrency(cowSubtotalTotal, 0));
 
     const totalCow = utils.calculateTotalCostOfWork(phaseCostOfWork);
     let indirectsTotal = 0;
@@ -176,6 +225,20 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
             indirectsTotal += value;
             return utils.formatCurrency(value, 0);
         });
+    }
+
+    // Render fixed-dollar indirects
+    if (state.indirectCostFixed && state.indirectCostFixed.length > 0) {
+        const fixedIndirectRows = tbody.selectAll('tr.indirect-fixed-row')
+            .data(state.indirectCostFixed)
+            .enter()
+            .append('tr')
+            .attr('class', 'indirect-fixed-row bg-white border-b hover:bg-gray-50');
+        fixedIndirectRows.append('td').attr('class', 'px-6 py-4 font-medium text-gray-900 whitespace-nowrap').text(d => d.name);
+        fixedIndirectRows.append('td').attr('class', 'px-6 py-4 text-gray-400').text('-');
+        fixedIndirectRows.append('td').attr('class', 'px-6 py-4 text-gray-400').text('-');
+        fixedIndirectRows.append('td').attr('class', 'px-6 py-4').text(d => utils.formatCurrency(d.amount, 0));
+        indirectsTotal += d3.sum(state.indirectCostFixed, i => Number(i.amount) || 0);
     }
 
     const grandTotal = totalCow + indirectsTotal;
