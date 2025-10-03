@@ -12,11 +12,14 @@
 
 const INDIRECT_COSTS = [
     // Percentage-based indirects (applied to total Cost of Work)
-    { "Type": "Indirect", "Category": "Design", "Subcategory": "Design and Preconstruction", "Amount": 7200000 },
-    { "Type": "Indirect", "Category": "GCs and Insurance", "Subcategory": "Fee", "Amount": 2307653 },
-    { "Type": "Indirect", "Category": "GCs and Insurance", "Subcategory": "General Conditions", "Amount": 3240000 },
-    { "Type": "Indirect", "Category": "GCs and Insurance", "Subcategory": "Insurance and Bonding", "Amount": 1287000 },
-    { "Type": "Indirect", "Category": "Escalation & Contingency", "Subcategory": "Contingency and Escalation", "Amount": 4600000 },
+    { "Type": "Indirect", "Category": "Design", "Subcategory": "Design and Preconstruction", "Percentage": 0.1200 },
+    { "Type": "Indirect", "Category": "GCs and Insurance", "Subcategory": "Fee", "Percentage": 0.0384 },
+    { "Type": "Indirect", "Category": "GCs and Insurance", "Subcategory": "General Conditions", "Percentage": 0.054 },
+    { "Type": "Indirect", "Category": "GCs and Insurance", "Subcategory": "Insurance and Bonding", "Percentage": 0.02145 },
+    { "Type": "Indirect", "Category": "Escalation & Contingency", "Subcategory": "Contingency and Escalation", "Percentage": 0.07666666667 },
+
+
+    // Fixed-dollar indirects (applied to total Cost of Work)
     // Fixed-dollar Cost of Work additions (direct costs)
     { "Type": "CostOfWork", "Category": "Demolition", "Subcategory": "Demo", "Amount": 5350000 },
     { "Type": "CostOfWork", "Category": "Site", "Subcategory": "Site Infrastructure", "Amount": 3000000 }

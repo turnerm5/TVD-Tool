@@ -300,8 +300,17 @@ function clearUnsavedMixFlag() {
 export function calculateComponentValue(component) {
     // Check if the component is an indirect cost by looking for a 'percentage' property
     if (component.hasOwnProperty('percentage')) {
-        const totalCow = calculateTotalCostOfWork(state.currentScheme.costOfWork);
-        return totalCow * (Number(component.percentage) || 0);
+        // Indirects are a percentage of the TOTAL CONTRACT, and are part of that total.
+        // Let C = Cost of Work (including fixed COW additions)
+        // Let F = fixed-dollar indirects
+        // Let r = sum of percent-based indirects (as a fraction)
+        // Then Total T satisfies: T = C + F + r*T => T = (C + F) / (1 - r)
+        const cowTotal = calculateTotalCostOfWork(state.currentScheme.costOfWork, state.costOfWorkFixedAdditions);
+        const r = d3.sum((state.indirectCostPercentages || []), p => Number(p.percentage) || 0);
+        const fixedIndirectTotal = d3.sum((state.indirectCostFixed || []), i => Number(i.amount) || 0);
+        const denom = 1 - r;
+        const totalProjectCost = denom !== 0 ? (cowTotal + fixedIndirectTotal) / denom : Infinity;
+        return totalProjectCost * (Number(component.percentage) || 0);
     }
     // Default calculation for regular "Cost of Work" items
     const targetValue = Number(component.target_value) || 0;
@@ -378,11 +387,13 @@ export function createImportedDataSeries() {
  */
 export function calculateSeriesTotal(series, indirectCostPercentages) {
     const cowTotal = calculateTotalCostOfWork(series.costOfWork, series.costOfWorkFixedAdditions);
-    const indirectPercentTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
+    const r = d3.sum(indirectCostPercentages, p => Number(p.percentage) || 0);
     const sourceFixedIndirects = Array.isArray(series.indirectCostFixed) ? series.indirectCostFixed : (state.indirectCostFixed || []);
     const indirectFixedTotal = d3.sum(sourceFixedIndirects, i => Number(i.amount) || 0);
-    const totalProjectCost = cowTotal + indirectPercentTotal + indirectFixedTotal;
-    
+    const denom = 1 - r;
+    const totalProjectCost = denom !== 0 ? (cowTotal + indirectFixedTotal) / denom : cowTotal + indirectFixedTotal;
+    const indirectPercentTotal = totalProjectCost * r;
+
     return {
         cowTotal,
         indirectTotal: indirectPercentTotal + indirectFixedTotal,

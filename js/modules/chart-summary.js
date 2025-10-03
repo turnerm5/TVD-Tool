@@ -332,8 +332,12 @@ function renderStackedBarChart(allSeriesData, seriesNames, costOfWorkNames, gmpV
         });
 
         // 2. Indirect Cost Components - use original percentages applied to this series' COW
+        const r = d3.sum((state.indirectCostPercentages || []), p => Number(p.percentage) || 0);
+        const fixedIndirectTotal = d3.sum(((series.indirectCostFixed) || state.indirectCostFixed || []), i => Number(i.amount) || 0);
+        const denom = 1 - r;
+        const totalContract = denom !== 0 ? (cowTotal + fixedIndirectTotal) / denom : cowTotal + fixedIndirectTotal;
         const indirectCostItems = state.indirectCostPercentages.map(indirect => {
-            const value = indirect.percentage * cowTotal;
+            const value = totalContract * (Number(indirect.percentage) || 0);
             const start = cumulative;
             cumulative += value;
             return { name: indirect.name, value, start, end: cumulative, isIndirect: true };

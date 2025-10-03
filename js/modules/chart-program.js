@@ -68,9 +68,10 @@ function estimateTotalFor(grossSF, floors, shelledFloors) {
 
     const fixedCow = d3.sum((state.costOfWorkFixedAdditions || []), i => Number(i.amount) || 0);
     const cowTotal = cowDirect + fixedCow;
-    const indirectPercent = d3.sum((state.indirectCostPercentages || []), p => (Number(p.percentage) || 0) * cowTotal);
+    const r = d3.sum((state.indirectCostPercentages || []), p => Number(p.percentage) || 0);
     const indirectFixed = d3.sum((state.indirectCostFixed || []), i => Number(i.amount) || 0);
-    const total = cowTotal + indirectPercent + indirectFixed;
+    const denom = 1 - r;
+    const total = denom !== 0 ? (cowTotal + indirectFixed) / denom : cowTotal + indirectFixed;
     return { total, cowTotal };
 }
 

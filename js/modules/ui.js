@@ -55,9 +55,10 @@ export function renderGlobalEstimate() {
     const { indirectCostPercentages } = state;
 
     const cowTotal = utils.calculateTotalCostOfWork(costOfWork, state.costOfWorkFixedAdditions);
-    const indirectPercentTotal = d3.sum(indirectCostPercentages, p => p.percentage * cowTotal);
+    const r = d3.sum(indirectCostPercentages, p => Number(p.percentage) || 0);
     const indirectFixedTotal = d3.sum((state.indirectCostFixed || []), i => Number(i.amount) || 0);
-    const totalProjectCost = cowTotal + indirectPercentTotal + indirectFixedTotal;
+    const denom = 1 - r;
+    const totalProjectCost = denom !== 0 ? (cowTotal + indirectFixedTotal) / denom : cowTotal + indirectFixedTotal;
 
     const gmp = state.originalData?.phase2?.totalProjectBudget ?? 0;
     const variance = totalProjectCost - gmp;
