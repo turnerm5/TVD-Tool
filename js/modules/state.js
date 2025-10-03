@@ -217,9 +217,9 @@ export const state = {
             this.currentScheme.costOfWork = JSON.parse(JSON.stringify(snap.costOfWork));
         }
         if (typeof snap.numFloors === 'number' && isFinite(snap.numFloors)) {
-            this.numFloors = Math.max(1, Math.min(5, Math.round(snap.numFloors)));
+            this.numFloors = Math.max(1, Math.min(6, Math.round(snap.numFloors)));
         } else if (Array.isArray(snap.floorData) && snap.floorData.length > 0) {
-            this.numFloors = Math.max(1, Math.min(5, snap.floorData.length));
+            this.numFloors = Math.max(1, Math.min(6, snap.floorData.length));
         }
         if (typeof snap.shelledFloorsCount === 'number' && isFinite(snap.shelledFloorsCount)) {
             this.shelledFloorsCount = Math.max(0, Math.min(this.numFloors, Number(snap.shelledFloorsCount)));

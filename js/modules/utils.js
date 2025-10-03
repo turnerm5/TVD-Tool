@@ -459,7 +459,7 @@ export async function takeSnapshot(state, ui, renderCallback) {
             square_footage: c.square_footage
         }));
         // Compute floorData from current floor settings so snapshots persist shelled floors
-        const floors = Math.min(Math.max(Number(state.numFloors) || 1, 1), 5);
+        const floors = Math.min(Math.max(Number(state.numFloors) || 1, 1), 6);
         const shelled = Math.min(Math.max(Number(state.shelledFloorsCount) || 0, 0), floors);
         const perFloorSF = floors > 0 ? (Number(state.currentData?.grossSF) || 0) / floors : 0;
         const floorData = Array.from({ length: floors }, (_, idx) => ({

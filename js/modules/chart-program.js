@@ -17,13 +17,17 @@ import * as ui from './ui.js?v=2.0.1';
 
 // Estimates total cost for a given grossSF using current target values,
 // number of floors, and shelled floors. Mirrors updateProgramSF geometry.
+
 function estimateTotalFor(grossSF, floors, shelledFloors) {
     const perFloorSF = floors > 0 ? grossSF / floors : 0;
     const finishedFloors = Math.max(0, floors - Math.min(Math.max(shelledFloors || 0, 0), floors));
     const finishedSF = finishedFloors * perFloorSF;
 
     let cowDirect = 0;
+
+    // Floor-to-floor height of 16 feet
     const floorToFloor = 16;
+
     state.currentScheme.costOfWork.forEach(component => {
         const name = component.name;
         let sf = 0;
@@ -72,7 +76,7 @@ function estimateTotalFor(grossSF, floors, shelledFloors) {
 
 async function maximizeGrossSFToBudget(render) {
     const targetBudget = Number(state.originalData?.phase2?.totalProjectBudget) || 0;
-    const floors = Math.min(Math.max(Number(state.numFloors) || 1, 1), 5);
+    const floors = Math.min(Math.max(Number(state.numFloors) || 1, 1), 6);
     const shelled = Math.min(Math.max(Number(state.shelledFloorsCount) || 0, 0), floors);
     let currentGross = Number(state.currentData?.grossSF) || 0;
     if (targetBudget <= 0 || floors <= 0) {
@@ -129,7 +133,7 @@ export function updateProgramSF() {
     if (!state.currentScheme || !Array.isArray(state.currentScheme.costOfWork)) return;
 
     const grossSF = Number(state.currentData?.grossSF) || 0;
-    const floors = Math.min(Math.max(Number(state.numFloors) || 1, 1), 5); // clamp 1-5
+    const floors = Math.min(Math.max(Number(state.numFloors) || 1, 1), 6); // clamp 1-6
     const shelled = Math.min(Math.max(Number(state.shelledFloorsCount) || 0, 0), floors);
 
     const perFloorSF = floors > 0 ? grossSF / floors : 0;
@@ -155,6 +159,8 @@ export function updateProgramSF() {
             const a = Math.sqrt(A / 1.6);
             const b = 1.6 * a;
             const perimeter = 2 * (a + b);
+
+            // Floor-to-floor height of 16 feet
             const floorToFloor = 16;
             let enclosureArea = perimeter * floorToFloor * floors;
             // Add penthouse enclosure if dimensions provided
@@ -499,11 +505,11 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
     // Removed inline program estimate element; using global header estimate instead
         
     const schemeGrid = schemesContainer.append('div')
-        .attr('class', 'grid grid-cols-7 gap-4')
+        .attr('class', 'grid grid-cols-8 gap-4')
         .style('height', '108px');
 
-    // Five floor cards (1-5)
-    const floorCardsData = [1, 2, 3, 4, 5];
+    // Six floor cards (1-6)
+    const floorCardsData = [1, 2, 3, 4, 5, 6];
     const floorCards = schemeGrid.selectAll('.floor-card')
         .data(floorCardsData)
         .join('div')
