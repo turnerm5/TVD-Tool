@@ -663,11 +663,11 @@ export function balanceToGmp() {
         return;
     }
 
-    const totalIndirectPercentage = d3.sum(state.indirectCostPercentages, p => p.percentage);
+    const totalIndirectPercentage = d3.sum(state.indirectCostPercentages, p => Number(p.percentage) || 0);
     const totalCow = utils.calculateTotalCostOfWork(phase.costOfWork, state.costOfWorkFixedAdditions);
     const fixedIndirects = d3.sum((state.indirectCostFixed || []), i => Number(i.amount) || 0);
-    const currentIndirectCosts = totalCow * totalIndirectPercentage + fixedIndirects;
-    const currentTotalCost = totalCow + currentIndirectCosts;
+    const denom = 1 - totalIndirectPercentage;
+    const currentTotalCost = denom !== 0 ? (totalCow + fixedIndirects) / denom : totalCow + fixedIndirects;
     const targetBudget = state.originalData.phase2.totalProjectBudget;
     const difference = targetBudget - currentTotalCost;
 
@@ -676,16 +676,9 @@ export function balanceToGmp() {
         return;
     }
 
-    // We need to find the change in COW that will result in the desired total cost change.
-    // Let deltaCOW be the change needed in the total Cost of Work.
-    // newTotalCost = (totalCow + deltaCOW) + (totalCow + deltaCOW) * totalIndirectPercentage
-    // newTotalCost = (totalCow + deltaCOW) * (1 + totalIndirectPercentage)
-    // We want newTotalCost to be targetBudget.
-    // targetBudget = (totalCow + deltaCOW) * (1 + totalIndirectPercentage)
-    // targetBudget / (1 + totalIndirectPercentage) = totalCow + deltaCOW
-    // deltaCOW = (targetBudget / (1 + totalIndirectPercentage)) - totalCow
-    // Subtract fixed-dollar indirects before solving for required COW
-    const requiredCowTotal = (targetBudget - fixedIndirects) / (1 + totalIndirectPercentage);
+    // Solve for required COW given total is circular: T = (C + F) / (1 - r)
+    // => C = T*(1 - r) - F
+    const requiredCowTotal = targetBudget * (1 - totalIndirectPercentage) - fixedIndirects;
     const cowDifference = requiredCowTotal - totalCow;
 
 
