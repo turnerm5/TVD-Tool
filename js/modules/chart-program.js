@@ -266,7 +266,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
 
     cowRows.append('td')
         .attr('class', 'px-6 py-4')
-        .text(d => utils.formatCurrency(d.target_value, 0));
+        .text(d => utils.formatCurrency(d.target_value, 2));
 
     cowRows.append('td')
         .attr('class', 'px-6 py-4')
