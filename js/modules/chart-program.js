@@ -299,7 +299,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
                     .attr('type', 'text')
                     .attr('inputmode', 'numeric')
                     .attr('pattern', '[0-9,]*')
-                    .attr('class', 'text-right program-table-input editable-input')
+                    .attr('class', 'text-left program-table-input editable-input')
                     .attr('value', utils.formatCurrency(Number(d.amount) || 0, 0))
                     .on('focus', function() {
                         const numeric = Number(d.amount) || 0;
