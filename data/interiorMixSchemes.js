@@ -16,10 +16,10 @@ const INTERIOR_MIX_SCHEMES = [
         "label": "Max Lab",
         "values": {
             "Teaching Lab": 17630,
-            "Classroom": 6060,
+            "Classroom and Lecture Hall": 6060,
             "Offices": 1500,
             "Student Success Center": 4660,
-            "Collaborative Space": 1470
+            "Collaborative / Conference Room": 1470
         }
     },
     {
@@ -27,10 +27,10 @@ const INTERIOR_MIX_SCHEMES = [
         "label": "Mix",
         "values": {
             "Teaching Lab": 14104,
-            "Classroom": 8152,
+            "Classroom and Lecture Hall": 8152,
             "Offices": 1200,
             "Student Success Center": 6126,
-            "Collaborative Space": 1590
+            "Collaborative / Conference Room": 1590
         }
     },
     {
@@ -38,10 +38,10 @@ const INTERIOR_MIX_SCHEMES = [
         "label": "Max Student Success",
         "values": {
             "Teaching Lab": 10584,
-            "Classroom": 6700,
+            "Classroom and Lecture Hall": 6700,
             "Offices": 1200,
             "Student Success Center": 8100,
-            "Collaborative Space": 4500
+            "Collaborative / Conference Room": 4500
         }
     }
 ];

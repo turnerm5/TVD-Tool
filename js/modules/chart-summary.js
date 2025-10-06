@@ -607,7 +607,7 @@ export function updateSummary() {
         const grossSF = series.grossSF || 0;
 
         // Assignable SF (ASF) = sum of Interiors Classroom Mix SF for NSF-included types
-        const assignedSF = (() => {
+            const assignedSF = (() => {
             const interiors = series.interiors || {};
             const mixSF = interiors.mixSF || {};
             const targetValues = Array.isArray(interiors.targetValues) ? interiors.targetValues : [];

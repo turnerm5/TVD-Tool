@@ -295,7 +295,7 @@ export function renderClassroomMix() {
 
         // Merge auto-calculated circulation/support SF into its row, if present,
         // absorbing the gap between total GSF and the sum of program SF.
-        const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false) && /grossing|support/i.test(rt.name));
+    const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false));
         const circulationName = circulationRoomType ? circulationRoomType.name : null;
         const programTotalSF = rows
             .filter(r => r.name !== circulationName)
@@ -645,7 +645,7 @@ export function renderInteriorsGraph() {
         const sf = Number(state.interiors.mixSF[rt.name]) || 0;
         return include ? sum + sf : sum;
     }, 0);
-    const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false) && /(grossing|circulation|support)/i.test(rt.name));
+    const circulationRoomType = roomTypes.find(rt => (rt.includeInNSF === false));
     const circulationSF = Math.max(0, totalGSF - programSF);
     const effectiveMixByRoom = new Map();
     roomTypes.forEach(rt => {
