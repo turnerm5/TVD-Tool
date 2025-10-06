@@ -14,15 +14,15 @@ const INTERIOR_TARGET_VALUES = [
     {
         "name": "Teaching Lab",
         "C Interiors": 200,
-        "D Services": 350,
+        "D Services": 500,
         "E Equipment and Furnishings": 100,
         "includeInNSF": true
     },
     {
         "name": "Classroom",
         "C Interiors": 150,
-        "D Services": 275,
-        "E Equipment and Furnishings": 50,
+        "D Services": 400,
+        "E Equipment and Furnishings": 80,
         "includeInNSF": true
     },
     {
