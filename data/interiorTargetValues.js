@@ -13,44 +13,44 @@
 const INTERIOR_TARGET_VALUES = [
     {
         "name": "Teaching Lab",
-        "C Interiors": 69.3,
-        "D Services": 600,
+        "C Interiors": 200,
+        "D Services": 350,
         "E Equipment and Furnishings": 100,
         "includeInNSF": true
     },
     {
         "name": "Classroom",
-        "C Interiors": 77,
-        "D Services": 300,
-        "E Equipment and Furnishings": 22,
+        "C Interiors": 150,
+        "D Services": 275,
+        "E Equipment and Furnishings": 50,
         "includeInNSF": true
     },
     {
         "name": "Collaborative Space",
-        "C Interiors": 71.5,
-        "D Services": 230,
-        "E Equipment and Furnishings": 42.9,
+        "C Interiors": 140,
+        "D Services": 265,
+        "E Equipment and Furnishings": 40,
         "includeInNSF": true
     },
     {
         "name": "Student Success Center",
-        "C Interiors": 88,
-        "D Services": 230,
-        "E Equipment and Furnishings": 56.1,
+        "C Interiors": 140,
+        "D Services": 275,
+        "E Equipment and Furnishings": 50,
         "includeInNSF": true
     },
     {
         "name": "Offices",
-        "C Interiors": 68.2,
-        "D Services": 230,
-        "E Equipment and Furnishings": 33,
+        "C Interiors": 160,
+        "D Services": 265,
+        "E Equipment and Furnishings": 50,
         "includeInNSF": true
     },
     {
         "name": "Grossing Area (Auto-Calculated)",
-        "C Interiors": 30,
-        "D Services": 200,
-        "E Equipment and Furnishings": 20,
+        "C Interiors": 100,
+        "D Services": 240,
+        "E Equipment and Furnishings": 0,
         "includeInNSF": false
     }
 ];
