@@ -568,7 +568,8 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
             const step = 0.5;
             const nextCount = Math.min(state.numFloors || 1, (Number(state.shelledFloorsCount) || 0) + step);
             const willIncrease = nextCount > (state.shelledFloorsCount || 0);
-            if (willIncrease && state.interiors?.hasAssignedSF) {
+            // Only show warning once per session when user has assigned SF
+            if (willIncrease && state.interiors?.hasAssignedSF && !state.interiors?.shellingWarningShown) {
                 const confirmed = await ui.showConfirmDialog(
                     'Shelling Floors With Assigned Program SF',
                     'You have room square footage assigned in Interiors. Shelling floors reduces finished area and may not fit the assigned program SF. Do you want to proceed?',
@@ -578,6 +579,8 @@ export function renderPhase2ProgramView(render, handleSquareFootageCellChange) {
                 if (!confirmed) {
                     return;
                 }
+                // Mark that we've shown the warning
+                state.interiors.shellingWarningShown = true;
             }
             state.shelledFloorsCount = Math.round(nextCount * 2) / 2;
             updateProgramSF();
