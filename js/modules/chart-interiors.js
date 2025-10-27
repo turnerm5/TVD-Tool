@@ -86,6 +86,8 @@ export function renderValuesTable() {
             state.interiors.unsavedMix = true;
             // Set hasAssignedSF true if any assigned
             state.interiors.hasAssignedSF = Object.values(next).some(v => Number(v) > 0);
+            // Reset shelling warning so user gets warned again if they shell after changing program
+            state.interiors.shellingWarningShown = false;
             state.interiors.selectedMixScheme = d.key;
             renderClassroomMix();
             renderInteriorsGraph();
@@ -186,6 +188,8 @@ export function renderValuesTable() {
             state.interiors.unsavedMix = true;
             // Update hasAssignedSF based on any positive SF across mixSF
             state.interiors.hasAssignedSF = Object.values(state.interiors.mixSF).some(v => Number(v) > 0);
+            // Reset shelling warning so user gets warned again if they shell after changing program
+            state.interiors.shellingWarningShown = false;
             this.value = `${numeric.toLocaleString('en-US')} sf`;
             renderClassroomMix();
             renderInteriorsGraph();

@@ -29,7 +29,9 @@ export const state = {
         // Flag indicating Interiors Classroom Mix or $/SF values changed without updating targets
         unsavedMix: false,
         // Flag indicating any Interiors SF has been assigned (manual entry or preset)
-        hasAssignedSF: false
+        hasAssignedSF: false,
+        // Flag to track if shelling warning has been shown
+        shellingWarningShown: false
     },
     lockedCostOfWork: new Set(),
     currentView: 'splash-screen', // 'summary', 'slider', 'program'
@@ -162,6 +164,7 @@ export const state = {
                 this.interiors.hasAssignedSF = false;
                 this.interiors.selectedMixScheme = null;
                 this.interiors.mixSF = {};
+                this.interiors.shellingWarningShown = false;
             }
         }
     },
