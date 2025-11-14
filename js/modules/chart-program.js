@@ -68,10 +68,8 @@ function estimateTotalFor(grossSF, floors, shelledFloors) {
 
     const fixedCow = d3.sum((state.costOfWorkFixedAdditions || []), i => Number(i.amount) || 0);
     const cowTotal = cowDirect + fixedCow;
-    const r = d3.sum((state.indirectCostPercentages || []), p => Number(p.percentage) || 0);
     const indirectFixed = d3.sum((state.indirectCostFixed || []), i => Number(i.amount) || 0);
-    const denom = 1 - r;
-    const total = denom !== 0 ? (cowTotal + indirectFixed) / denom : cowTotal + indirectFixed;
+    const total = cowTotal + indirectFixed;
     return { total, cowTotal };
 }
 
@@ -337,23 +335,7 @@ function updatePhase2ProgramTable(container, render, handleSquareFootageCellChan
         .attr('colspan', 4)
         .text('Indirects');
 
-    if (state.indirectCostPercentages && state.indirectCostPercentages.length > 0) {
-        const indirectRows = tbody.selectAll('tr.indirect-row')
-            .data(state.indirectCostPercentages)
-            .enter()
-            .append('tr')
-            .attr('class', 'indirect-row bg-white border-b hover:bg-gray-50');
-        indirectRows.append('td').attr('class', 'px-6 py-4 font-medium text-gray-900 whitespace-nowrap').text(d => d.name);
-        indirectRows.append('td').attr('class', 'px-6 py-4 text-gray-400').text('-');
-        indirectRows.append('td').attr('class', 'px-6 py-4 text-gray-400').text('-');
-        indirectRows.append('td').attr('class', 'px-6 py-4').html(d => {
-            const value = utils.calculateComponentValue(d);
-            indirectsTotal += value;
-            return utils.formatCurrency(value, 0);
-        });
-    }
-
-    // Render fixed-dollar indirects
+    // Render fixed-dollar indirects (all indirects are now manually editable)
     if (state.indirectCostFixed && state.indirectCostFixed.length > 0) {
         const fixedIndirectRows = tbody.selectAll('tr.indirect-fixed-row')
             .data(state.indirectCostFixed)

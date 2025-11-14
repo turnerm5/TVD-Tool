@@ -298,21 +298,11 @@ function clearUnsavedMixFlag() {
  * @returns {number} The calculated value for this component.
  */
 export function calculateComponentValue(component) {
-    // Check if the component is an indirect cost by looking for a 'percentage' property
-    if (component.hasOwnProperty('percentage')) {
-        // Indirects are a percentage of the TOTAL CONTRACT, and are part of that total.
-        // Let C = Cost of Work (including fixed COW additions)
-        // Let F = fixed-dollar indirects
-        // Let r = sum of percent-based indirects (as a fraction)
-        // Then Total T satisfies: T = C + F + r*T => T = (C + F) / (1 - r)
-        const cowTotal = calculateTotalCostOfWork(state.currentScheme.costOfWork, state.costOfWorkFixedAdditions);
-        const r = d3.sum((state.indirectCostPercentages || []), p => Number(p.percentage) || 0);
-        const fixedIndirectTotal = d3.sum((state.indirectCostFixed || []), i => Number(i.amount) || 0);
-        const denom = 1 - r;
-        const totalProjectCost = denom !== 0 ? (cowTotal + fixedIndirectTotal) / denom : Infinity;
-        return totalProjectCost * (Number(component.percentage) || 0);
+    // Check if the component is a fixed-amount indirect or Cost of Work addition
+    if (component.hasOwnProperty('amount')) {
+        return Number(component.amount) || 0;
     }
-    // Default calculation for regular "Cost of Work" items
+    // Default calculation for regular "Cost of Work" items (target_value * square_footage)
     const targetValue = Number(component.target_value) || 0;
     const squareFootage = Number(component.square_footage) || 0;
     return targetValue * squareFootage;
@@ -382,21 +372,17 @@ export function createImportedDataSeries() {
 /**
  * Calculates the total project cost including indirects for a given series.
  * @param {object} series - A data series with costOfWork array
- * @param {Array} indirectCostPercentages - Array of indirect cost percentage objects
  * @returns {object} Object with cowTotal, indirectTotal, and totalProjectCost
  */
-export function calculateSeriesTotal(series, indirectCostPercentages) {
+export function calculateSeriesTotal(series) {
     const cowTotal = calculateTotalCostOfWork(series.costOfWork, series.costOfWorkFixedAdditions);
-    const r = d3.sum(indirectCostPercentages, p => Number(p.percentage) || 0);
     const sourceFixedIndirects = Array.isArray(series.indirectCostFixed) ? series.indirectCostFixed : (state.indirectCostFixed || []);
-    const indirectFixedTotal = d3.sum(sourceFixedIndirects, i => Number(i.amount) || 0);
-    const denom = 1 - r;
-    const totalProjectCost = denom !== 0 ? (cowTotal + indirectFixedTotal) / denom : cowTotal + indirectFixedTotal;
-    const indirectPercentTotal = totalProjectCost * r;
+    const indirectTotal = d3.sum(sourceFixedIndirects, i => Number(i.amount) || 0);
+    const totalProjectCost = cowTotal + indirectTotal;
 
     return {
         cowTotal,
-        indirectTotal: indirectPercentTotal + indirectFixedTotal,
+        indirectTotal,
         totalProjectCost
     };
 }
